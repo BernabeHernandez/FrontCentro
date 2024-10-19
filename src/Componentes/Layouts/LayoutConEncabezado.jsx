@@ -1,0 +1,71 @@
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import EncabezadoPublico from '../Compartidos/EncabezadoPublico';
+import EncabezadoAdministrativo from '../Compartidos/EncabezadoAdministrativo';
+import EncabezadoCliente from '../Compartidos/EncabezadoCliente';
+import PieDePagina from '../Compartidos/PieDePagina';
+import { useTheme } from '../Temas/ThemeContext';
+
+const LayoutConEncabezado = ({ children }) => {
+  const location = useLocation();
+  let encabezado;
+  let pieDePagina;
+  const { theme } = useTheme();
+
+  if (location.pathname.startsWith('/admin')) {
+    encabezado = <EncabezadoAdministrativo />;
+    pieDePagina = <PieDePagina />;
+  } else if (location.pathname.startsWith('/cliente')) {
+    encabezado = <EncabezadoCliente />;
+    pieDePagina = <PieDePagina />;
+  } else {
+    encabezado = <EncabezadoPublico />;
+    pieDePagina = <PieDePagina />;
+  }
+
+  return (
+    <div className={`layout-container ${theme}`}>
+      <header>{encabezado}</header>
+      <main className="content">{children}</main>
+      <footer>{pieDePagina}</footer>
+
+      <style>{`
+        :root {
+          --min-header-footer-height: 60px; /* Mínimo alto para el encabezado y pie de página */
+        }
+
+        body, html {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          width: 100%;
+        }
+
+        .layout-container {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        .content {
+          flex-grow: 1;
+          background-color: ${theme === 'dark' ? '#1d1d1d' : '#ffffff'};
+          color: ${theme === 'dark' ? '#ffffff' : '#000000'};
+        }
+
+        header, footer {
+          width: 100%;
+          min-height: var(--min-header-footer-height);
+          box-sizing: border-box;
+          background-color: ${theme === 'dark' ? '#333' : '#FFA500'};
+        }
+
+        footer {
+          background-color: ${theme === 'dark' ? '#d45d00' : '#d45d00'};
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default LayoutConEncabezado;
