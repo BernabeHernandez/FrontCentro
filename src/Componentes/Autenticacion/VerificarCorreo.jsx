@@ -27,14 +27,13 @@ function VerificarCorreo() {
     }
 
     try {
-      // Realiza la solicitud al backend para verificar el código
-      const response = await axios.get(`http://localhost:5000/api/registro/verify/${verificationCode}`);
+      const response = await axios.get(`https://back-rq8v.onrender.com/api/registro/verify/${verificationCode}`);
       MySwal.fire({
         icon: "success",
         title: "Verificación exitosa",
         text: response.data.message,
       });
-      navigate("/login"); // Redirige al inicio de sesión tras la verificación
+      navigate("/login");
     } catch (error) {
       console.error("Error al verificar el código:", error);
       MySwal.fire({

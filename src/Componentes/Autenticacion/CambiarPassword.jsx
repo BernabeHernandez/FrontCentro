@@ -11,12 +11,12 @@ function CambiarPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const { email } = location.state; // Recibe el email desde el estado
+  const { email } = location.state; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar si las contraseñas coinciden
+   
     if (newPassword !== confirmPassword) {
       MySwal.fire({
         icon: 'error',
@@ -28,7 +28,7 @@ function CambiarPassword() {
 
     try {
       // Enviar nueva contraseña al backend
-      const response = await axios.post('http://localhost:5000/api/cambio/reset-password', {
+      const response = await axios.post('https://back-rq8v.onrender.com/api/cambio/reset-password', {
         email,
         newPassword,
       });

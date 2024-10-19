@@ -19,7 +19,7 @@ function Deslinde() {
 
   const fetchDeslindes = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/deslinde');
+      const response = await axios.get('https://back-rq8v.onrender.com/api/deslinde');
       setDeslindes(response.data);
     } catch (error) {
       console.error('Error al obtener deslindes:', error);
@@ -37,7 +37,7 @@ function Deslinde() {
 
   const createDeslinde = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/deslinde', { deslinde });
+      const response = await axios.post('https://back-rq8v.onrender.com/api/deslinde', { deslinde });
       setDeslindes([...deslindes, response.data]);
       resetForm();
       MySwal.fire('Éxito', 'Deslinde creado correctamente', 'success');
@@ -49,7 +49,7 @@ function Deslinde() {
 
   const updateDeslinde = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/deslinde/${editId}`, { deslinde });
+      const response = await axios.put(`https://back-rq8v.onrender.com/api/deslinde/${editId}`, { deslinde });
       setDeslindes(deslindes.map(d => (d.id === editId ? response.data : d)));
       resetForm();
       MySwal.fire('Éxito', 'Deslinde actualizado correctamente', 'success');
@@ -73,7 +73,7 @@ function Deslinde() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/deslinde/${id}`);
+        await axios.delete(`https://back-rq8v.onrender.com/api/deslinde/${id}`);
         setDeslindes(deslindes.filter(d => d.id !== id));
         MySwal.fire('Éxito', 'Deslinde eliminado correctamente', 'success');
       } catch (error) {

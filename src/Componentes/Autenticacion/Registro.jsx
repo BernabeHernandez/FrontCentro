@@ -35,7 +35,7 @@ function FormularioRegistro() {
   useEffect(() => {
     const fetchPreguntas = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/preguntas");
+        const response = await axios.get("https://back-rq8v.onrender.com/api/preguntas");
         setPreguntas(response.data);
       } catch (error) {
         console.error("Error al cargar las preguntas:", error);
@@ -164,7 +164,7 @@ function FormularioRegistro() {
     };
 
     try {
-      await axios.post("http://localhost:5000/api/registro", formDataWithPassword);
+      await axios.post("https://back-rq8v.onrender.com/api/registro", formDataWithPassword);
       MySwal.fire({
         title: "Tu registro se realizó correctamente",
         text: "Por favor revisa tu correo para verificar tu cuenta.",

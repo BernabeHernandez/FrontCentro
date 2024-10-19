@@ -18,7 +18,7 @@ function Terminos() {
 
   const fetchTerminos = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/terminos');
+      const response = await axios.get('https://back-rq8v.onrender.com/api/terminos');
       setTerminos(response.data);
     } catch (error) {
       console.error('Error al obtener términos:', error);
@@ -36,7 +36,7 @@ function Terminos() {
 
   const createTermino = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/terminos', { termino });
+      const response = await axios.post('https://back-rq8v.onrender.com/api/terminos', { termino });
       setTerminos([...terminos, response.data]);
       resetForm();
       MySwal.fire('Éxito', 'Término creado correctamente', 'success');
@@ -48,7 +48,7 @@ function Terminos() {
 
   const updateTermino = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/terminos/${editId}`, { termino });
+      const response = await axios.put(`https://back-rq8v.onrender.com/api/terminos/${editId}`, { termino });
       setTerminos(terminos.map(t => (t.id === editId ? response.data : t)));
       resetForm();
       MySwal.fire('Éxito', 'Término actualizado correctamente', 'success');
@@ -72,7 +72,7 @@ function Terminos() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/terminos/${id}`);
+        await axios.delete(`https://back-rq8v.onrender.com/api/terminos/${id}`);
         setTerminos(terminos.filter(t => t.id !== id));
         MySwal.fire('Éxito', 'Término eliminado correctamente', 'success');
       } catch (error) {

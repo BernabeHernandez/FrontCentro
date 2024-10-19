@@ -19,7 +19,7 @@ function Perfil() {
 
   const fetchPerfiles = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/perfil');
+      const response = await axios.get('https://back-rq8v.onrender.com/api/perfil');
       setPerfiles(response.data);
     } catch (error) {
       console.error('Error al obtener perfiles:', error);
@@ -37,7 +37,7 @@ function Perfil() {
 
   const createPerfil = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/perfil', { mision, vision });
+      const response = await axios.post('https://back-rq8v.onrender.com/api/perfil', { mision, vision });
       setPerfiles([...perfiles, response.data]);
       resetForm();
       MySwal.fire('Éxito', 'Perfil creado correctamente', 'success');
@@ -49,7 +49,7 @@ function Perfil() {
 
   const updatePerfil = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/perfil/${editId}`, { mision, vision });
+      const response = await axios.put(`https://back-rq8v.onrender.com/api/perfil/${editId}`, { mision, vision });
       setPerfiles(perfiles.map(p => (p.id === editId ? response.data : p)));
       resetForm();
       MySwal.fire('Éxito', 'Perfil actualizado correctamente', 'success');
@@ -73,7 +73,7 @@ function Perfil() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/perfil/${id}`);
+        await axios.delete(`https://back-rq8v.onrender.com/api/perfil/${id}`);
         setPerfiles(perfiles.filter(p => p.id !== id));
         MySwal.fire('Éxito', 'Perfil eliminado correctamente', 'success');
       } catch (error) {

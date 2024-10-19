@@ -19,7 +19,7 @@ function Politicas() {
 
   const fetchPoliticas = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/politicas');
+      const response = await axios.get('https://back-rq8v.onrender.com/api/politicas');
       setPoliticas(response.data);
     } catch (error) {
       console.error('Error al obtener políticas:', error);
@@ -37,7 +37,7 @@ function Politicas() {
 
   const createPolitica = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/politicas', { politica });
+      const response = await axios.post('https://back-rq8v.onrender.com/api/politicas', { politica });
       setPoliticas([...politicas, response.data]);
       resetForm();
       MySwal.fire('Éxito', 'Política creada correctamente', 'success');
@@ -49,7 +49,7 @@ function Politicas() {
 
   const updatePolitica = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/politicas/${editId}`, { politica });
+      const response = await axios.put(`https://back-rq8v.onrender.com/api/politicas/${editId}`, { politica });
       setPoliticas(politicas.map(p => (p.id === editId ? response.data : p)));
       resetForm();
       MySwal.fire('Éxito', 'Política actualizada correctamente', 'success');
@@ -73,7 +73,7 @@ function Politicas() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/politicas/${id}`);
+        await axios.delete(`https://back-rq8v.onrender.com/api/politicas/${id}`);
         setPoliticas(politicas.filter(p => p.id !== id));
         MySwal.fire('Éxito', 'Política eliminada correctamente', 'success');
       } catch (error) {
