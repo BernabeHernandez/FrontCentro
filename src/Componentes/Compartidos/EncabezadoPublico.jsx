@@ -181,26 +181,6 @@ const EncabezadoPublico = () => {
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
-            <li className={active === 'usuarios' ? 'active' : ''} onClick={() => { handleClick('usuarios'); handleMenuClick('usuarios'); }}>
-              <UserOutlined style={{ color: '#00B300' }} /> {/* Color de icono verde brillante */}
-              Servicios
-            </li>
-            <li className={active === 'productos' ? 'active' : ''} onClick={() => { handleClick('productos'); handleMenuClick('productos'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} />
-              ...
-            </li>
-            <li className={active === 'informacion' ? 'active' : ''} onClick={() => { handleClick('informacion'); handleMenuClick('quienesSomos'); }}>
-              <UserOutlined style={{ color: '#00B300' }} />
-              ....
-            </li>
-            <li className={active === 'preguntasFrecuentes' ? 'active' : ''} onClick={() => { handleClick('preguntasFrecuentes'); handleMenuClick('preguntasFrecuentes'); }}>
-              <PhoneOutlined style={{ color: '#00B300' }} />
-              ....
-            </li>
-            <li className={active === 'asignarIOT' ? 'active' : ''} onClick={() => { handleClick('asignarIOT'); handleMenuClick('asignarIOT'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} />
-              ...
-            </li>
             <li className={active === 'login' ? 'active' : ''} onClick={() => { handleClick('login'); handleMenuClick('login'); }}>
               <LoginOutlined style={{ color: '#00B300' }} />
               Iniciar sesión

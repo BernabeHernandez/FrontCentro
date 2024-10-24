@@ -17,6 +17,14 @@ import ValidarCodigo from './Componentes/Autenticacion/ValidarCodigo';
 import CambiarPassword from './Componentes/Autenticacion/CambiarPassword';
 import SolicitarCodigo from './Componentes/Autenticacion/SolicitarCodigo';
 import VerificarCorreo from './Componentes/Autenticacion/VerificarCorreo';
+import ActividadLogeo from './Componentes/Administrativo/ActividadLogeo';
+import RegistroCambioPassw from './Componentes/Administrativo/RegistroCambioPassw';
+import TerminosF from './Componentes/Compartidos/TerminosF';
+import PoliticasF from './Componentes/Compartidos/PoliticasF';
+import DeslindeF from './Componentes/Compartidos/DeslindeF';
+import RolesF from './Componentes/Administrativo/RolesF';
+import PieDePaginaCliente from './Componentes/Compartidos/PieDePaginaCliente';
+import PieDePaginaAdmin from './Componentes/Compartidos/PieDePaginaAdmin';
 
 const ThemeToggleButton = () => {
   const { toggleTheme, theme } = useTheme();
@@ -75,10 +83,27 @@ const App = () => {
           <Route path="/admin/terminos" element={<Terminos />} />
           <Route path="/admin/perfil" element={<Perfil />} />
           <Route path="/admin/deslinde" element={<Deslinde />} />
+          <Route path="/admin/activity-log" element={<ActividadLogeo />} />
+          <Route path="/admin/registro-password" element={<RegistroCambioPassw />} />
+          <Route path="/admin/roles" element={<RolesF />} />
+          <Route path="/admin/terminos-condiciones" element={<TerminosF />} />
+          <Route path="/admin/politicass" element={<PoliticasF />} />
+          <Route path="/admin/deslindes" element={<DeslindeF />} />
+
+
+          <Route path="/cliente/terminos-condiciones" element={<TerminosF />} />
+          <Route path="/cliente/politicass" element={<PoliticasF />} />
+          <Route path="/cliente/deslindes" element={<DeslindeF />} />
+
           <Route path="/verificar_correo" element={<SolicitarCodigo />} />
           <Route path="/validar_codigo" element={<ValidarCodigo />} />
           <Route path="/cambiar_password" element={<CambiarPassword />} />
           <Route path="/verificar-correo" element={<VerificarCorreo />} />
+          <Route path="/terminos-condiciones" element={<TerminosF />} />
+          <Route path="/politicass" element={<PoliticasF />} />
+          <Route path="/deslindes" element={<DeslindeF />} />
+
+          
         </Routes>
       </LayoutConEncabezado>
     </ThemeProvider>

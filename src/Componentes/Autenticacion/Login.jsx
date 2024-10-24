@@ -5,14 +5,10 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import ReCAPTCHA from 'react-google-recaptcha';
 
-
 import imagen1 from '../Imagenes/ImagenV1.jpg';
-import imagen2 from '../Imagenes/Imge77.jpg';
 import imagen3 from '../Imagenes/Image4.jpg';
-import imagen4 from '../Imagenes//Image2.png';
+import imagen4 from '../Imagenes/Image2.png';
 import imagen5 from '../Imagenes/Imagen1.png';
-import imagen6 from '../Imagenes/Image6.jpg';
-
 
 const MySwal = withReactContent(Swal);
 
@@ -20,9 +16,8 @@ function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
+  const [lockTimeLeft, setLockTimeLeft] = useState(0);
   const [captchaToken, setCaptchaToken] = useState(null);
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -36,17 +31,25 @@ function Login() {
     e.preventDefault();
 
     if (isLocked) {
-      setErrorMessage('Tu cuenta está bloqueada tras 5 intentos fallidos. Inténtalo más tarde.');
+      MySwal.fire({
+        icon: 'error',
+        title: 'Cuenta Bloqueada',
+        text: 'Tu cuenta está bloqueada. Espera un momento para intentar de nuevo.',
+      });
       return;
     }
 
     if (!captchaToken) {
-      setErrorMessage('Por favor, completa el CAPTCHA para continuar.');
+      MySwal.fire({
+        icon: 'warning',
+        title: 'CAPTCHA Requerido',
+        text: 'Por favor, completa el CAPTCHA para continuar.',
+      });
       return;
     }
 
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/login', {
+      const response = await axios.post('http://localhost:5000/api/login', {
         user: username,
         password: password,
         captchaToken,
@@ -61,12 +64,16 @@ function Login() {
         case "Cliente":
           ruta = '/cliente';
           break;
-        case "Administrativo":
+        case "Administrador":
           ruta = '/admin';
           break;
         default:
           console.log('Tipo de usuario no reconocido:', tipo);
-          setErrorMessage('Tipo de usuario desconocido');
+          MySwal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Tipo de usuario desconocido',
+          });
           return;
       }
 
@@ -81,46 +88,50 @@ function Login() {
         navigate(ruta);
       });
 
-      setLoginAttempts(0);
+      setLockTimeLeft(0);
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setLoginAttempts(prev => {
-          const newAttempts = prev + 1;
-          let attemptsLeft = 5 - newAttempts;
-
-          if (newAttempts >= 5) {
-            setIsLocked(true);
-            MySwal.fire({
-              icon: 'error',
-              title: 'Cuenta Bloqueada',
-              text: 'Tu cuenta ha sido bloqueada tras 5 intentos fallidos. Intenta de nuevo más tarde.',
-            });
-            setErrorMessage('Tu cuenta ha sido bloqueada.');
-          } else {
-            MySwal.fire({
-              icon: 'error',
-              title: 'Inicio de Sesión Fallido',
-              text: `Usuario o contraseña incorrectos. Intentos restantes: ${attemptsLeft}`,
-            });
-            setErrorMessage(`Intentos restantes: ${attemptsLeft}`);
-          }
-          return newAttempts;
-        });
-      } else if (error.response) {
-        setErrorMessage('Error en el servidor: ' + error.response.data.error);
+      if (error.response) {
+        const { lockTimeLeft, attemptsLeft } = error.response.data;
+        if (lockTimeLeft) {
+          setIsLocked(true);
+          setLockTimeLeft(lockTimeLeft);
+        } else {
+          MySwal.fire({
+            icon: 'error',
+            title: 'Usuario o Contraseña Incorrecta',
+            text: `Intentos restantes: ${attemptsLeft}`,
+          });
+        }
       } else {
-        setErrorMessage('Error al iniciar sesión. Inténtalo de nuevo más tarde.');
+        MySwal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al iniciar sesión. Inténtalo de nuevo más tarde.',
+        });
       }
     }
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImage((prevImage) => (prevImage + 1) % images.length);
-    }, 5000);
+      if (isLocked && lockTimeLeft > 0) {
+        setLockTimeLeft(prev => {
+          const newTime = prev - 1;
+          return newTime;
+        });
+      } else if (lockTimeLeft === 0) {
+        setIsLocked(false);
+      }
+    }, 1000); // Intervalo de un segundo
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [isLocked, lockTimeLeft]);
+
+  const formatLockTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes}m ${seconds}s`;
+  };
 
   const estilos = {
     contenedorPrincipal: {
@@ -142,15 +153,6 @@ function Login() {
       overflow: 'hidden',
       flexDirection: 'row',
     },
-    carrusel: {
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '15px',
-      height: '500px',
-      backgroundColor: '#e0f7fa', 
-    },
     contenedorFormulario: {
       flex: 1,
       padding: '20px',
@@ -162,7 +164,7 @@ function Login() {
     },
     titulo: {
       fontSize: '24px',
-      marginBottom: '10px', 
+      marginBottom: '10px',
       color: '#004d40',
     },
     campo: {
@@ -178,7 +180,7 @@ function Login() {
     },
     input: {
       width: '100%',
-      padding: '10px', 
+      padding: '10px',
       borderRadius: '8px',
       border: '1px solid #b2dfdb',
       fontSize: '16px',
@@ -188,110 +190,84 @@ function Login() {
       backgroundColor: '#00796b',
       color: 'white',
       border: 'none',
-      padding: '10px 15px', 
       borderRadius: '8px',
-      cursor: 'pointer',
+      padding: '10px 15px',
       fontSize: '16px',
-      fontWeight: 'bold',
-      transition: 'background-color 0.3s ease',
-      textDecoration: 'none',
-      display: 'block',
-      margin: '20px auto 0',
-      width: '100%',
+      cursor: 'pointer',
     },
     enlace: {
-      color: '#00796b',
-      textDecoration: 'none',
-      marginTop: '10px', 
       display: 'block',
+      marginTop: '10px',
+      textDecoration: 'none',
+      color: '#00796b',
     },
     error: {
       color: 'red',
+    },
+    temporizador: {
+      color: 'red',
       marginTop: '10px',
     },
-    captcha: {
-      margin: '10px 0',
-    },
-    imagenCarrusel: {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      borderRadius: '10px',
-    },
-    
-    '@media (max-width: 768px)': { // Tablets
-      contenedorLogin: {
-        flexDirection: 'column',
-        maxWidth: '600px',
-      },
-      carrusel: {
-        height: '300px',
-      },
-    },
-    '@media (max-width: 480px)': { // Móviles
-      contenedorLogin: {
-        flexDirection: 'column',
-        maxWidth: '100%',
-        width: '100%',
-      },
-      carrusel: {
-        height: '200px',
-      },
-      contenedorFormulario: {
-        padding: '10px',
-      },
-      boton: {
-        padding: '10px 15px',
-        fontSize: '14px',
-      },
+    imagen: {
+      flex: 1,
+      backgroundImage: `url(${images[currentImage]})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      minHeight: '350px',
     },
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prevImage) => (prevImage + 1) % images.length);
+    }, 5000); // Cambiar imagen cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
     <div style={estilos.contenedorPrincipal}>
       <div style={estilos.contenedorLogin}>
-        <div style={estilos.carrusel}>
-          <img src={images[currentImage]} alt="Carrusel" style={estilos.imagenCarrusel} />
-        </div>
+        <div style={estilos.imagen}></div>
         <div style={estilos.contenedorFormulario}>
-          <h1 style={estilos.titulo}>Iniciar Sesión</h1>
+          <h2 style={estilos.titulo}>Iniciar Sesión</h2>
           <form onSubmit={handleSubmit}>
             <div style={estilos.campo}>
-              <label style={estilos.etiqueta}>&#128100; Usuario</label>
+              <label style={estilos.etiqueta}>Usuario:</label>
               <input
                 type="text"
-                placeholder="Usuario"
                 style={estilos.input}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                disabled={isLocked}
               />
             </div>
             <div style={estilos.campo}>
-              <label style={estilos.etiqueta}>&#128274; Contraseña</label>
+              <label style={estilos.etiqueta}>Contraseña:</label>
               <input
                 type="password"
-                placeholder="Contraseña"
                 style={estilos.input}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLocked}
               />
             </div>
-            <div style={estilos.captcha}>
-              <ReCAPTCHA
-                sitekey="6Lc_u2EqAAAAAG8Jg_KW2Rf6qLF0mFY8j79Lifjk"
-                onChange={onCaptchaChange}
-              />
-            </div>
-
-            <button type="submit" style={estilos.boton} disabled={isLocked}>Iniciar Sesión</button>
+            <ReCAPTCHA
+              sitekey="6Lc_u2EqAAAAAG8Jg_KW2Rf6qLF0mFY8j79Lifjk" 
+              onChange={onCaptchaChange}
+              style={{ marginBottom: '10px' }}
+            />
+            <button type="submit" style={estilos.boton} disabled={isLocked}>
+              Iniciar Sesión
+            </button>
             <Link to="/verificar_correo" style={estilos.enlace}>¿Olvidaste la contraseña?</Link>
             <Link to="/registro" style={estilos.enlace}>Regístrate</Link>
           </form>
-          {errorMessage && <p style={estilos.error}>{errorMessage}</p>}
+          {isLocked && (
+            <p style={estilos.temporizador}>
+              Tiempo restante para desbloquear: {formatLockTime(lockTimeLeft)}
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -1,20 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HomeOutlined, UserOutlined, PhoneOutlined, AppstoreOutlined, LogoutOutlined, FileTextOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const EncabezadoAdministrativo = () => {
   const [active, setActive] = useState('inicio');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isEmpresaMenuOpen, setIsEmpresaMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(''); 
   const navigate = useNavigate();
-  const menuRef = useRef(null); 
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/perfilF');
+        const data = response.data;
+        setLogoUrl(`http://localhost:5000/images/${data.logo}`); 
+      } catch (error) {
+        console.error('Error al obtener datos del perfil:', error);
+      }
+    };
+    fetchLogo();
+  }, []);
 
   const handleClick = (option) => {
     setActive(option);
-    setIsMobileMenuOpen(false); 
+    setIsMobileMenuOpen(false);
   };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleEmpresaMenu = () => {
+    setIsEmpresaMenuOpen(!isEmpresaMenuOpen);
   };
 
   const handleMenuClick = (key) => {
@@ -31,28 +51,28 @@ const EncabezadoAdministrativo = () => {
       case "deslinde":
         navigate('/admin/deslinde');
         break;
-      case "quienesSomos":
-        navigate('/admin/informacion/lista-quienes-somos');
+      case "activity-log":
+        navigate('/admin/activity-log');
         break;
-      case "misionVision":
-        navigate('/admin/informacion/mision-vision-lista');
+      case "registro-password":
+        navigate('/admin/registro-password');
         break;
-      case "politicasPrivacidad":
-        navigate('/admin/informacion/politicas-privacidad-lista');
-        break;
-      case "preguntasFrecuentes":
-        navigate('/admin/preguntas-frecuentes');
-        break;
-      case "asignarIOT":
-        navigate('/admin/asignar-IOT');
+      case "roles":
+        navigate('/admin/roles');
         break;
       case "cerrarSesion":
-        console.log('Cerrando sesión...');
-        navigate('/');
+        handleLogout(); // Cerrar sesión sin llamar al backend
         break;
       default:
         console.log("No se reconoce la acción del menú");
     }
+  };
+
+  const handleLogout = () => {
+    console.log('Cerrando sesión...');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    navigate('/'); // Redirigir al usuario a la página de inicio
   };
 
   const handleClickOutside = (event) => {
@@ -90,6 +110,16 @@ const EncabezadoAdministrativo = () => {
           color: var(--color-secondary);
         }
 
+        .logo {
+          display: flex;
+          align-items: center;
+        }
+
+        .logo img {
+          height: 50px; /* Ajusta la altura del logo */
+          margin-right: 10px; /* Espaciado entre logo y título */
+        }
+
         .logo h1 {
           font-size: 1.5rem; /* Tamaño de la fuente del logo */
           font-weight: bold;
@@ -125,6 +155,26 @@ const EncabezadoAdministrativo = () => {
           border-radius: 5px;
         }
 
+        .menu ul .dropdown-menu {
+          display: none;
+          position: absolute;
+          background-color: var(--color-primary);
+          list-style: none;
+          padding: 12px;
+          margin-top: 200px;
+          border-radius: 5px;
+        }
+
+        .menu ul .dropdown-menu li {
+          padding: 8.5px 12px;
+          cursor: pointer;
+          color: var(--color-secondary);
+        }
+
+        .menu ul .dropdown:hover .dropdown-menu {
+          display: block;
+        }
+
         .mobile-menu-icon {
           display: none;
           cursor: pointer;
@@ -148,7 +198,7 @@ const EncabezadoAdministrativo = () => {
             left: -100%;
             width: 70%;
             height: 100%;
-            background-color: var(--color-mobile-bg); /* Color de fondo del menú móvil actualizado */
+            background-color: var(--color-mobile-bg);
             padding: 20px;
             transition: left 0.3s ease-in-out;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
@@ -163,7 +213,7 @@ const EncabezadoAdministrativo = () => {
             padding: 20px;
             border-bottom: 1px solid var(--color-hover);
             text-align: left;
-            color: var(--color-mobile-text); /* Color blanco para el texto del menú móvil */
+            color: var(--color-mobile-text);
           }
 
           .mobile-menu-icon {
@@ -174,32 +224,39 @@ const EncabezadoAdministrativo = () => {
 
       <header className="header">
         <div className="logo">
+          {logoUrl && <img src={logoUrl} alt="Logo" />} {/* Mostrar logo aquí */}
           <h1>Centro de Rehabilitación Integral</h1>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
-            <li className={active === 'politicas' ? 'active' : ''} onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}>
-              <FileTextOutlined style={{ color: '#00B300' }} /> 
-              Políticas
+            <li className="dropdown">
+              <span onMouseEnter={toggleEmpresaMenu}>
+                <FileTextOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+                Datos de la Empresa
+              </span>
+              <ul className="dropdown-menu">
+                <li onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}>Perfil</li>
+                <li onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}>Términos</li>
+                <li onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}>Políticas</li>
+                <li onClick={() => { handleClick('deslinde'); handleMenuClick('deslinde'); }}>Deslinde</li>
+              </ul>
             </li>
-            <li className={active === 'terminos' ? 'active' : ''} onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} /> 
-              Términos
+
+            <li className="dropdown">
+              <span>
+                <AppstoreOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+                Registro de actividades
+              </span>
+              <ul className="dropdown-menu">
+                <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>Registro de logeos</li>
+                <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>Registro de Contraseña</li>
+                <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>.</li>
+                <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>.</li>
+              </ul>
             </li>
-            <li className={active === 'perfil' ? 'active' : ''} onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}>
-              <UserOutlined style={{ color: '#00B300' }} /> 
-              Perfil
-            </li>
-            <li className={active === 'deslinde' ? 'active' : ''} onClick={() => { handleClick('deslinde'); handleMenuClick('deslinde'); }}>
-              <PhoneOutlined style={{ color: '#00B300' }} /> 
-              Deslinde
-            </li>
-            <li className={active === 'asignarIOT' ? 'active' : ''} onClick={() => { handleClick('asignarIOT'); handleMenuClick('asignarIOT'); }}>
-              <InfoCircleOutlined style={{ color: '#00B300' }} /> 
-              ...
-            </li>
-            <li className={active === 'cerrarSesion' ? 'active' : ''} onClick={() => { handleClick('cerrarSesion'); handleMenuClick('cerrarSesion'); }}>
-              <LogoutOutlined style={{ color: '#00B300' }} />
+
+            <li onClick={() => handleMenuClick('cerrarSesion')}>
+              <LogoutOutlined style={{ color: '#00B300', marginRight: '8px' }} />
               Cerrar Sesión
             </li>
           </ul>

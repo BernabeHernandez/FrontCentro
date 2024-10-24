@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import '@fortawesome/fontawesome-free/css/all.min.css'; // Importa Font Awesome
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-function Politicas() {
+const Politicas = () => {
   const [politicas, setPoliticas] = useState([]);
-  const [politica, setPolitica] = useState('');
+  const [titulo, setTitulo] = useState('');
+  const [contenido, setContenido] = useState('');
+  const [fechaVigencia, setFechaVigencia] = useState('');
+  const [secciones, setSecciones] = useState([{ titulo: '', contenido: '' }]);
   const [editMode, setEditMode] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [formVisible, setFormVisible] = useState(false);
+  const [currentId, setCurrentId] = useState('');
+
+  const apiUrl = 'http://localhost:5000/api/politicas';
 
   useEffect(() => {
     fetchPoliticas();
@@ -19,40 +22,39 @@ function Politicas() {
 
   const fetchPoliticas = async () => {
     try {
-      const response = await axios.get('https://back-rq8v.onrender.com/api/politicas');
+      const response = await axios.get(apiUrl);
       setPoliticas(response.data);
     } catch (error) {
       console.error('Error al obtener políticas:', error);
+      MySwal.fire('Error', 'No se pudo obtener la lista de políticas', 'error');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editMode) {
-      await updatePolitica();
+      await updatePolitica(currentId);
     } else {
       await createPolitica();
     }
+    resetForm();
+    fetchPoliticas();
   };
 
   const createPolitica = async () => {
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/politicas', { politica });
-      setPoliticas([...politicas, response.data]);
-      resetForm();
-      MySwal.fire('Éxito', 'Política creada correctamente', 'success');
+      await axios.post(apiUrl, { titulo, contenido, fechaVigencia, secciones });
+      MySwal.fire('Éxito', 'Se insertó correctamente', 'success');
     } catch (error) {
       console.error('Error al crear política:', error);
       MySwal.fire('Error', 'No se pudo crear la política', 'error');
     }
   };
 
-  const updatePolitica = async () => {
+  const updatePolitica = async (id) => {
     try {
-      const response = await axios.put(`https://back-rq8v.onrender.com/api/politicas/${editId}`, { politica });
-      setPoliticas(politicas.map(p => (p.id === editId ? response.data : p)));
-      resetForm();
-      MySwal.fire('Éxito', 'Política actualizada correctamente', 'success');
+      await axios.put(`${apiUrl}/${id}`, { titulo, contenido, fechaVigencia, secciones });
+      MySwal.fire('Éxito', 'Actualizado correctamente', 'success');
     } catch (error) {
       console.error('Error al actualizar política:', error);
       MySwal.fire('Error', 'No se pudo actualizar la política', 'error');
@@ -62,10 +64,10 @@ function Politicas() {
   const deletePolitica = async (id) => {
     const confirm = await MySwal.fire({
       title: '¿Estás seguro?',
-      text: "Esta acción no se puede deshacer.",
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
+      confirmButtonColor: '#4caf50',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
@@ -73,9 +75,9 @@ function Politicas() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`https://back-rq8v.onrender.com/api/politicas/${id}`);
-        setPoliticas(politicas.filter(p => p.id !== id));
-        MySwal.fire('Éxito', 'Política eliminada correctamente', 'success');
+        await axios.delete(`${apiUrl}/${id}`);
+        MySwal.fire('Eliminado', 'Eliminado correctamente', 'success');
+        fetchPoliticas();
       } catch (error) {
         console.error('Error al eliminar política:', error);
         MySwal.fire('Error', 'No se pudo eliminar la política', 'error');
@@ -83,269 +85,292 @@ function Politicas() {
     }
   };
 
-  const handleEdit = (politica) => {
-    setPolitica(politica.politica);
-    setEditId(politica.id);
+  const editPolitica = (id, politica) => {
+    setCurrentId(id);
+    setTitulo(politica.titulo);
+    setContenido(politica.contenido);
+    setFechaVigencia(politica.fechaVigencia);
+    setSecciones(politica.secciones || []);
     setEditMode(true);
-    setFormVisible(true);
   };
 
   const resetForm = () => {
-    setPolitica('');
-    setEditId(null);
+    setTitulo('');
+    setContenido('');
+    setFechaVigencia('');
+    setSecciones([{ titulo: '', contenido: '' }]);
     setEditMode(false);
-    setFormVisible(false);
+    setCurrentId('');
+  };
+
+  const handleAddSection = () => {
+    setSecciones([...secciones, { titulo: '', contenido: '' }]);
+  };
+
+  const handleRemoveSection = (index) => {
+    const newSections = secciones.filter((_, i) => i !== index);
+    setSecciones(newSections);
+  };
+
+  const handleSectionChange = (index, field, value) => {
+    const newSections = [...secciones];
+    newSections[index][field] = value;
+    setSecciones(newSections);
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Políticas de Privacidad</h1>
-      <button onClick={() => setFormVisible(!formVisible)} style={styles.toggleFormButton}>
-        {formVisible ? (
-          <><i className="fas fa-eye-slash"></i> Ocultar Formulario</>
-        ) : (
-          <><i className="fas fa-plus"></i> Agregar Política</>
-        )}
-      </button>
-
-      {formVisible && (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <textarea
-            placeholder="Escribe la política aquí..."
-            value={politica}
-            onChange={(e) => setPolitica(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-          <div style={styles.buttonContainer}>
-            <button type="submit" style={styles.submitButton}>
-              {editMode ? (
-                <><i className="fas fa-edit"></i> Actualizar</>
-              ) : (
-                <><i className="fas fa-plus-circle"></i> Crear</>
-              )}
-            </button>
-            {editMode && (
-              <button type="button" onClick={resetForm} style={styles.cancelButton}>
-                <i className="fas fa-times"></i> Cancelar
+      <h1 style={styles.title}>Gestión de Políticas</h1>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
+          placeholder="Ingrese título"
+          required
+          style={styles.input}
+        />
+        <textarea
+          value={contenido}
+          onChange={(e) => setContenido(e.target.value)}
+          placeholder="Ingrese contenido"
+          required
+          style={styles.textarea}
+        />
+        <input
+          type="date"
+          value={fechaVigencia}
+          onChange={(e) => setFechaVigencia(e.target.value)}
+          required
+          style={styles.input}
+        />
+        
+        {secciones.map((section, index) => (
+          <div key={index} style={styles.section}>
+            <div style={styles.sectionInputContainer}>
+              <input
+                type="text"
+                value={section.titulo}
+                onChange={(e) => handleSectionChange(index, 'titulo', e.target.value)}
+                placeholder="Ingrese subtítulo"
+                required
+                style={styles.input}
+              />
+              <textarea
+                value={section.contenido}
+                onChange={(e) => handleSectionChange(index, 'contenido', e.target.value)}
+                placeholder="Ingrese contenido del subtítulo"
+                required
+                style={styles.textarea}
+              />
+            </div>
+            <div style={styles.removeButtonContainer}>
+              <button 
+                type="button" 
+                onClick={() => handleRemoveSection(index)} 
+                style={styles.removeButton}>
+                Eliminar Sección
               </button>
-            )}
+            </div>
           </div>
-        </form>
-      )}
+        ))}
+        
+        <button type="button" onClick={handleAddSection} style={styles.addButton}>
+          Agregar Sección
+        </button>
 
-      {/* Contenedor de tabla con desplazamiento */}
+        <div style={styles.buttonContainer}>
+          <button type="submit" style={styles.submitButton}>
+            {editMode ? 'Actualizar' : 'Crear'}
+          </button>
+          {editMode && (
+            <button type="button" onClick={resetForm} style={styles.cancelButton}>
+              Cancelar
+            </button>
+          )}
+        </div>
+      </form>
       <div style={styles.tableContainer}>
         <table style={styles.table}>
           <thead>
             <tr style={styles.tableHeader}>
-              <th style={styles.tableHeaderCell}>Política</th>
+              <th style={styles.tableHeaderCell}>Título</th>
+              <th style={styles.tableHeaderCell}>Contenido</th>
+              <th style={styles.tableHeaderCell}>Fecha de Vigencia</th>
               <th style={styles.tableHeaderCell}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {politicas.map(politica => (
-              <tr key={politica.id} style={styles.tableRow}>
-                <td style={styles.tableCell}>{politica.politica}</td>
+            {politicas.map((item) => (
+              <tr key={item._id} style={styles.tableRow}>
+                <td style={styles.tableCell}>{item.titulo}</td>
+                <td style={styles.tableCell}>{item.contenido}</td>
+                <td style={styles.tableCell}>{item.fechaVigencia}</td>
                 <td style={styles.tableCell}>
-                  <div style={styles.actionButtonContainer}>
-                    <button onClick={() => handleEdit(politica)} style={styles.editButton}>
-                      <i className="fas fa-edit"></i> Editar
-                    </button>
-                    <button onClick={() => deletePolitica(politica.id)} style={styles.deleteButton}>
-                      <i className="fas fa-trash-alt"></i> Eliminar
-                    </button>
-                  </div>
+                  <button onClick={() => editPolitica(item._id, item)} style={styles.editButton}>
+                    Editar
+                  </button>
+                  <button onClick={() => deletePolitica(item._id)} style={styles.deleteButton}>
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          textarea {
-            height: 80px;
-          }
-
-          table {
-            font-size: 14px;
-          }
-
-          button {
-            width: auto; // Cambiar a auto para el botón principal
-            margin-bottom: 5px; // Espacio entre botones
-          }
-
-          .actionButtonContainer {
-            flex-direction: column; /* Cambio a columna en móviles */
-          }
-
-          .editButton, .deleteButton {
-            width: auto; /* Botones ocupan el ancho automático */
-          }
-        }
-
-        @media (max-width: 480px) {
-          h1 {
-            font-size: 24px;
-          }
-
-          textarea {
-            height: 60px;
-          }
-
-          button {
-            font-size: 14px;
-            padding: 5px 8px; // Reducir el tamaño del padding
-          }
-        }
-      `}</style>
     </div>
   );
-}
+};
 
 const styles = {
   container: {
-padding: '20px',
     maxWidth: '800px',
     margin: 'auto',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f5f5f5', 
-    borderRadius: '10px', 
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', 
-    marginBottom: '40px', 
+    padding: '20px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    backgroundColor: '#f9f9f9',
   },
   title: {
     textAlign: 'center',
+    marginBottom: '20px',
+    fontSize: '24px',
     color: '#333',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
     marginBottom: '20px',
   },
-  toggleFormButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#4caf50', 
+  input: {
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  },
+  textarea: {
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  },
+  section: {
+    marginBottom: '15px',
+  },
+  sectionInputContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  addButton: {
+    padding: '10px 15px',
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    marginBottom: '20px',
-    transition: 'background-color 0.3s',
-  },
-  form: {
-    marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  textarea: {
-    width: '100%',
-    height: '100px',
     marginBottom: '10px',
-    padding: '10px',
+    alignSelf: 'flex-start', // Alinear a la izquierda
+  },
+  removeButton: {
+    padding: '5px 10px', // Botón pequeño
+    backgroundColor: '#f44336',
+    color: 'white',
+    border: 'none',
     borderRadius: '8px',
-    border: '1px solid #b2dfdb',
-    resize: 'none',
-    fontSize: '16px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', 
+    cursor: 'pointer',
+  },
+  removeButtonContainer: {
+    textAlign: 'center', // Centrar el contenedor del botón
+    marginTop: '5px',
   },
   buttonContainer: {
     display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
+    justifyContent: 'space-between',
   },
   submitButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#4caf50',
+    padding: '10px 15px',
+    backgroundColor: '#4CAF50', // Color verde
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
+    flex: 1, // Asegura que el botón ocupe el mismo espacio
+    marginRight: '10px', // Espacio entre botones
   },
   cancelButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#e53935',
+    padding: '10px 15px',
+    backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
+    flex: 1, // Asegura que el botón ocupe el mismo espacio
   },
   tableContainer: {
-    maxHeight: '380px', 
-    overflowY: 'auto', 
-    marginTop: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', 
+    overflowX: 'auto', // Permitir desplazamiento en la tabla
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    backgroundColor: '#e8f5e9', 
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+    marginTop: '20px',
   },
   tableHeader: {
-    backgroundColor: '#4caf50', 
+    backgroundColor: '#2196F3',
     color: 'white',
   },
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    borderBottom: '2px solid #388e3c',
-    fontWeight: 'bold', 
+    width: '25%', // Ancho fijo para la columna
   },
   tableRow: {
-    backgroundColor: '#c8e6c9', 
-    '&:hover': {
-      backgroundColor: '#b2dfdb', 
-    },
+    borderBottom: '1px solid #ccc',
   },
   tableCell: {
     padding: '10px',
-    borderBottom: '1px solid #ddd',
-    textAlign: 'left',
-    color: '#333', 
-  },
-  actionButtonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
-    flexWrap: 'wrap',
+    verticalAlign: 'top',
+    color: '#333', // Ajustado para modo oscuro
+    maxWidth: '200px', // Ancho máximo para evitar el movimiento
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap', // Evitar salto de línea
   },
   editButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#ffa726', 
+    padding: '5px 10px',
+    backgroundColor: '#FFA500',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '4px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
-    display: 'flex',
-    alignItems: 'center', 
-    gap: '5px', 
   },
   deleteButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#e53935', 
+    padding: '5px 10px',
+    backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '4px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
-    display: 'flex',
-    alignItems: 'center', 
-    gap: '5px', 
+    marginLeft: '5px',
+  },
+  '@media (max-width: 768px)': {
+    tableCell: {
+      fontSize: '12px', // Cambiar el tamaño de fuente para dispositivos móviles
+      display: 'block', // Cambiar a bloque para mejor visualización
+    },
+    input: {
+      padding: '8px',
+    },
+    textarea: {
+      padding: '8px',
+    },
+    buttonContainer: {
+      flexDirection: 'column', // Cambiar a columna para botones en móviles
+    },
+    submitButton: {
+      marginRight: '0', // Quitar margen a la derecha
+      marginBottom: '10px', // Añadir margen inferior
+    },
   },
 };
 

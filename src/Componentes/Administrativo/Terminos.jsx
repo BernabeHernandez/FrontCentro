@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-function Terminos() {
+const Terminos = () => {
   const [terminos, setTerminos] = useState([]);
-  const [termino, setTermino] = useState('');
+  const [titulo, setTitulo] = useState('');
+  const [contenido, setContenido] = useState('');
+  const [fechaVigencia, setFechaVigencia] = useState('');
+  const [secciones, setSecciones] = useState([{ titulo: '', contenido: '' }]);
   const [editMode, setEditMode] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [formVisible, setFormVisible] = useState(false); 
+  const [currentId, setCurrentId] = useState('');
+
+  const apiUrl = 'http://localhost:5000/api/terminos';
 
   useEffect(() => {
     fetchTerminos();
@@ -18,40 +22,39 @@ function Terminos() {
 
   const fetchTerminos = async () => {
     try {
-      const response = await axios.get('https://back-rq8v.onrender.com/api/terminos');
+      const response = await axios.get(apiUrl);
       setTerminos(response.data);
     } catch (error) {
       console.error('Error al obtener términos:', error);
+      MySwal.fire('Error', 'No se pudo obtener la lista de términos', 'error');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editMode) {
-      await updateTermino();
+      await updateTermino(currentId);
     } else {
       await createTermino();
     }
+    resetForm();
+    fetchTerminos();
   };
 
   const createTermino = async () => {
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/terminos', { termino });
-      setTerminos([...terminos, response.data]);
-      resetForm();
-      MySwal.fire('Éxito', 'Término creado correctamente', 'success');
+      await axios.post(apiUrl, { titulo, contenido, fechaVigencia, secciones });
+      MySwal.fire('Éxito', 'Se insertó correctamente', 'success');
     } catch (error) {
       console.error('Error al crear término:', error);
       MySwal.fire('Error', 'No se pudo crear el término', 'error');
     }
   };
 
-  const updateTermino = async () => {
+  const updateTermino = async (id) => {
     try {
-      const response = await axios.put(`https://back-rq8v.onrender.com/api/terminos/${editId}`, { termino });
-      setTerminos(terminos.map(t => (t.id === editId ? response.data : t)));
-      resetForm();
-      MySwal.fire('Éxito', 'Término actualizado correctamente', 'success');
+      await axios.put(`${apiUrl}/${id}`, { titulo, contenido, fechaVigencia, secciones });
+      MySwal.fire('Éxito', 'Actualizado correctamente', 'success');
     } catch (error) {
       console.error('Error al actualizar término:', error);
       MySwal.fire('Error', 'No se pudo actualizar el término', 'error');
@@ -61,10 +64,10 @@ function Terminos() {
   const deleteTermino = async (id) => {
     const confirm = await MySwal.fire({
       title: '¿Estás seguro?',
-      text: "Esta acción no se puede deshacer.",
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
+      confirmButtonColor: '#4caf50',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
@@ -72,9 +75,9 @@ function Terminos() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`https://back-rq8v.onrender.com/api/terminos/${id}`);
-        setTerminos(terminos.filter(t => t.id !== id));
-        MySwal.fire('Éxito', 'Término eliminado correctamente', 'success');
+        await axios.delete(`${apiUrl}/${id}`);
+        MySwal.fire('Eliminado', 'Eliminado correctamente', 'success');
+        fetchTerminos();
       } catch (error) {
         console.error('Error al eliminar término:', error);
         MySwal.fire('Error', 'No se pudo eliminar el término', 'error');
@@ -82,252 +85,295 @@ function Terminos() {
     }
   };
 
-  const handleEdit = (termino) => {
-    setTermino(termino.termino);
-    setEditId(termino.id);
+  const editTermino = (id, termino) => {
+    setCurrentId(id);
+    setTitulo(termino.titulo);
+    setContenido(termino.contenido);
+    setFechaVigencia(termino.fechaVigencia);
+    setSecciones(termino.secciones || []);
     setEditMode(true);
-    setFormVisible(true); 
   };
 
   const resetForm = () => {
-    setTermino('');
-    setEditId(null);
+    setTitulo('');
+    setContenido('');
+    setFechaVigencia('');
+    setSecciones([{ titulo: '', contenido: '' }]);
     setEditMode(false);
-    setFormVisible(false); 
+    setCurrentId('');
+  };
+
+  const handleAddSection = () => {
+    setSecciones([...secciones, { titulo: '', contenido: '' }]);
+  };
+
+  const handleRemoveSection = (index) => {
+    const newSections = secciones.filter((_, i) => i !== index);
+    setSecciones(newSections);
+  };
+
+  const handleSectionChange = (index, field, value) => {
+    const newSections = [...secciones];
+    newSections[index][field] = value;
+    setSecciones(newSections);
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Términos y Condiciones</h1>
-
-      <button onClick={() => setFormVisible(!formVisible)} style={styles.toggleFormButton}>
-        {formVisible ? (
-          <><i className="fas fa-eye-slash"></i> Ocultar Formulario</>
-        ) : (
-          <><i className="fas fa-plus"></i> Agregar Término</>
-        )}
-      </button>
-
-      {formVisible && (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <textarea
-            placeholder="Escribe el término aquí..."
-            value={termino}
-            onChange={(e) => setTermino(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-          <div style={styles.buttonContainer}>
-            <button type="submit" style={styles.submitButton}>
-              {editMode ? (
-                <><i className="fas fa-edit"></i> Actualizar</>
-              ) : (
-                <><i className="fas fa-plus-circle"></i> Crear</>
-              )}
-            </button>
-            {editMode && (
-              <button type="button" onClick={resetForm} style={styles.cancelButton}>
-                <i className="fas fa-times"></i> Cancelar
+      <h1 style={styles.title}>Gestión de Términos</h1>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
+          placeholder="Ingrese título"
+          required
+          style={styles.input}
+        />
+        <textarea
+          value={contenido}
+          onChange={(e) => setContenido(e.target.value)}
+          placeholder="Ingrese contenido"
+          required
+          style={styles.textarea}
+        />
+        <input
+          type="date"
+          value={fechaVigencia}
+          onChange={(e) => setFechaVigencia(e.target.value)}
+          required
+          style={styles.input}
+        />
+        
+        {secciones.map((section, index) => (
+          <div key={index} style={styles.section}>
+            <div style={styles.sectionInputContainer}>
+              <input
+                type="text"
+                value={section.titulo}
+                onChange={(e) => handleSectionChange(index, 'titulo', e.target.value)}
+                placeholder="Ingrese subtítulo"
+                required
+                style={styles.input}
+              />
+              <textarea
+                value={section.contenido}
+                onChange={(e) => handleSectionChange(index, 'contenido', e.target.value)}
+                placeholder="Ingrese contenido del subtítulo"
+                required
+                style={styles.textarea}
+              />
+            </div>
+            <div style={styles.removeButtonContainer}>
+              <button 
+                type="button" 
+                onClick={() => handleRemoveSection(index)} 
+                style={styles.removeButton}>
+                Eliminar Sección
               </button>
-            )}
+            </div>
           </div>
-        </form>
-      )}
+        ))}
+        
+        <button type="button" onClick={handleAddSection} style={styles.addButton}>
+          Agregar Sección
+        </button>
 
-      {/* Contenedor de tabla con desplazamiento */}
+        <div style={styles.buttonContainer}>
+          <button type="submit" style={styles.submitButton}>
+            {editMode ? 'Actualizar Término' : 'Agregar Término'}
+          </button>
+          {editMode && (
+            <button type="button" onClick={resetForm} style={styles.cancelButton}>
+              Cancelar
+            </button>
+          )}
+        </div>
+      </form>
+
+      <h2 style={styles.subTitle}>Lista de Términos</h2>
       <div style={styles.tableContainer}>
         <table style={styles.table}>
           <thead>
             <tr style={styles.tableHeader}>
-              <th style={styles.tableHeaderCell}>Término</th>
+              <th style={styles.tableHeaderCell}>Título</th>
+              <th style={styles.tableHeaderCell}>Contenido</th>
+              <th style={styles.tableHeaderCell}>Fecha de Vigencia</th>
               <th style={styles.tableHeaderCell}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {terminos.map(termino => (
-              <tr key={termino.id} style={styles.tableRow}>
-                <td style={styles.tableCell}>{termino.termino}</td>
-                <td style={styles.tableCell}>
-                  <div style={styles.actionButtonContainer}>
-                    <button onClick={() => handleEdit(termino)} style={styles.editButton}>
-                      <i className="fas fa-edit"></i> Editar
-                    </button>
-                    <button onClick={() => deleteTermino(termino.id)} style={styles.deleteButton}>
-                      <i className="fas fa-trash-alt"></i> Eliminar
-                    </button>
-                  </div>
+            {terminos.map((termino) => (
+              <tr key={termino._id} style={styles.tableRow}>
+                <td style={styles.tableCell}>{termino.titulo}</td>
+                <td style={styles.tableCell}>{termino.contenido}</td>
+                <td style={styles.tableCell}>{new Date(termino.fechaVigencia).toLocaleDateString()}</td>
+                <td>
+                  <button onClick={() => editTermino(termino._id, termino)} style={styles.editButton}>
+                    Editar
+                  </button>
+                  <button onClick={() => deleteTermino(termino._id)} style={styles.deleteButton}>
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          textarea {
-            height: 80px;
-          }
-
-          table {
-            font-size: 14px;
-          }
-
-          button {
-            width: auto; // Cambiar a auto para el botón principal
-            margin-bottom: 5px; // Espacio entre botones
-          }
-
-          .actionButtonContainer {
-            flex-direction: column; /* Cambio a columna en móviles */
-          }
-
-          .editButton, .deleteButton {
-            width: auto; /* Botones ocupan el ancho automático */
-          }
-        }
-
-        @media (max-width: 480px) {
-          h1 {
-            font-size: 24px;
-          }
-
-          textarea {
-            height: 60px;
-          }
-
-          button {
-            font-size: 14px;
-            padding: 5px 8px; // Reducir el tamaño del padding
-          }
-        }
-      `}</style>
     </div>
   );
-}
+};
 
+// Estilos para el componente
 const styles = {
   container: {
-    padding: '20px',
     maxWidth: '800px',
     margin: 'auto',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f5f5f5', 
-    borderRadius: '10px', 
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', 
-    marginBottom: '20px', 
+    padding: '20px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    backgroundColor: '#f9f9f9',
   },
   title: {
     textAlign: 'center',
+    marginBottom: '20px',
+    fontSize: '24px',
     color: '#333',
-    marginBottom: '20px',
-  },
-  toggleFormButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#4caf50', 
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    marginBottom: '20px',
-    transition: 'background-color 0.3s',
   },
   form: {
-    marginBottom: '20px',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  input: {
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
   },
   textarea: {
-    width: '100%',
-    height: '100px',
-    marginBottom: '10px',
     padding: '10px',
-    borderRadius: '8px',
-    border: '1px solid #b2dfdb',
-    resize: 'none',
-    fontSize: '16px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', 
+    marginBottom: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
   },
-  buttonContainer: {
+  section: {
+    marginBottom: '15px',
+  },
+  sectionInputContainer: {
     display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
+    flexDirection: 'column',
   },
-  submitButton: {
-    padding: '8px 12px', 
-    backgroundColor: '#4caf50', 
+  addButton: {
+    padding: '10px 15px',
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
+    marginBottom: '10px',
+    alignSelf: 'flex-start', // Alinear a la izquierda
   },
-  cancelButton: {
-    padding: '8px 12px',
+  removeButton: {
+    padding: '5px 10px', // Botón pequeño
     backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
+  },
+  removeButtonContainer: {
+    textAlign: 'center', // Centrar el contenedor del botón
+    marginTop: '5px',
+  },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  submitButton: {
+    padding: '10px 15px',
+    backgroundColor: '#4CAF50', // Color verde
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    flex: 1, // Asegura que el botón ocupe el mismo espacio
+    marginRight: '10px', // Espacio entre botones
+  },
+  cancelButton: {
+    padding: '10px 15px',
+    backgroundColor: '#f44336',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    flex: 1, // Asegura que el botón ocupe el mismo espacio
   },
   tableContainer: {
-    maxHeight: '400px', 
-    overflowY: 'auto', 
-    marginTop: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', 
+    overflowX: 'auto', // Permitir desplazamiento en la tabla
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    marginTop: '10px',
-    backgroundColor: '#fff',
+    marginTop: '20px',
   },
   tableHeader: {
-    backgroundColor: '#4caf50', 
+    backgroundColor: '#2196F3',
     color: 'white',
   },
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    borderBottom: '2px solid #4caf50', 
+    width: '25%', // Ancho fijo para la columna
   },
   tableRow: {
-    backgroundColor: '#c8e6c9', 
-    '&:hover': {
-      backgroundColor: '#c8e6c9', 
-    },
+    borderBottom: '1px solid #ccc',
   },
   tableCell: {
     padding: '10px',
-    borderBottom: '1px solid #ddd',
-    textAlign: 'left',
-    color: '#333', 
-  },
-  actionButtonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
+    verticalAlign: 'top',
+    color: '#333', // Ajustado para modo oscuro
+    maxWidth: '200px', // Ancho máximo para evitar el movimiento
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap', // Evitar salto de línea
   },
   editButton: {
     padding: '5px 10px',
-    backgroundColor: '#ffa726',
+    backgroundColor: '#FFA500',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '4px',
     cursor: 'pointer',
   },
   deleteButton: {
     padding: '5px 10px',
-    backgroundColor: '#e53935',
+    backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '4px',
     cursor: 'pointer',
+    marginLeft: '5px',
+  },
+  '@media (max-width: 768px)': {
+    tableCell: {
+      fontSize: '12px', // Cambiar el tamaño de fuente para dispositivos móviles
+      display: 'block', // Cambiar a bloque para mejor visualización
+    },
+    input: {
+      padding: '8px',
+    },
+    textarea: {
+      padding: '8px',
+    },
+    buttonContainer: {
+      flexDirection: 'column', // Cambiar a columna para botones en móviles
+    },
+    submitButton: {
+      marginRight: '0', // Quitar margen a la derecha
+      marginBottom: '10px', // Añadir margen inferior
+    },
   },
 };
 

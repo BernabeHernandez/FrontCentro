@@ -1,347 +1,278 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 
-const MySwal = withReactContent(Swal);
-
-function Perfil() {
-  const [perfiles, setPerfiles] = useState([]);
-  const [mision, setMision] = useState('');
-  const [vision, setVision] = useState('');
-  const [editMode, setEditMode] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [formVisible, setFormVisible] = useState(false);
-
-  useEffect(() => {
-    fetchPerfiles();
-  }, []);
-
-  const fetchPerfiles = async () => {
-    try {
-      const response = await axios.get('https://back-rq8v.onrender.com/api/perfil');
-      setPerfiles(response.data);
-    } catch (error) {
-      console.error('Error al obtener perfiles:', error);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (editMode) {
-      await updatePerfil();
-    } else {
-      await createPerfil();
-    }
-  };
-
-  const createPerfil = async () => {
-    try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/perfil', { mision, vision });
-      setPerfiles([...perfiles, response.data]);
-      resetForm();
-      MySwal.fire('Éxito', 'Perfil creado correctamente', 'success');
-    } catch (error) {
-      console.error('Error al crear perfil:', error);
-      MySwal.fire('Error', 'No se pudo crear el perfil', 'error');
-    }
-  };
-
-  const updatePerfil = async () => {
-    try {
-      const response = await axios.put(`https://back-rq8v.onrender.com/api/perfil/${editId}`, { mision, vision });
-      setPerfiles(perfiles.map(p => (p.id === editId ? response.data : p)));
-      resetForm();
-      MySwal.fire('Éxito', 'Perfil actualizado correctamente', 'success');
-    } catch (error) {
-      console.error('Error al actualizar perfil:', error);
-      MySwal.fire('Error', 'No se pudo actualizar el perfil', 'error');
-    }
-  };
-
-  const deletePerfil = async (id) => {
-    const confirm = await MySwal.fire({
-      title: '¿Estás seguro?',
-      text: "Esta acción no se puede deshacer.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+const Perfil = () => {
+    const [perfil, setPerfil] = useState({
+        eslogan: '',
+        logo: null,
+        direccion: '',
+        correo: '',
+        telefono: '',
+        redesSociales: {
+            facebook: '',
+            twitter: '',
+            linkedin: '',
+            instagram: ''
+        }
     });
+    const [perfiles, setPerfiles] = useState([]);
+    const [editingId, setEditingId] = useState(null);
 
-    if (confirm.isConfirmed) {
-      try {
-        await axios.delete(`https://back-rq8v.onrender.com/api/perfil/${id}`);
-        setPerfiles(perfiles.filter(p => p.id !== id));
-        MySwal.fire('Éxito', 'Perfil eliminado correctamente', 'success');
-      } catch (error) {
-        console.error('Error al eliminar perfil:', error);
-        MySwal.fire('Error', 'No se pudo eliminar el perfil', 'error');
-      }
-    }
-  };
+    useEffect(() => {
+        const fetchPerfiles = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/perfil');
+                setPerfiles(response.data);
+            } catch (error) {
+                console.error('Error al obtener perfiles:', error.message);
+            }
+        };
+        fetchPerfiles();
+    }, []);
 
-  const handleEdit = (perfil) => {
-    setMision(perfil.mision);
-    setVision(perfil.vision);
-    setEditId(perfil.id);
-    setEditMode(true);
-    setFormVisible(true);
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
 
-  const resetForm = () => {
-    setMision('');
-    setVision('');
-    setEditId(null);
-    setEditMode(false);
-    setFormVisible(false);
-  };
+        if (name === 'telefono') {
+            if (/^\d*$/.test(value) && value.length <= 10) {
+                setPerfil({
+                    ...perfil,
+                    [name]: value,
+                });
+            }
+        } else {
+            setPerfil({
+                ...perfil,
+                [name]: value,
+            });
+        }
+    };
 
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Perfil de la Empresa</h1>
+    const handleSocialChange = (e) => {
+        const { name, value } = e.target;
+        setPerfil({
+            ...perfil,
+            redesSociales: {
+                ...perfil.redesSociales,
+                [name]: value,
+            }
+        });
+    };
 
-      <button onClick={() => setFormVisible(!formVisible)} style={styles.toggleFormButton}>
-        {formVisible ? 'Ocultar Formulario' : 'Agregar Perfil'}
-      </button>
+    const handleLogoChange = (e) => {
+        setPerfil({
+            ...perfil,
+            logo: e.target.files[0],
+        });
+    };
 
-      {formVisible && (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <textarea
-            placeholder="Escribe la misión aquí..."
-            value={mision}
-            onChange={(e) => setMision(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-          <textarea
-            placeholder="Escribe la visión aquí..."
-            value={vision}
-            onChange={(e) => setVision(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-          <div style={styles.buttonContainer}>
-            <button type="submit" style={styles.submitButton}>
-              {editMode ? 'Actualizar Perfil' : 'Crear Perfil'}
-            </button>
-            {editMode && (
-              <button type="button" onClick={resetForm} style={styles.cancelButton}>
-                Cancelar
-              </button>
-            )}
-          </div>
-        </form>
-      )}
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.tableHeader}>
-              <th style={styles.tableHeaderCell}>Misión</th>
-              <th style={styles.tableHeaderCell}>Visión</th>
-              <th style={styles.tableHeaderCell}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {perfiles.map(perfil => (
-              <tr key={perfil.id} style={styles.tableRow}>
-                <td style={styles.tableCell}>{perfil.mision}</td>
-                <td style={styles.tableCell}>{perfil.vision}</td>
-                <td style={styles.tableCell}>
-                  <div style={styles.actionButtonContainer}>
-                    <button onClick={() => handleEdit(perfil)} style={styles.editButton}>
-                      <i className="fa fa-edit" aria-hidden="true"></i> Editar
-                    </button>
-                    <button onClick={() => deletePerfil(perfil.id)} style={styles.deleteButton}>
-                      <i className="fa fa-trash" aria-hidden="true"></i> Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        const requiredFields = ['eslogan', 'direccion', 'correo', 'telefono'];
+        const socialFields = ['facebook', 'twitter', 'linkedin', 'instagram'];
+        
+        const allFieldsFilled = requiredFields.every(field => perfil[field]);
+        const allSocialFieldsFilled = socialFields.every(field => perfil.redesSociales[field]);
 
-      {/* Espacio entre la tabla y el pie de página */}
-      <div style={styles.footerSpacer}></div>
-      <style>{`
-        @media (max-width: 768px) {
-          textarea {
-            height: 80px;
-          }
+        const isPhoneValid = /^\d{10}$/.test(perfil.telefono);
 
-          table {
-            font-size: 14px;
-          }
-
-          button {
-            width: 100%;
-            margin-bottom: 10px;
-          }
+        if (!allFieldsFilled || !allSocialFieldsFilled || !isPhoneValid) {
+            let errorMessage = "Todos los campos son requeridos y el teléfono debe tener 10 dígitos.";
+            if (!isPhoneValid) {
+                errorMessage = "El teléfono debe tener exactamente 10 dígitos numéricos.";
+            }
+            alert(errorMessage); 
+            return;
         }
 
-        @media (max-width: 480px) {
-          h1 {
-            font-size: 24px;
-          }
-
-          textarea {
-            height: 60px;
-          }
-
-          button {
-            font-size: 14px;
-          }
+        const formData = new FormData();
+        formData.append('eslogan', perfil.eslogan);
+        formData.append('direccion', perfil.direccion);
+        formData.append('correo', perfil.correo);
+        formData.append('telefono', perfil.telefono);
+        formData.append('facebook', perfil.redesSociales.facebook);
+        formData.append('twitter', perfil.redesSociales.twitter);
+        formData.append('linkedin', perfil.redesSociales.linkedin);
+        formData.append('instagram', perfil.redesSociales.instagram);
+        if (perfil.logo) {
+            formData.append('logo', perfil.logo);
         }
-      `}</style>
-    </div>
-  );
-}
 
-const styles = {
-  container: {
-    padding: '20px',
-    maxWidth: '800px',
-    margin: 'auto',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f5f5f5', // Fondo suave
-    borderRadius: '10px', // Esquinas redondeadas
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', // Sombra sutil
-    marginBottom: '40px',
-  },
-  title: {
-    textAlign: 'center',
-    color: '#333',
-  },
-  toggleFormButton: {
-    padding: '10px 15px',
-    backgroundColor: '#4caf50', // Color verde
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    marginBottom: '20px',
-    transition: 'background-color 0.3s',
-  },
-  form: {
-    marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  textarea: {
-    width: '100%',
-    height: '100px',
-    marginBottom: '10px',
-    padding: '10px',
-    borderRadius: '8px',
-    border: '1px solid #b2dfdb',
-    resize: 'none',
-    fontSize: '16px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-  },
-  submitButton: {
-    padding: '8px 15px',
-    backgroundColor: '#4caf50', // Color verde
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
-  },
-  cancelButton: {
-    padding: '8px 15px',
-    backgroundColor: '#f44336',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
-  },
-  tableContainer: {
-    maxHeight: '350px', 
-    overflowY: 'auto', 
-    marginTop: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', 
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-  tableHeader: {
-    backgroundColor: '#4caf50', // Color igual al de "Políticas"
-    color: 'white',
-  },
-  tableHeaderCell: {
-    padding: '10px',
-    textAlign: 'left',
-    borderBottom: '2px solid #4caf50',
-  },
-  tableRow: {
-    backgroundColor: '#c8e6c9',
-    '&:hover': {
-      backgroundColor: '#f1f1f1',
-    },
-  },
-  tableCell: {
-    padding: '10px',
-    borderBottom: '1px solid #ddd',
-    textAlign: 'left',
-    color: '#333',
-  },
-  actionButtonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    gap: '10px',
-  },
-  editButton: {
-    padding: '5px 10px',
-    backgroundColor: '#ffa726',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
-  },
-  deleteButton: {
-    padding: '5px 10px',
-    backgroundColor: '#e53935',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
-  },
-  footerSpacer: {
-    height: '20px', // Altura del espacio entre la tabla y el pie de página
-  },
-  footer: {
-    textAlign: 'center',
-    padding: '10px',
-    backgroundColor: '#f1f1f1',
-    borderRadius: '8px',
-    marginTop: '20px',
-    fontSize: '12px',
-  },
-  footerText: {
-    color: '#666',
-  },
+        try {
+            if (editingId) {
+                await axios.put(`http://localhost:5000/api/perfil/${editingId}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+            } else {
+                await axios.post('http://localhost:5000/api/perfil', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+            }
+            // Reiniciar el formulario
+            setPerfil({
+                eslogan: '',
+                logo: null,
+                direccion: '',
+                correo: '',
+                telefono: '',
+                redesSociales: {
+                    facebook: '',
+                    twitter: '',
+                    linkedin: '',
+                    instagram: ''
+                }
+            });
+            setEditingId(null);
+            const response = await axios.get('http://localhost:5000/api/perfil');
+            setPerfiles(response.data);
+        } catch (error) {
+            console.error('Error al guardar perfil:', error.message);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/perfil/${id}`);
+            setPerfiles(perfiles.filter(p => p._id !== id));
+        } catch (error) {
+            console.error('Error al eliminar perfil:', error.message);
+        }
+    };
+
+    const handleEdit = (perfil) => {
+        setPerfil(perfil);
+        setEditingId(perfil._id);
+    };
+
+    return (
+        <div style={{ maxWidth: '800px', margin: 'auto', padding: '20px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)' }}>
+            <h1 style={{ color: '#333' }}>Gestión de Perfil</h1>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', marginBottom: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <input
+                        type="text"
+                        name="eslogan"
+                        placeholder="Eslogan"
+                        value={perfil.eslogan}
+                        onChange={handleChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="file"
+                        name="logo"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="text"
+                        name="direccion"
+                        placeholder="Dirección"
+                        value={perfil.direccion}
+                        onChange={handleChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="email"
+                        name="correo"
+                        placeholder="Correo"
+                        value={perfil.correo}
+                        onChange={handleChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="text"
+                        name="telefono"
+                        placeholder="Teléfono (10 dígitos)"
+                        value={perfil.telefono}
+                        onChange={handleChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="text"
+                        name="facebook"
+                        placeholder="Facebook"
+                        value={perfil.redesSociales.facebook}
+                        onChange={handleSocialChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="text"
+                        name="twitter"
+                        placeholder="Twitter"
+                        value={perfil.redesSociales.twitter}
+                        onChange={handleSocialChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="text"
+                        name="linkedin"
+                        placeholder="LinkedIn"
+                        value={perfil.redesSociales.linkedin}
+                        onChange={handleSocialChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                    <input
+                        type="text"
+                        name="instagram"
+                        placeholder="Instagram"
+                        value={perfil.redesSociales.instagram}
+                        onChange={handleSocialChange}
+                        required
+                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
+                    />
+                </div>
+                <button type="submit" style={{ padding: '10px', margin: '10px 0', border: 'none', borderRadius: '4px', backgroundColor: '#4CAF50', color: 'white', cursor: 'pointer' }}>
+                    {editingId ? 'Actualizar Perfil' : 'Crear Perfil'}
+                </button>
+            </form>
+
+            <h2 style={{ color: '#333' }}>Perfiles Creados</h2>
+            <ul style={{ listStyleType: 'none', padding: '0' }}>
+                {perfiles.map((p) => (
+                    <li key={p._id} style={{ margin: '10px 0', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '10px', alignItems: 'center' }}>
+                            <img
+                                src={`http://localhost:5000/uploads/${p.logo}`}
+                                alt="Logo"
+                                style={{ width: '100px', height: 'auto', borderRadius: '4px' }}
+                            />
+                            <div>
+                                <h3 style={{ margin: '0' }}>Eslogan: {p.eslogan}</h3>
+                                <p><strong>Dirección:</strong> {p.direccion}</p>
+                                <p><strong>Correo:</strong> {p.correo}</p>
+                                <p><strong>Teléfono:</strong> {p.telefono}</p>
+                                <div>
+                                    <strong>Redes Sociales:</strong>
+                                    <ul style={{ listStyleType: 'none', padding: '0' }}>
+                                        {p.redesSociales.facebook && <li>Facebook: {p.redesSociales.facebook}</li>}
+                                        {p.redesSociales.twitter && <li>Twitter: {p.redesSociales.twitter}</li>}
+                                        {p.redesSociales.linkedin && <li>LinkedIn: {p.redesSociales.linkedin}</li>}
+                                        {p.redesSociales.instagram && <li>Instagram: {p.redesSociales.instagram}</li>}
+                                    </ul>
+                                </div>
+                                <button onClick={() => handleEdit(p)} style={{ margin: '5px', padding: '5px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Editar</button>
+                                <button onClick={() => handleDelete(p._id)} style={{ margin: '5px', padding: '5px', backgroundColor: '#F44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Eliminar</button>
+                            </div>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 };
 
 export default Perfil;

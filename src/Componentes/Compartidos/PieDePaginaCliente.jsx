@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 const { Footer } = Layout;
 const { Text } = Typography;
 
-const PieDePagina = () => {
+const PieDePaginaCliente = () => {
   const [datosEmpresa, setDatosEmpresa] = useState({
     redesSociales: {
       facebook: "",
@@ -93,9 +93,9 @@ const PieDePagina = () => {
           </div>
           <div>
             <h2 style={headerStyle}>Datos de la empresa</h2>
-            <Link to="/deslindes" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Deslinde legal</Link>
-            <Link to="/politicass" style={linkStyle}><LockOutlined style={iconStyle} /> Política de Privacidad</Link>
-            <Link to="/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Términos y condiciones</Link>
+            <Link to="/cliente/deslindes" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Deslinde legal</Link>
+            <Link to="/cliente/politicass" style={linkStyle}><LockOutlined style={iconStyle} /> Política de Privacidad</Link>
+            <Link to="/cliente/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Términos y condiciones</Link>
           </div>
         </div>
       </Footer>
@@ -140,4 +140,4 @@ const headerStyle = {
   marginBottom: '10px',
 };
 
-export default PieDePagina;
+export default PieDePaginaCliente;

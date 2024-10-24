@@ -16,7 +16,7 @@ function ValidarCodigo() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/codigo/validar_codigo', { email, codigo });
+      const response = await axios.post('http://localhost:5000/api/codigo/validar_codigo', { email, codigo });
 
       if (response.data.success) {
         MySwal.fire({
@@ -84,14 +84,21 @@ function ValidarCodigo() {
       <h1 style={estilos.titulo}>Verificar Código</h1>
       <form onSubmit={handleSubmit}>
         <div style={estilos.campo}>
-          <input
-            type="text"
-            placeholder="Código de 6 dígitos"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-            required
-            style={estilos.input}
-          />
+        <input
+        type="text"
+        placeholder="Código de 6 dígitos"
+        value={codigo}
+        onChange={(e) => setCodigo(e.target.value)}
+        required
+        style={estilos.input}
+        maxLength="6" // Limitar a 6 caracteres
+        onKeyPress={(e) => {
+            // Permitir solo números
+            if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+            }
+        }}
+    />
         </div>
         <button type="submit" style={estilos.boton}>Validar Código</button>
       </form>

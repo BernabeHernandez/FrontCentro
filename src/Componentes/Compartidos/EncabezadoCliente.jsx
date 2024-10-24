@@ -1,54 +1,48 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HomeOutlined, UserOutlined, PhoneOutlined, AppstoreOutlined, LogoutOutlined } from '@ant-design/icons';
+import { HomeOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'; 
 import { useNavigate } from 'react-router-dom';
 
 const EncabezadoCliente = () => {
   const [active, setActive] = useState('inicio');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const menuRef = useRef(null); 
+  const menuRef = useRef(null);
 
   const handleClick = (option) => {
     setActive(option);
-    setIsMobileMenuOpen(false); 
+    setIsMobileMenuOpen(false);
   };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen); 
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleMenuClick = (key) => {
+  const handleMenuClick = async (key) => {
     switch (key) {
-      case "usuarios":
-        navigate('/admin/usuarios');
-        break;
-      case "insertarUsuario":
-        navigate('/admin/insertarUsuario');
-        break;
-      case "productos":
-        navigate('/admin/productos');
-        break;
-      case "insertarProductos":
-        navigate('/admin/insertarProductos');
-        break;
-      case "quienesSomos":
-        navigate('/admin/informacion/lista-quienes-somos');
-        break;
-      case "misionVision":
-        navigate('/admin/informacion/mision-vision-lista');
-        break;
-      case "politicasPrivacidad":
-        navigate('/admin/informacion/politicas-privacidad-lista');
-        break;
-      case "preguntasFrecuentes":
-        navigate('/admin/preguntas-frecuentes');
-        break;
-      case "asignarIOT":
-        navigate('/admin/asignar-IOT');
+      case "perfil":
+        navigate('/cliente/perfil');
         break;
       case "cerrarSesion":
-        console.log('Cerrando sesión...');
-        navigate('/');
+        try {
+         
+          console.log('Cerrando sesión...');
+
+         
+          await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include', 
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          localStorage.removeItem('token'); 
+          sessionStorage.removeItem('token'); 
+
+          
+          navigate('/');
+        } catch (error) {
+          console.error('Error al cerrar sesión:', error);
+        }
         break;
       default:
         console.log("No se reconoce la acción del menú");
@@ -72,42 +66,38 @@ const EncabezadoCliente = () => {
     <>
       <style>{`
         :root {
-          --color-primary: #000000; /* Encabezado negro */
-          --color-secondary: #FFFFFF; /* Blanco */
-          --color-highlight: #4682B4; /* Azul */
-          --color-hover: #A9DFBF; /* Verde claro */
-          --color-mobile-bg: #2E8B57; /* Verde para el menú móvil */
-          --color-mobile-text: #FFFFFF; /* Color blanco para el texto del menú móvil */
-          --color-icon: #00B300; /* Verde brillante para los iconos */
+          --color-primary: #000000;
+          --color-secondary: #FFFFFF;
+          --color-hover: #A9DFBF;
         }
 
         .header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-           padding: 20px 15px;  /* Grosor del encabezado ajustado */
+          padding: 20px 15px;
           background-color: var(--color-primary);
           color: var(--color-secondary);
         }
 
         .logo h1 {
-          font-size: 1.5rem; /* Tamaño de la fuente del logo */
+          font-size: 1.5rem;
           font-weight: bold;
           color: var(--color-secondary);
         }
 
         .menu ul {
           display: flex;
-          gap: 15px; /* Espacio entre las opciones */
+          gap: 15px;
           list-style-type: none;
           margin: 0;
           padding: 0;
         }
 
         .menu ul li {
-          font-size: 1rem; /* Tamaño de la fuente del menú */
+          font-size: 1rem;
           cursor: pointer;
-          padding: 8px 12px; /* Padding de las opciones del menú */
+          padding: 8px 12px;
           color: var(--color-secondary);
           transition: background-color 0.3s ease;
           display: flex;
@@ -121,7 +111,7 @@ const EncabezadoCliente = () => {
         }
 
         .menu ul li.active {
-          background-color: var(--color-highlight);
+          background-color: var(--color-secondary);
           border-radius: 5px;
         }
 
@@ -136,7 +126,6 @@ const EncabezadoCliente = () => {
           width: 25px;
           height: 3px;
           background-color: var(--color-secondary);
-          transition: background-color 0.3s ease;
         }
 
         @media (max-width: 768px) {
@@ -148,10 +137,9 @@ const EncabezadoCliente = () => {
             left: -100%;
             width: 70%;
             height: 100%;
-            background-color: var(--color-mobile-bg); /* Color de fondo del menú móvil actualizado */
+            background-color: var(--color-primary);
             padding: 20px;
             transition: left 0.3s ease-in-out;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
           }
 
           .menu.menu-open ul {
@@ -159,55 +147,24 @@ const EncabezadoCliente = () => {
             left: 0;
           }
 
-          .menu ul li {
-            padding: 20px;
-            border-bottom: 1px solid var(--color-hover);
-            text-align: left;
-            color: var(--color-mobile-text); /* Color blanco para el texto del menú móvil */
-          }
-
           .mobile-menu-icon {
-            display: flex; /* Asegúrate de que el ícono se muestre en móvil */
+            display: flex;
           }
         }
       `}</style>
 
       <header className="header">
         <div className="logo">
-          <h1>Centro de Rehabilitación Integral</h1>
+          <h1>Centro de Rehabilitación</h1>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
-            <li className={active === 'usuarios' ? 'active' : ''} onClick={() => { handleClick('usuarios'); handleMenuClick('usuarios'); }}>
-              <UserOutlined style={{ color: '#00B300' }} /> {/* Icono de usuarios */}
-              ..
-            </li>
-            <li className={active === 'insertarUsuario' ? 'active' : ''} onClick={() => { handleClick('insertarUsuario'); handleMenuClick('insertarUsuario'); }}>
-              <UserOutlined style={{ color: '#00B300' }} /> {/* Icono de insertar usuario */}
-              ..
-            </li>
-            <li className={active === 'productos' ? 'active' : ''} onClick={() => { handleClick('productos'); handleMenuClick('productos'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} /> {/* Icono de productos */}
-              ...
-            </li>
-            <li className={active === 'insertarProductos' ? 'active' : ''} onClick={() => { handleClick('insertarProductos'); handleMenuClick('insertarProductos'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} /> {/* Icono de insertar productos */}
-              ...
-            </li>
-            <li className={active === 'quienesSomos' ? 'active' : ''} onClick={() => { handleClick('quienesSomos'); handleMenuClick('quienesSomos'); }}>
-              <UserOutlined style={{ color: '#00B300' }} /> {/* Icono de quienes somos */}
-              ...
-            </li>
-            <li className={active === 'preguntasFrecuentes' ? 'active' : ''} onClick={() => { handleClick('preguntasFrecuentes'); handleMenuClick('preguntasFrecuentes'); }}>
-              <PhoneOutlined style={{ color: '#00B300' }} /> {/* Icono de preguntas frecuentes */}
-              ...
-            </li>
-            <li className={active === 'asignarIOT' ? 'active' : ''} onClick={() => { handleClick('asignarIOT'); handleMenuClick('asignarIOT'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} /> {/* Icono de asignar IoT */}
-              ...
+            <li className={active === 'perfil' ? 'active' : ''} onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}>
+              <UserOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              Perfil
             </li>
             <li className={active === 'cerrarSesion' ? 'active' : ''} onClick={() => { handleClick('cerrarSesion'); handleMenuClick('cerrarSesion'); }}>
-              <LogoutOutlined style={{ color: '#00B300' }} /> {/* Icono de cerrar sesión */}
+              <LogoutOutlined style={{ color: '#00B300', marginRight: '8px' }} />
               Cerrar Sesión
             </li>
           </ul>

@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import { FaEdit, FaTrash } from 'react-icons/fa'; 
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-function Deslinde() {
+const Deslinde = () => {
   const [deslindes, setDeslindes] = useState([]);
-  const [deslinde, setDeslindeInput] = useState('');
+  const [titulo, setTitulo] = useState('');
+  const [contenido, setContenido] = useState('');
+  const [fecha, setFecha] = useState('');
+  const [subtitulos, setSubtitulos] = useState([{ titulo: '', contenido: '' }]);
   const [editMode, setEditMode] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [formVisible, setFormVisible] = useState(false); 
+  const [currentId, setCurrentId] = useState('');
+
+  const apiUrl = 'http://localhost:5000/api/deslinde';
 
   useEffect(() => {
     fetchDeslindes();
@@ -19,40 +22,39 @@ function Deslinde() {
 
   const fetchDeslindes = async () => {
     try {
-      const response = await axios.get('https://back-rq8v.onrender.com/api/deslinde');
+      const response = await axios.get(apiUrl);
       setDeslindes(response.data);
     } catch (error) {
       console.error('Error al obtener deslindes:', error);
+      MySwal.fire('Error', 'No se pudo obtener la lista de deslindes', 'error');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editMode) {
-      await updateDeslinde();
+      await updateDeslinde(currentId);
     } else {
       await createDeslinde();
     }
+    resetForm();
+    fetchDeslindes();
   };
 
   const createDeslinde = async () => {
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/deslinde', { deslinde });
-      setDeslindes([...deslindes, response.data]);
-      resetForm();
-      MySwal.fire('Éxito', 'Deslinde creado correctamente', 'success');
+      await axios.post(apiUrl, { titulo, contenido, fecha, subtitulos });
+      MySwal.fire('Éxito', 'Se insertó correctamente', 'success');
     } catch (error) {
       console.error('Error al crear deslinde:', error);
       MySwal.fire('Error', 'No se pudo crear el deslinde', 'error');
     }
   };
 
-  const updateDeslinde = async () => {
+  const updateDeslinde = async (id) => {
     try {
-      const response = await axios.put(`https://back-rq8v.onrender.com/api/deslinde/${editId}`, { deslinde });
-      setDeslindes(deslindes.map(d => (d.id === editId ? response.data : d)));
-      resetForm();
-      MySwal.fire('Éxito', 'Deslinde actualizado correctamente', 'success');
+      await axios.put(`${apiUrl}/${id}`, { titulo, contenido, fecha, subtitulos });
+      MySwal.fire('Éxito', 'Actualizado correctamente', 'success');
     } catch (error) {
       console.error('Error al actualizar deslinde:', error);
       MySwal.fire('Error', 'No se pudo actualizar el deslinde', 'error');
@@ -62,10 +64,10 @@ function Deslinde() {
   const deleteDeslinde = async (id) => {
     const confirm = await MySwal.fire({
       title: '¿Estás seguro?',
-      text: "Esta acción no se puede deshacer.",
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#4caf50', 
+      confirmButtonColor: '#4caf50',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
@@ -73,9 +75,9 @@ function Deslinde() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`https://back-rq8v.onrender.com/api/deslinde/${id}`);
-        setDeslindes(deslindes.filter(d => d.id !== id));
-        MySwal.fire('Éxito', 'Deslinde eliminado correctamente', 'success');
+        await axios.delete(`${apiUrl}/${id}`);
+        MySwal.fire('Eliminado', 'Eliminado correctamente', 'success');
+        fetchDeslindes();
       } catch (error) {
         console.error('Error al eliminar deslinde:', error);
         MySwal.fire('Error', 'No se pudo eliminar el deslinde', 'error');
@@ -83,195 +85,230 @@ function Deslinde() {
     }
   };
 
-  const handleEdit = (d) => {
-    setDeslindeInput(d.deslinde);
-    setEditId(d.id);
+  const editDeslinde = (id, deslinde) => {
+    setCurrentId(id);
+    setTitulo(deslinde.titulo);
+    setContenido(deslinde.contenido);
+    setFecha(deslinde.fecha);
+    setSubtitulos(deslinde.subtitulos || []);
     setEditMode(true);
-    setFormVisible(true); 
   };
 
   const resetForm = () => {
-    setDeslindeInput('');
-    setEditId(null);
+    setTitulo('');
+    setContenido('');
+    setFecha('');
+    setSubtitulos([{ titulo: '', contenido: '' }]);
     setEditMode(false);
-    setFormVisible(false);
+    setCurrentId('');
+  };
+
+  const handleAddSubtitle = () => {
+    setSubtitulos([...subtitulos, { titulo: '', contenido: '' }]);
+  };
+
+  const handleRemoveSubtitle = (index) => {
+    const newSubtitles = subtitulos.filter((_, i) => i !== index);
+    setSubtitulos(newSubtitles);
+  };
+
+  const handleSubtitleChange = (index, field, value) => {
+    const newSubtitles = [...subtitulos];
+    newSubtitles[index][field] = value;
+    setSubtitulos(newSubtitles);
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Deslindes</h1>
-
-      <button onClick={() => setFormVisible(!formVisible)} style={styles.toggleFormButton}>
-        {formVisible ? 'Ocultar Formulario' : 'Agregar Deslinde'}
-      </button>
-
-      {formVisible && (
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <textarea
-            placeholder="Escribe el deslinde aquí..."
-            value={deslinde}
-            onChange={(e) => setDeslindeInput(e.target.value)}
-            required
-            style={styles.textarea}
-          />
-          <div style={styles.buttonContainer}>
-            <button type="submit" style={styles.submitButton}>
-              {editMode ? 'Actualizar Deslinde' : 'Crear Deslinde'}
-            </button>
-            {editMode && (
-              <button type="button" onClick={resetForm} style={styles.cancelButton}>
-                Cancelar
+      <h1 style={styles.title}>Gestión de Deslindes</h1>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
+          placeholder="Ingrese título"
+          required
+          style={styles.input}
+        />
+        <textarea
+          value={contenido}
+          onChange={(e) => setContenido(e.target.value)}
+          placeholder="Ingrese contenido"
+          required
+          style={styles.textarea}
+        />
+        <input
+          type="date"
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
+          required
+          style={styles.input}
+        />
+        
+        {subtitulos.map((subtitle, index) => (
+          <div key={index} style={styles.subtitle}>
+            <div style={styles.subtitleInputContainer}>
+              <input
+                type="text"
+                value={subtitle.titulo}
+                onChange={(e) => handleSubtitleChange(index, 'titulo', e.target.value)}
+                placeholder="Ingrese subtítulo"
+                required
+                style={styles.input}
+              />
+              <textarea
+                value={subtitle.contenido}
+                onChange={(e) => handleSubtitleChange(index, 'contenido', e.target.value)}
+                placeholder="Ingrese contenido del subtítulo"
+                required
+                style={styles.textarea}
+              />
+            </div>
+            <div style={styles.removeButtonContainer}>
+              <button 
+                type="button" 
+                onClick={() => handleRemoveSubtitle(index)} 
+                style={styles.removeButton}>
+                Eliminar Subtítulo
               </button>
-            )}
+            </div>
           </div>
-        </form>
-      )}
+        ))}
+        
+        <button type="button" onClick={handleAddSubtitle} style={styles.addButton}>
+          Agregar Subtítulo
+        </button>
 
-    
-        <div style={styles.scrollContainer}> 
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.tableHeader}>
-                <th style={styles.tableHeaderCell}>Deslinde</th>
-                <th style={styles.tableHeaderCell}>Acciones</th>
+        <div style={styles.buttonContainer}>
+          <button type="submit" style={styles.submitButton}>
+            {editMode ? 'Actualizar' : 'Crear'}
+          </button>
+          {editMode && (
+            <button type="button" onClick={resetForm} style={styles.cancelButton}>
+              Cancelar
+            </button>
+          )}
+        </div>
+      </form>
+      <div style={styles.tableContainer}>
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.tableHeader}>
+              <th style={styles.tableHeaderCell}>Título</th>
+              <th style={styles.tableHeaderCell}>Contenido</th>
+              <th style={styles.tableHeaderCell}>Fecha</th>
+              <th style={styles.tableHeaderCell}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deslindes.map((item) => (
+              <tr key={item._id} style={styles.tableRow}>
+                <td style={styles.tableCell}>{item.titulo}</td>
+                <td style={styles.tableCell}>{item.contenido}</td>
+                <td style={styles.tableCell}>{new Date(item.fecha).toLocaleDateString()}</td>
+                <td style={styles.tableCell}>
+                  <button onClick={() => editDeslinde(item._id, item)} style={styles.editButton}>
+                    Editar
+                  </button>
+                  <button onClick={() => deleteDeslinde(item._id)} style={styles.deleteButton}>
+                    Eliminar
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {deslindes.map(d => (
-                <tr key={d.id} style={styles.tableRow}>
-                  <td style={styles.tableCell}>{d.deslinde}</td>
-                  <td style={styles.tableCell}>
-                    <div style={styles.actionButtonContainer}>
-                      <button onClick={() => handleEdit(d)} style={styles.editButton}>
-                        <FaEdit style={styles.icon} /> Editar
-                      </button>
-                      <button onClick={() => deleteDeslinde(d.id)} style={styles.deleteButton}>
-                        <FaTrash style={styles.icon} /> Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-       
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <div style={styles.footerSpacer} /> 
-
-
-      <style>{`
-        @media (max-width: 768px) {
-          textarea {
-            height: 80px;
-          }
-
-          table {
-            font-size: 14px;
-          }
-
-          button {
-            width: 100%;
-            margin-bottom: 10px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          h1 {
-            font-size: 24px;
-          }
-
-          textarea {
-            height: 60px;
-          }
-
-          button {
-            font-size: 14px;
-          }
-        }
-      `}</style>
     </div>
   );
-}
+};
 
 const styles = {
   container: {
-    padding: '20px',
     maxWidth: '800px',
     margin: 'auto',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f5f5f5', 
-    borderRadius: '10px', 
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', 
-    marginBottom: '40px', 
+    padding: '20px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    backgroundColor: '#f9f9f9',
   },
   title: {
     textAlign: 'center',
-    color: 'black', 
-    margin: '0 0 20px 0', 
+    marginBottom: '20px',
+    fontSize: '24px',
+    color: '#333',
   },
-  toggleFormButton: {
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginBottom: '20px',
+  },
+  input: {
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  },
+  textarea: {
+    padding: '10px',
+    marginBottom: '10px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  },
+  subtitle: {
+    marginBottom: '15px',
+  },
+  subtitleInputContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  addButton: {
     padding: '10px 15px',
-    backgroundColor: '#4caf50',
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    marginBottom: '20px',
-    transition: 'background-color 0.3s',
-  },
-  form: {
-    marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  textarea: {
-    width: '100%',
-    height: '100px',
     marginBottom: '10px',
-    padding: '10px',
+    alignSelf: 'flex-start', // Alinear a la izquierda
+  },
+  removeButton: {
+    padding: '5px 10px', // Botón pequeño
+    backgroundColor: '#f44336',
+    color: 'white',
+    border: 'none',
     borderRadius: '8px',
-    border: '1px solid #b2dfdb',
-    resize: 'none',
-    fontSize: '16px',
+    cursor: 'pointer',
+  },
+  removeButtonContainer: {
+    textAlign: 'center', // Centrar el contenedor del botón
+    marginTop: '5px',
   },
   buttonContainer: {
     display: 'flex',
-    justifyContent: 'center', 
-    gap: '10px',
+    justifyContent: 'space-between',
   },
   submitButton: {
-    padding: '8px 15px',
-    backgroundColor: '#4caf50',
+    padding: '10px 15px',
+    backgroundColor: '#4CAF50', // Color verde
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
+    flex: 1, // Asegura que el botón ocupe el mismo espacio
+    marginRight: '10px', // Espacio entre botones
   },
   cancelButton: {
-    padding: '8px 15px',
-    backgroundColor: '#e53935',
+    padding: '10px 15px',
+    backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    fontSize: '14px',
+    flex: 1, // Asegura que el botón ocupe el mismo espacio
   },
   tableContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-    padding: '10px', 
-    marginBottom: '30px',
-  },
-  scrollContainer: {
-    maxHeight: '300px', 
-    overflowY: 'auto',
-    maxHeight: '400px',
+    overflowX: 'auto', // Permitir desplazamiento en la tabla
   },
   table: {
     width: '100%',
@@ -279,65 +316,61 @@ const styles = {
     marginTop: '20px',
   },
   tableHeader: {
-    backgroundColor: '#4caf50', 
+    backgroundColor: '#2196F3',
     color: 'white',
   },
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    borderBottom: '2px solid #388e3c',
+    width: '25%', // Ancho fijo para la columna
   },
   tableRow: {
-    backgroundColor: '#c8e6c9', 
-    '&:hover': {
-      backgroundColor: '#a5d6a7',
-    },
+    borderBottom: '1px solid #ccc',
   },
   tableCell: {
     padding: '10px',
-    borderBottom: '1px solid #ddd',
-    textAlign: 'left',
-    color: '#333', 
-  },
-  actionButtonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end', 
-    gap: '10px',
+    verticalAlign: 'top',
+    color: '#333', // Ajustado para modo oscuro
+    maxWidth: '200px', // Ancho máximo para evitar el movimiento
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap', // Evitar salto de línea
   },
   editButton: {
     padding: '5px 10px',
-    backgroundColor: '#ffa726', 
+    backgroundColor: '#FFA500',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '4px',
     cursor: 'pointer',
-    display: 'flex', 
-    alignItems: 'center',
   },
   deleteButton: {
     padding: '5px 10px',
-    backgroundColor: '#e53935', 
+    backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
+    borderRadius: '4px',
     cursor: 'pointer',
-    display: 'flex', 
-    alignItems: 'center',
+    marginLeft: '5px',
   },
-  icon: {
-    marginRight: '5px', 
-  },
-  footerSpacer: {
-    marginTop: '10px', 
-  },
-  footer: {
-    textAlign: 'center',
-    marginTop: '40px',
-    padding: '50px',
-    backgroundColor: '#f1f1f1',
-  },
-  footerText: {
-    color: '#555',
+  '@media (max-width: 768px)': {
+    tableCell: {
+      fontSize: '12px', // Cambiar el tamaño de fuente para dispositivos móviles
+      display: 'block', // Cambiar a bloque para mejor visualización
+    },
+    input: {
+      padding: '8px',
+    },
+    textarea: {
+      padding: '8px',
+    },
+    buttonContainer: {
+      flexDirection: 'column', // Cambiar a columna para botones en móviles
+    },
+    submitButton: {
+      marginRight: '0', // Quitar margen a la derecha
+      marginBottom: '10px', // Añadir margen inferior
+    },
   },
 };
 

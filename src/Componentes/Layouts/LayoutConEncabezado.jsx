@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import EncabezadoPublico from '../Compartidos/EncabezadoPublico';
 import EncabezadoAdministrativo from '../Compartidos/EncabezadoAdministrativo';
 import EncabezadoCliente from '../Compartidos/EncabezadoCliente';
+import PieDePaginaCliente from '../Compartidos/PieDePaginaCliente';
+import PieDePaginaAdmin from '../Compartidos/PieDePaginaAdmin';
 import PieDePagina from '../Compartidos/PieDePagina';
 import { useTheme } from '../Temas/ThemeContext';
 
@@ -14,10 +16,10 @@ const LayoutConEncabezado = ({ children }) => {
 
   if (location.pathname.startsWith('/admin')) {
     encabezado = <EncabezadoAdministrativo />;
-    pieDePagina = <PieDePagina />;
+    pieDePagina = <PieDePaginaAdmin />;
   } else if (location.pathname.startsWith('/cliente')) {
     encabezado = <EncabezadoCliente />;
-    pieDePagina = <PieDePagina />;
+    pieDePagina = <PieDePaginaCliente />;
   } else {
     encabezado = <EncabezadoPublico />;
     pieDePagina = <PieDePagina />;

@@ -27,7 +27,7 @@ function VerificarCorreo() {
     }
 
     try {
-      const response = await axios.get(`https://back-rq8v.onrender.com/api/registro/verify/${verificationCode}`);
+      const response = await axios.get(`http://localhost:5000/api/registro/verify/${verificationCode}`);
       MySwal.fire({
         icon: "success",
         title: "Verificación exitosa",
@@ -35,14 +35,17 @@ function VerificarCorreo() {
       });
       navigate("/login");
     } catch (error) {
-      console.error("Error al verificar el código:", error);
+      console.error("Error al verificar el código:", error.response || error);
       MySwal.fire({
         icon: "error",
         title: "Error de verificación",
         text: error.response?.data?.error || "Ocurrió un error al verificar el código.",
       });
     }
+
+
   };
+
 
   const estilos = {
     contenedor: {
@@ -107,7 +110,15 @@ function VerificarCorreo() {
             value={verificationCode}
             onChange={handleChange}
             required
+            maxLength="6" // Limita a 6 caracteres
+            onKeyPress={(e) => {
+              // Permitir solo números
+              if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+              }
+            }}
           />
+
         </div>
         <button type="submit" style={estilos.boton}>Verificar</button>
       </form>
