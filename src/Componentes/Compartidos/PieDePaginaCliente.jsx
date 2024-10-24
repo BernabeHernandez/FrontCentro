@@ -29,7 +29,7 @@ const PieDePaginaCliente = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/perfilF')
+    fetch('https://back-rq8v.onrender.com/api/perfilF')
       .then(response => {
         if (!response.ok) {
           throw new Error(`Error fetching perfil: ${response.status}`);

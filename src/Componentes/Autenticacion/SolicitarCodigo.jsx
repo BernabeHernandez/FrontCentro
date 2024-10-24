@@ -14,7 +14,7 @@ function SolicitarCodigo() {
         e.preventDefault();
 
         try {
-            await axios.post("http://localhost:5000/api/codigo/forgot-password", { gmail });
+            await axios.post("https://back-rq8v.onrender.com/api/codigo/forgot-password", { gmail });
             MySwal.fire({
                 title: "Código enviado",
                 text: "Por favor revisa tu correo electrónico para obtener el código de recuperación.",

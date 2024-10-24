@@ -14,7 +14,7 @@ const Politicas = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
 
-  const apiUrl = 'http://localhost:5000/api/politicas';
+  const apiUrl = 'https://back-rq8v.onrender.com/api/politicas';
 
   useEffect(() => {
     fetchPoliticas();

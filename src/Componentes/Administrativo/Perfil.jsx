@@ -21,7 +21,7 @@ const Perfil = () => {
     useEffect(() => {
         const fetchPerfiles = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/perfil');
+                const response = await axios.get('https://back-rq8v.onrender.com/api/perfil');
                 setPerfiles(response.data);
             } catch (error) {
                 console.error('Error al obtener perfiles:', error.message);
@@ -101,13 +101,13 @@ const Perfil = () => {
 
         try {
             if (editingId) {
-                await axios.put(`http://localhost:5000/api/perfil/${editingId}`, formData, {
+                await axios.put(`https://back-rq8v.onrender.com/api/perfil/${editingId}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
             } else {
-                await axios.post('http://localhost:5000/api/perfil', formData, {
+                await axios.post('https://back-rq8v.onrender.com/api/perfil', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -128,7 +128,7 @@ const Perfil = () => {
                 }
             });
             setEditingId(null);
-            const response = await axios.get('http://localhost:5000/api/perfil');
+            const response = await axios.get('https://back-rq8v.onrender.com/api/perfil');
             setPerfiles(response.data);
         } catch (error) {
             console.error('Error al guardar perfil:', error.message);
@@ -137,7 +137,7 @@ const Perfil = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/perfil/${id}`);
+            await axios.delete(`https://back-rq8v.onrender.com/api/perfil/${id}`);
             setPerfiles(perfiles.filter(p => p._id !== id));
         } catch (error) {
             console.error('Error al eliminar perfil:', error.message);
@@ -246,7 +246,7 @@ const Perfil = () => {
                     <li key={p._id} style={{ margin: '10px 0', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '10px', alignItems: 'center' }}>
                             <img
-                                src={`http://localhost:5000/uploads/${p.logo}`}
+                                src={`https://back-rq8v.onrender.com/uploads/${p.logo}`}
                                 alt="Logo"
                                 style={{ width: '100px', height: 'auto', borderRadius: '4px' }}
                             />

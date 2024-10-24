@@ -14,7 +14,7 @@ const Terminos = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
 
-  const apiUrl = 'http://localhost:5000/api/terminos';
+  const apiUrl = 'https://back-rq8v.onrender.com/api/terminos';
 
   useEffect(() => {
     fetchTerminos();
@@ -273,10 +273,10 @@ const styles = {
     borderRadius: '8px',
     cursor: 'pointer',
     marginBottom: '10px',
-    alignSelf: 'flex-start', // Alinear a la izquierda
+    alignSelf: 'flex-start', 
   },
   removeButton: {
-    padding: '5px 10px', // Botón pequeño
+    padding: '5px 10px', 
     backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
@@ -284,7 +284,7 @@ const styles = {
     cursor: 'pointer',
   },
   removeButtonContainer: {
-    textAlign: 'center', // Centrar el contenedor del botón
+    textAlign: 'center', 
     marginTop: '5px',
   },
   buttonContainer: {
@@ -293,13 +293,13 @@ const styles = {
   },
   submitButton: {
     padding: '10px 15px',
-    backgroundColor: '#4CAF50', // Color verde
+    backgroundColor: '#4CAF50', 
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    flex: 1, // Asegura que el botón ocupe el mismo espacio
-    marginRight: '10px', // Espacio entre botones
+    flex: 1, 
+    marginRight: '10px', 
   },
   cancelButton: {
     padding: '10px 15px',
@@ -308,10 +308,10 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    flex: 1, // Asegura que el botón ocupe el mismo espacio
+    flex: 1, 
   },
   tableContainer: {
-    overflowX: 'auto', // Permitir desplazamiento en la tabla
+    overflowX: 'auto', 
   },
   table: {
     width: '100%',
@@ -325,7 +325,7 @@ const styles = {
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    width: '25%', // Ancho fijo para la columna
+    width: '25%', 
   },
   tableRow: {
     borderBottom: '1px solid #ccc',
@@ -333,11 +333,11 @@ const styles = {
   tableCell: {
     padding: '10px',
     verticalAlign: 'top',
-    color: '#333', // Ajustado para modo oscuro
-    maxWidth: '200px', // Ancho máximo para evitar el movimiento
+    color: '#333', 
+    maxWidth: '200px', 
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap', // Evitar salto de línea
+    whiteSpace: 'nowrap', 
   },
   editButton: {
     padding: '5px 10px',
@@ -358,8 +358,8 @@ const styles = {
   },
   '@media (max-width: 768px)': {
     tableCell: {
-      fontSize: '12px', // Cambiar el tamaño de fuente para dispositivos móviles
-      display: 'block', // Cambiar a bloque para mejor visualización
+      fontSize: '12px',
+      display: 'block', 
     },
     input: {
       padding: '8px',
@@ -368,11 +368,11 @@ const styles = {
       padding: '8px',
     },
     buttonContainer: {
-      flexDirection: 'column', // Cambiar a columna para botones en móviles
+      flexDirection: 'column', 
     },
     submitButton: {
-      marginRight: '0', // Quitar margen a la derecha
-      marginBottom: '10px', // Añadir margen inferior
+      marginRight: '0', 
+      marginBottom: '10px',
     },
   },
 };

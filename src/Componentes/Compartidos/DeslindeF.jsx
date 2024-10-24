@@ -9,7 +9,7 @@ const DeslindeF = () => {
   useEffect(() => {
     const fetchDeslinde = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/deslindes/ultimo'); 
+        const response = await fetch('https://back-rq8v.onrender.com/api/deslindes/ultimo'); 
         if (!response.ok) {
           throw new Error('Error al cargar el deslinde');
         }

@@ -16,7 +16,7 @@ function CambiarPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Verificar que las contraseñas coincidan
+ 
     if (newPassword !== confirmPassword) {
       MySwal.fire({
         icon: 'error',
@@ -26,7 +26,7 @@ function CambiarPassword() {
       return;
     }
 
-    // Validar longitud de la nueva contraseña
+ 
     if (newPassword.length < 6 || newPassword.length > 15) {
       MySwal.fire({
         icon: 'error',
@@ -37,8 +37,8 @@ function CambiarPassword() {
     }
 
     try {
-      // Enviar nueva contraseña al backend
-      const response = await axios.post('http://localhost:5000/api/cambio/reset-password', {
+ 
+      const response = await axios.post('https://back-rq8v.onrender.com/api/cambio/reset-password', {
         email,
         newPassword,
       });
@@ -50,7 +50,7 @@ function CambiarPassword() {
           text: 'Tu contraseña ha sido actualizada correctamente.',
         });
 
-        // Redirigir al inicio de sesión
+      
         navigate('/login');
       }
     } catch (error) {
@@ -63,7 +63,7 @@ function CambiarPassword() {
     }
   };
 
-  // Estilos en línea
+ 
   const estilos = {
     contenedor: {
       textAlign: 'center',

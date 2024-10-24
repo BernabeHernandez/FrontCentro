@@ -57,13 +57,12 @@ function FormularioRegistro() {
             }));
         }
 
-        validateField(name, value); // Validación en cada cambio de campo
+        validateField(name, value); 
     };
 
     const validateField = (name, value) => {
         let errors = { ...formErrors };
 
-        // Validación de nombre y apellidos (solo letras y longitud entre 4-15)
         if (name === "datos_cliente.nombre" || name === "datos_cliente.apellidoPaterno" || name === "datos_cliente.apellidoMaterno") {
             const nameRegex = /^[a-zA-Z]{4,15}$/;
             if (!nameRegex.test(value)) {
@@ -73,7 +72,6 @@ function FormularioRegistro() {
             }
         }
 
-        // Validación de teléfono (10 dígitos)
         if (name === "datos_cliente.telefono") {
             const phoneRegex = /^\d{10}$/;
             if (!phoneRegex.test(value)) {
@@ -83,7 +81,6 @@ function FormularioRegistro() {
             }
         }
 
-        // Validación de usuario (solo letras y números, entre 4 y 15 caracteres)
         if (name === "username") {
             const usernameRegex = /^[a-zA-Z0-9]{4,15}$/;
             if (!usernameRegex.test(value)) {
@@ -93,7 +90,6 @@ function FormularioRegistro() {
             }
         }
 
-        // Validación de contraseña (longitud entre 6-15 caracteres)
         if (name === "password") {
             const passwordRegex = /^.{6,15}$/;
             if (!passwordRegex.test(value)) {
@@ -143,10 +139,8 @@ function FormularioRegistro() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Revisar si hay errores en el formulario
         const isValidForm = Object.keys(formErrors).length === 0;
 
-        // Si el formulario no es válido, mostrar mensaje de error
         if (!isValidForm || passwordError) {
             MySwal.fire({
                 icon: "error",
@@ -178,7 +172,7 @@ function FormularioRegistro() {
         };
 
         try {
-            await axios.post("http://localhost:5000/api/registro", formDataWithPassword);
+            await axios.post("https://back-rq8v.onrender.com/api/registro", formDataWithPassword);
             MySwal.fire({
                 title: "Tu registro se realizó correctamente",
                 text: "Por favor revisa tu correo para verificar tu cuenta.",

@@ -14,9 +14,9 @@ const EncabezadoAdministrativo = () => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/perfilF');
+        const response = await axios.get('https://back-rq8v.onrender.com/api/perfilF');
         const data = response.data;
-        setLogoUrl(`http://localhost:5000/images/${data.logo}`); 
+        setLogoUrl(`https://back-rq8v.onrender.com/images/${data.logo}`); 
       } catch (error) {
         console.error('Error al obtener datos del perfil:', error);
       }
@@ -61,7 +61,7 @@ const EncabezadoAdministrativo = () => {
         navigate('/admin/roles');
         break;
       case "cerrarSesion":
-        handleLogout(); // Cerrar sesión sin llamar al backend
+        handleLogout(); 
         break;
       default:
         console.log("No se reconoce la acción del menú");
@@ -72,7 +72,7 @@ const EncabezadoAdministrativo = () => {
     console.log('Cerrando sesión...');
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
-    navigate('/'); // Redirigir al usuario a la página de inicio
+    navigate('/'); 
   };
 
   const handleClickOutside = (event) => {
@@ -253,6 +253,11 @@ const EncabezadoAdministrativo = () => {
                 <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>.</li>
                 <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>.</li>
               </ul>
+            </li>
+
+            <li onClick={() => handleMenuClick('roles')}>
+              <FileTextOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              Roles
             </li>
 
             <li onClick={() => handleMenuClick('cerrarSesion')}>

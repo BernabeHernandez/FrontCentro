@@ -16,7 +16,7 @@ const RegistroCambioPassw = () => {
         if (startDate) queryParams.append('startDate', startDate);
         if (endDate) queryParams.append('endDate', endDate);
 
-        const response = await fetch(`http://localhost:5000/api/registro-password?${queryParams.toString()}`);
+        const response = await fetch(`https://back-rq8v.onrender.com/api/registro-password?${queryParams.toString()}`);
         if (!response.ok) {
           throw new Error('Error al cargar los registros');
         }

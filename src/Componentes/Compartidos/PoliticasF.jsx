@@ -9,7 +9,7 @@ const PoliticasF = () => {
   useEffect(() => {
     const fetchPoliticas = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/politica/ultimo');
+        const response = await fetch('https://back-rq8v.onrender.com/api/politica/ultimo');
         if (!response.ok) {
           throw new Error('Error al cargar las políticas');
         }
@@ -17,7 +17,7 @@ const PoliticasF = () => {
         setPolitica(data);
       } catch (err) {
         setError(err.message);
-        message.error('Error al cargar las políticas'); // Mensaje de error
+        message.error('Error al cargar las políticas');
       } finally {
         setLoading(false);
       }
