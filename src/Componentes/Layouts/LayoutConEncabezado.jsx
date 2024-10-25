@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import EncabezadoPublico from '../Compartidos/EncabezadoPublico';
 import EncabezadoAdministrativo from '../Compartidos/EncabezadoAdministrativo';
 import EncabezadoCliente from '../Compartidos/EncabezadoCliente';
@@ -7,17 +7,27 @@ import PieDePaginaCliente from '../Compartidos/PieDePaginaCliente';
 import PieDePaginaAdmin from '../Compartidos/PieDePaginaAdmin';
 import PieDePagina from '../Compartidos/PieDePagina';
 import { useTheme } from '../Temas/ThemeContext';
+import { useAuth } from '../Autenticacion/AuthContext';
 
 const LayoutConEncabezado = ({ children }) => {
   const location = useLocation();
-  let encabezado;
-  let pieDePagina;
+  const { user } = useAuth();
   const { theme } = useTheme();
 
+  let encabezado;
+  let pieDePagina;
+
+  // Verifica el acceso basado en el usuario
   if (location.pathname.startsWith('/admin')) {
+    if (!user || user.tipo !== 'Administrador') {
+      return <Navigate to="/login" replace />; 
+    }
     encabezado = <EncabezadoAdministrativo />;
     pieDePagina = <PieDePaginaAdmin />;
   } else if (location.pathname.startsWith('/cliente')) {
+    if (!user || user.tipo !== 'Cliente') {
+      return <Navigate to="/login" replace />; 
+    }
     encabezado = <EncabezadoCliente />;
     pieDePagina = <PieDePaginaCliente />;
   } else {

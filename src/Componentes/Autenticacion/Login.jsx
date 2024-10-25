@@ -1,9 +1,11 @@
+// Login.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useAuth } from './AuthContext'; // Importa el contexto de autenticación
 
 import imagen1 from '../Imagenes/ImagenV1.jpg';
 import imagen3 from '../Imagenes/Image4.jpg';
@@ -14,6 +16,7 @@ const MySwal = withReactContent(Swal);
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Obtén el método de login del contexto
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLocked, setIsLocked] = useState(false);
@@ -56,7 +59,8 @@ function Login() {
       });
 
       const { tipo } = response.data;
-      localStorage.setItem('usuario', JSON.stringify(response.data));
+      login(response.data); // Usa el método login del contexto
+
       let ruta = '/';
       let mensaje = 'Has iniciado sesión correctamente.';
 
@@ -139,8 +143,8 @@ function Login() {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      minHeight: '50vh',
-      padding: '20px',
+      minHeight: '5vh',
+      padding: '44px',
       backgroundColor: '#ffffff',
     },
     contenedorLogin: {

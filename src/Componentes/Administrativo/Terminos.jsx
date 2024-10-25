@@ -144,7 +144,7 @@ const Terminos = () => {
           required
           style={styles.input}
         />
-        
+
         {secciones.map((section, index) => (
           <div key={index} style={styles.section}>
             <div style={styles.sectionInputContainer}>
@@ -165,16 +165,16 @@ const Terminos = () => {
               />
             </div>
             <div style={styles.removeButtonContainer}>
-              <button 
-                type="button" 
-                onClick={() => handleRemoveSection(index)} 
+              <button
+                type="button"
+                onClick={() => handleRemoveSection(index)}
                 style={styles.removeButton}>
                 Eliminar Sección
               </button>
             </div>
           </div>
         ))}
-        
+
         <button type="button" onClick={handleAddSection} style={styles.addButton}>
           Agregar Sección
         </button>
@@ -208,13 +208,15 @@ const Terminos = () => {
                 <td style={styles.tableCell}>{termino.titulo}</td>
                 <td style={styles.tableCell}>{termino.contenido}</td>
                 <td style={styles.tableCell}>{new Date(termino.fechaVigencia).toLocaleDateString()}</td>
-                <td>
-                  <button onClick={() => editTermino(termino._id, termino)} style={styles.editButton}>
-                    Editar
-                  </button>
-                  <button onClick={() => deleteTermino(termino._id)} style={styles.deleteButton}>
-                    Eliminar
-                  </button>
+                <td style={styles.actionCell}> {/* Agregar un nuevo estilo para la celda de acciones */}
+                  <div style={styles.buttonActionContainer}> {/* Contenedor para los botones */}
+                    <button onClick={() => editTermino(termino._id, termino)} style={styles.editButton}>
+                      Editar
+                    </button>
+                    <button onClick={() => deleteTermino(termino._id)} style={styles.deleteButton}>
+                      Eliminar
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -224,6 +226,7 @@ const Terminos = () => {
     </div>
   );
 };
+// Component code remains the same...
 
 // Estilos para el componente
 const styles = {
@@ -234,6 +237,17 @@ const styles = {
     border: '1px solid #ccc',
     borderRadius: '8px',
     backgroundColor: '#f9f9f9',
+  },
+  actionCell: {
+    display: 'flex',
+    justifyContent: 'flex-start', // Ajusta el alineamiento
+    alignItems: 'center', // Centra verticalmente
+    padding: '10px',
+  },
+  buttonActionContainer: {
+    display: 'flex',
+    flexDirection: 'row', // Asegura que los botones estén en fila
+    gap: '5px', // Espacio entre los botones
   },
   title: {
     textAlign: 'center',
@@ -273,10 +287,10 @@ const styles = {
     borderRadius: '8px',
     cursor: 'pointer',
     marginBottom: '10px',
-    alignSelf: 'flex-start', 
+    alignSelf: 'flex-start',
   },
   removeButton: {
-    padding: '5px 10px', 
+    padding: '5px 10px',
     backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
@@ -284,22 +298,23 @@ const styles = {
     cursor: 'pointer',
   },
   removeButtonContainer: {
-    textAlign: 'center', 
+    textAlign: 'center',
     marginTop: '5px',
   },
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
+    flexWrap: 'wrap', // Agrega esta línea
   },
   submitButton: {
     padding: '10px 15px',
-    backgroundColor: '#4CAF50', 
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    flex: 1, 
-    marginRight: '10px', 
+    flex: 1,
+    marginRight: '10px',
   },
   cancelButton: {
     padding: '10px 15px',
@@ -308,10 +323,10 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    flex: 1, 
+    flex: 1,
   },
   tableContainer: {
-    overflowX: 'auto', 
+    overflowX: 'auto',
   },
   table: {
     width: '100%',
@@ -325,7 +340,7 @@ const styles = {
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    width: '25%', 
+    width: '25%',
   },
   tableRow: {
     borderBottom: '1px solid #ccc',
@@ -333,11 +348,11 @@ const styles = {
   tableCell: {
     padding: '10px',
     verticalAlign: 'top',
-    color: '#333', 
-    maxWidth: '200px', 
+    color: '#333',
+    maxWidth: '200px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap', 
+    whiteSpace: 'nowrap',
   },
   editButton: {
     padding: '5px 10px',
@@ -356,10 +371,11 @@ const styles = {
     cursor: 'pointer',
     marginLeft: '5px',
   },
+  // Estilos para móviles
   '@media (max-width: 768px)': {
     tableCell: {
       fontSize: '12px',
-      display: 'block', 
+      display: 'block',
     },
     input: {
       padding: '8px',
@@ -368,11 +384,15 @@ const styles = {
       padding: '8px',
     },
     buttonContainer: {
-      flexDirection: 'column', 
+      flexDirection: 'column', // Cambiado a column para móviles
+      alignItems: 'stretch', // Asegura que los botones ocupen todo el ancho
     },
     submitButton: {
-      marginRight: '0', 
+      marginRight: '0',
       marginBottom: '10px',
+    },
+    cancelButton: {
+      marginBottom: '10px', // Espacio entre botones
     },
   },
 };

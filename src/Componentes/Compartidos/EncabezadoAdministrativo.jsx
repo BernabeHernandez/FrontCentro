@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HomeOutlined, UserOutlined, PhoneOutlined, AppstoreOutlined, LogoutOutlined, FileTextOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, LogoutOutlined, HomeOutlined, FileTextOutlined, TeamOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const EncabezadoAdministrativo = () => {
   const [active, setActive] = useState('inicio');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isEmpresaMenuOpen, setIsEmpresaMenuOpen] = useState(false);
-  const [logoUrl, setLogoUrl] = useState(''); 
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [logoUrl, setLogoUrl] = useState('');
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
@@ -16,7 +16,7 @@ const EncabezadoAdministrativo = () => {
       try {
         const response = await axios.get('https://back-rq8v.onrender.com/api/perfilF');
         const data = response.data;
-        setLogoUrl(`https://back-rq8v.onrender.com/images/${data.logo}`); 
+        setLogoUrl(`https://back-rq8v.onrender.com/images/${data.logo}`);
       } catch (error) {
         console.error('Error al obtener datos del perfil:', error);
       }
@@ -27,20 +27,24 @@ const EncabezadoAdministrativo = () => {
   const handleClick = (option) => {
     setActive(option);
     setIsMobileMenuOpen(false);
+    setOpenDropdown(null);
   };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const toggleEmpresaMenu = () => {
-    setIsEmpresaMenuOpen(!isEmpresaMenuOpen);
+  const toggleDropdown = (menu) => {
+    setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
   const handleMenuClick = (key) => {
     switch (key) {
       case "politicas":
         navigate('/admin/politicas');
+        break;
+      case "home":
+        navigate('/admin/');
         break;
       case "terminos":
         navigate('/admin/terminos');
@@ -61,7 +65,7 @@ const EncabezadoAdministrativo = () => {
         navigate('/admin/roles');
         break;
       case "cerrarSesion":
-        handleLogout(); 
+        handleLogout();
         break;
       default:
         console.log("No se reconoce la acción del menú");
@@ -72,12 +76,13 @@ const EncabezadoAdministrativo = () => {
     console.log('Cerrando sesión...');
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
-    navigate('/'); 
+    navigate('/');
   };
 
   const handleClickOutside = (event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
       setIsMobileMenuOpen(false);
+      setOpenDropdown(null);
     }
   };
 
@@ -92,57 +97,67 @@ const EncabezadoAdministrativo = () => {
     <>
       <style>{`
         :root {
-          --color-primary: #000000; /* Encabezado negro */
-          --color-secondary: #FFFFFF; /* Blanco */
-          --color-highlight: #4682B4; /* Azul */
-          --color-hover: #A9DFBF; /* Verde claro */
-          --color-mobile-bg: #2E8B57; /* Verde para el menú móvil */
-          --color-mobile-text: #FFFFFF; /* Color blanco para el texto del menú móvil */
-          --color-icon: #00B300; /* Verde brillante para los iconos */
+          --color-primary: #000000; 
+          --color-secondary: #FFFFFF; 
+          --color-highlight: #4682B4; 
+          --color-hover: #A9DFBF; 
+          --color-mobile-bg: #000000; 
+          --color-mobile-text: #FFFFFF; 
+          --color-icon: #00B300; 
         }
 
         .header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px 15px; /* Grosor del encabezado ajustado */
+          padding: 20px 15px; 
           background-color: var(--color-primary);
           color: var(--color-secondary);
+          position: relative;
+          flex-wrap: wrap; 
         }
 
         .logo {
           display: flex;
           align-items: center;
+          flex: 1; 
         }
 
         .logo img {
-          height: 50px; /* Ajusta la altura del logo */
-          margin-right: 10px; /* Espaciado entre logo y título */
+          height: 50px; 
+          margin-right: 10px; 
         }
 
         .logo h1 {
-          font-size: 1.5rem; /* Tamaño de la fuente del logo */
+          font-size: 1.5rem; 
           font-weight: bold;
           color: var(--color-secondary);
         }
 
+        .menu {
+          flex: 2; 
+          display: flex;
+          justify-content: flex-end; 
+        }
+
         .menu ul {
           display: flex;
-          gap: 15px; /* Espacio entre las opciones */
+          gap: 15px; 
           list-style-type: none;
           margin: 0;
           padding: 0;
         }
 
         .menu ul li {
-          font-size: 1rem; /* Tamaño de la fuente del menú */
+          font-size: 1rem; 
           cursor: pointer;
-          padding: 8px 12px; /* Padding de las opciones del menú */
+          padding: 8px 12px; 
           color: var(--color-secondary);
           transition: background-color 0.3s ease;
           display: flex;
           align-items: center;
           gap: 8px;
+          position: relative;
         }
 
         .menu ul li:hover {
@@ -156,23 +171,22 @@ const EncabezadoAdministrativo = () => {
         }
 
         .menu ul .dropdown-menu {
-          display: none;
+          display: ${openDropdown ? 'block' : 'none'};
           position: absolute;
+          left: 0; 
+          top: 100%; 
           background-color: var(--color-primary);
           list-style: none;
           padding: 12px;
-          margin-top: 200px;
+          margin-top: 10px; 
           border-radius: 5px;
+          z-index: 10; 
         }
 
         .menu ul .dropdown-menu li {
           padding: 8.5px 12px;
           cursor: pointer;
           color: var(--color-secondary);
-        }
-
-        .menu ul .dropdown:hover .dropdown-menu {
-          display: block;
         }
 
         .mobile-menu-icon {
@@ -195,68 +209,80 @@ const EncabezadoAdministrativo = () => {
             flex-direction: column;
             position: fixed;
             top: 0;
-            left: -100%;
-            width: 70%;
+            left: 0; 
+            width: 70%; 
             height: 100%;
-            background-color: var(--color-mobile-bg);
+            background-color: var(--color-mobile-bg); 
             padding: 20px;
             transition: left 0.3s ease-in-out;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            z-index: 999; 
           }
 
           .menu.menu-open ul {
             display: flex;
-            left: 0;
+            left: 0; 
           }
 
           .menu ul li {
             padding: 20px;
             border-bottom: 1px solid var(--color-hover);
-            text-align: left;
+            text-align: right; 
             color: var(--color-mobile-text);
           }
 
+          
+        .logo h1 {
+            font-size: 1.5rem; 
+            white-space: nowrap; 
+        }
+
           .mobile-menu-icon {
-            display: flex; /* Asegúrate de que el ícono se muestre en móvil */
+            display: flex; 
           }
         }
       `}</style>
 
       <header className="header">
         <div className="logo">
-          {logoUrl && <img src={logoUrl} alt="Logo" />} {/* Mostrar logo aquí */}
           <h1>Centro de Rehabilitación Integral</h1>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
-            <li className="dropdown">
-              <span onMouseEnter={toggleEmpresaMenu}>
+            <li onClick={() => handleMenuClick('home')}>
+              <HomeOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              Home
+            </li>
+            <li className="dropdown" onClick={() => toggleDropdown('empresa')}>
+              <span>
                 <FileTextOutlined style={{ color: '#00B300', marginRight: '8px' }} />
                 Datos de la Empresa
               </span>
-              <ul className="dropdown-menu">
-                <li onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}>Perfil</li>
-                <li onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}>Términos</li>
-                <li onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}>Políticas</li>
-                <li onClick={() => { handleClick('deslinde'); handleMenuClick('deslinde'); }}>Deslinde</li>
-              </ul>
+              {openDropdown === 'empresa' && (
+                <ul className="dropdown-menu">
+                  <li onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}>Perfil</li>
+                  <li onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}>Términos</li>
+                  <li onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}>Políticas</li>
+                  <li onClick={() => { handleClick('deslinde'); handleMenuClick('deslinde'); }}>Deslinde</li>
+                </ul>
+              )}
             </li>
 
-            <li className="dropdown">
+            <li className="dropdown" onClick={() => toggleDropdown('actividades')}>
               <span>
                 <AppstoreOutlined style={{ color: '#00B300', marginRight: '8px' }} />
                 Registro de actividades
               </span>
-              <ul className="dropdown-menu">
-                <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>Registro de logeos</li>
-                <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>Registro de Contraseña</li>
-                <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>.</li>
-                <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>.</li>
-              </ul>
+              {openDropdown === 'actividades' && (
+                <ul className="dropdown-menu">
+                  <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>Registro de logeos</li>
+                  <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>Registro de Contraseña</li>
+                </ul>
+              )}
             </li>
 
             <li onClick={() => handleMenuClick('roles')}>
-              <FileTextOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              <TeamOutlined style={{ color: '#00B300', marginRight: '8px' }} />
               Roles
             </li>
 

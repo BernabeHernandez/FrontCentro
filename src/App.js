@@ -10,7 +10,7 @@ import Politicas from './Componentes/Administrativo/Politicas';
 import Terminos from './Componentes/Administrativo/Terminos';
 import Perfil from './Componentes/Administrativo/Perfil';
 import Deslinde from './Componentes/Administrativo/Deslinde';
-import { ThemeProvider, useTheme } from './Componentes/Temas/ThemeContext'; 
+import { ThemeProvider, useTheme } from './Componentes/Temas/ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 import ValidarCodigo from './Componentes/Autenticacion/ValidarCodigo';
@@ -23,12 +23,12 @@ import TerminosF from './Componentes/Compartidos/TerminosF';
 import PoliticasF from './Componentes/Compartidos/PoliticasF';
 import DeslindeF from './Componentes/Compartidos/DeslindeF';
 import RolesF from './Componentes/Administrativo/RolesF';
-import PieDePaginaCliente from './Componentes/Compartidos/PieDePaginaCliente';
-import PieDePaginaAdmin from './Componentes/Compartidos/PieDePaginaAdmin';
+import { AuthProvider } from './Componentes/Autenticacion/AuthContext';
+import ProtectedRoute from './Componentes/Autenticacion/ProtectedRoute';
 
 const ThemeToggleButton = () => {
   const { toggleTheme, theme } = useTheme();
-  
+
   return (
     <button 
       onClick={toggleTheme} 
@@ -51,16 +51,14 @@ const ThemeToggleButton = () => {
         style={{ color: theme === 'dark' ? 'yellow' : 'black' }}
       />
       <style>{`
-        /* Estilos responsivos */
         @media (max-width: 768px) {
           button {
-            font-size: 1.3rem; /* Tamaño más pequeño para pantallas móviles */
+            font-size: 1.3rem;
           }
         }
-
         @media (max-width: 480px) {
           button {
-            font-size: 1.1rem; /* Tamaño aún más pequeño para pantallas muy pequeñas */
+            font-size: 1.1rem;
           }
         }
       `}</style>
@@ -70,43 +68,43 @@ const ThemeToggleButton = () => {
 
 const App = () => {
   return (
-    <ThemeProvider>
-      <LayoutConEncabezado>
-        <ThemeToggleButton />
-        <Routes>
-          <Route path="/" element={<PaginaPrincipal />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
-          <Route path="/admin" element={<PaginaPrincipalAdministrativa />} />
-          <Route path="/cliente" element={<PaginaPrincipalCliente />} />
-          <Route path="/admin/politicas" element={<Politicas />} />
-          <Route path="/admin/terminos" element={<Terminos />} />
-          <Route path="/admin/perfil" element={<Perfil />} />
-          <Route path="/admin/deslinde" element={<Deslinde />} />
-          <Route path="/admin/activity-log" element={<ActividadLogeo />} />
-          <Route path="/admin/registro-password" element={<RegistroCambioPassw />} />
-          <Route path="/admin/roles" element={<RolesF />} />
-          <Route path="/admin/terminos-condiciones" element={<TerminosF />} />
-          <Route path="/admin/politicass" element={<PoliticasF />} />
-          <Route path="/admin/deslindes" element={<DeslindeF />} />
+    <AuthProvider>
+      <ThemeProvider>
+        <LayoutConEncabezado>
+          <ThemeToggleButton />
+          <Routes>
+            <Route path="/" element={<PaginaPrincipal />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
 
+            {/* Rutas protegidas para la sección administrativa */}
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['Administrador']}><PaginaPrincipalAdministrativa /></ProtectedRoute>} />
+            <Route path="/admin/politicas" element={<ProtectedRoute allowedRoles={['Administrador']}><Politicas /></ProtectedRoute>} />
+            <Route path="/admin/terminos" element={<ProtectedRoute allowedRoles={['Administrador']}><Terminos /></ProtectedRoute>} />
+            <Route path="/admin/perfil" element={<ProtectedRoute allowedRoles={['Administrador']}><Perfil /></ProtectedRoute>} />
+            <Route path="/admin/deslinde" element={<ProtectedRoute allowedRoles={['Administrador']}><Deslinde /></ProtectedRoute>} />
+            <Route path="/admin/activity-log" element={<ProtectedRoute allowedRoles={['Administrador']}><ActividadLogeo /></ProtectedRoute>} />
+            <Route path="/admin/registro-password" element={<ProtectedRoute allowedRoles={['Administrador']}><RegistroCambioPassw /></ProtectedRoute>} />
+            <Route path="/admin/roles" element={<ProtectedRoute allowedRoles={['Administrador']}><RolesF /></ProtectedRoute>} />
 
-          <Route path="/cliente/terminos-condiciones" element={<TerminosF />} />
-          <Route path="/cliente/politicass" element={<PoliticasF />} />
-          <Route path="/cliente/deslindes" element={<DeslindeF />} />
+            {/* Rutas protegidas para clientes */}
+            <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
+            <Route path="/cliente/terminos-condiciones" element={<ProtectedRoute allowedRoles={['Cliente']}><TerminosF /></ProtectedRoute>} />
+            <Route path="/cliente/politicass" element={<ProtectedRoute allowedRoles={['Cliente']}><PoliticasF /></ProtectedRoute>} />
+            <Route path="/cliente/deslindes" element={<ProtectedRoute allowedRoles={['Cliente']}><DeslindeF /></ProtectedRoute>} />
 
-          <Route path="/verificar_correo" element={<SolicitarCodigo />} />
-          <Route path="/validar_codigo" element={<ValidarCodigo />} />
-          <Route path="/cambiar_password" element={<CambiarPassword />} />
-          <Route path="/verificar-correo" element={<VerificarCorreo />} />
-          <Route path="/terminos-condiciones" element={<TerminosF />} />
-          <Route path="/politicass" element={<PoliticasF />} />
-          <Route path="/deslindes" element={<DeslindeF />} />
-
-          
-        </Routes>
-      </LayoutConEncabezado>
-    </ThemeProvider>
+            {/* Rutas públicas */}
+            <Route path="/verificar_correo" element={<SolicitarCodigo />} />
+            <Route path="/validar_codigo" element={<ValidarCodigo />} />
+            <Route path="/cambiar_password" element={<CambiarPassword />} />
+            <Route path="/verificar-correo" element={<VerificarCorreo />} />
+            <Route path="/terminos-condiciones" element={<TerminosF />} />
+            <Route path="/politicass" element={<PoliticasF />} />
+            <Route path="/deslindes" element={<DeslindeF />} />
+          </Routes>
+        </LayoutConEncabezado>
+      </ThemeProvider>
+    </AuthProvider>
   );
 };
 

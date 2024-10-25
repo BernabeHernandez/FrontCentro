@@ -19,8 +19,8 @@ const EncabezadoCliente = () => {
 
   const handleMenuClick = async (key) => {
     switch (key) {
-      case "perfil":
-        navigate('/cliente/perfil');
+      case "home":
+        navigate('/cliente/');
         break;
       case "cerrarSesion":
         try {
@@ -160,8 +160,8 @@ const EncabezadoCliente = () => {
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
             <li className={active === 'perfil' ? 'active' : ''} onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}>
-              <UserOutlined style={{ color: '#00B300', marginRight: '8px' }} />
-              Perfil
+              <HomeOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              Home
             </li>
             <li className={active === 'cerrarSesion' ? 'active' : ''} onClick={() => { handleClick('cerrarSesion'); handleMenuClick('cerrarSesion'); }}>
               <LogoutOutlined style={{ color: '#00B300', marginRight: '8px' }} />

@@ -1,7 +1,6 @@
-// frontend/src/components/Usuarios.js
 import React, { useEffect, useState } from 'react';
 import { Table, message, Spin } from 'antd'; // Importamos componentes de Ant Design
-import { UserOutlined, CrownOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons'; // Importamos iconos de Ant Design
+import { UserOutlined, CrownOutlined } from '@ant-design/icons'; // Importamos iconos de Ant Design
 
 const RolesF = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -104,21 +103,159 @@ const RolesF = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Usuarios y Roles</h2>
-      <Table
-        dataSource={usuarios}
-        columns={columns}
-        rowKey="id"
-        rowClassName={rowClassName}
-        pagination={false} // Desactivar paginación si no se necesita
-        bordered // Añade bordes a la tabla
-        style={styles.table} // Aplicar estilos a la tabla
-        scroll={{ x: 'max-content' }} // Permitir desplazamiento horizontal
-      />
+      <div style={styles.tableContainer}>
+        <Table
+          dataSource={usuarios}
+          columns={columns}
+          rowKey="id"
+          rowClassName={rowClassName}
+          pagination={false} // Desactivar paginación si no se necesita
+          bordered // Añade bordes a la tabla
+          style={styles.table} // Aplicar estilos a la tabla
+          scroll={{ x: 'max-content' }} // Permitir desplazamiento horizontal
+        />
+      </div>
+      <style>{`
+        /* Estilos para el contenedor */
+        .container {
+          max-width: 1200px;
+          margin: 20px auto;
+          padding: 20px;
+          background-color: #f9f9f9;
+          border-radius: 10px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Estilos del título */
+        .title {
+          font-size: 2rem;
+          color: #333;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        
+        /* Estilos para el contenedor de carga */
+        .loadingContainer {
+          text-align: center;
+          padding: 50px 0;
+        }
+        
+        /* Estilos para mensajes de error */
+        .errorMessage {
+          text-align: center;
+          font-size: 1.2rem;
+          color: #ff4d4f;
+        }
+        
+        /* Estilos para el título del encabezado */
+        .headerTitle {
+          display: flex;
+          align-items: center;
+          color: #000; /* Cambiado a negro */
+          font-weight: bold;
+        }
+        
+        /* Estilos para la tabla */
+        .table {
+          background-color: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-top: 20px; /* Espaciado para evitar superposición */
+        }
+
+        /* Estilos del contenedor de la tabla */
+        .tableContainer {
+          padding-bottom: 50px; /* Espacio adicional para que no cubra otros elementos */
+        }
+        
+        /* Estilos para las filas de los usuarios */
+        .cliente-row {
+          background-color: rgba(63, 134, 0, 0.1);
+        }
+        
+        .administrativo-row {
+          background-color: rgba(250, 173, 20, 0.1);
+        }
+        
+        /* Estilos para el encabezado de la tabla */
+        .ant-table-header {
+          background-color: #1890ff; /* Color azul para el encabezado */
+        }
+        
+        .ant-table-header-column {
+          color: #000; /* Color negro para el texto del encabezado */
+          font-weight: bold; /* Negrita */
+          padding: 16px; /* Espaciado interno */
+        }
+        
+        .ant-table-header > tr > th {
+          background-color: #1890ff; /* Color azul del encabezado */
+          color: #000; /* Color negro del texto del encabezado */
+          font-weight: bold; /* Negrita */
+        }
+        
+        .ant-table-cell {
+          border-bottom: 1px solid #e8e8e8; /* Borde entre filas */
+        }
+        
+        .ant-table-row:hover {
+          background-color: #f0f5ff; /* Color al pasar el mouse sobre la fila */
+        }
+        
+        /* Media Queries para Responsividad */
+        @media (max-width: 1024px) {
+          .title {
+            font-size: 1.8rem;
+          }
+        
+          .headerTitle {
+            font-size: 1rem;
+          }
+        
+          .ant-table-header > tr > th,
+          .ant-table-cell {
+            font-size: 0.9rem;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .container {
+            padding: 10px;
+          }
+        
+          .title {
+            font-size: 1.5rem;
+          }
+        
+          .headerTitle {
+            font-size: 0.9rem;
+          }
+        
+          .ant-table-header > tr > th,
+          .ant-table-cell {
+            font-size: 0.8rem;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .title {
+            font-size: 1.2rem;
+          }
+        
+          .headerTitle {
+            font-size: 0.8rem;
+          }
+        
+          .ant-table-header > tr > th,
+          .ant-table-cell {
+            font-size: 0.7rem;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-// Estilos en un objeto
 const styles = {
   container: {
     maxWidth: '1200px',
@@ -149,51 +286,15 @@ const styles = {
     color: '#000', // Cambiado a negro
     fontWeight: 'bold',
   },
+  tableContainer: {
+    paddingBottom: '50px', // Espacio adicional para evitar superposición
+  },
   table: {
     backgroundColor: '#fff',
     borderRadius: '8px',
     overflow: 'hidden',
+    marginTop: '20px', // Espaciado para evitar superposición
   },
 };
-
-// Agregamos estilos CSS para las filas de los usuarios
-const css = `
-.cliente-row {
-  background-color: rgba(63, 134, 0, 0.1);
-}
-
-.administrativo-row {
-  background-color: rgba(250, 173, 20, 0.1);
-}
-
-.ant-table-header {
-  background-color: #1890ff; /* Color azul para el encabezado */
-}
-
-.ant-table-header-column {
-  color: #000; /* Color negro para el texto del encabezado */
-  font-weight: bold; /* Negrita */
-  padding: 16px; /* Espaciado interno */
-}
-
-.ant-table-header > tr > th {
-  background-color: #1890ff; /* Color azul del encabezado */
-  color: #000; /* Color negro del texto del encabezado */
-  font-weight: bold; /* Negrita */
-}
-
-.ant-table-cell {
-  border-bottom: 1px solid #e8e8e8; /* Borde entre filas */
-}
-
-.ant-table-row:hover {
-  background-color: #f0f5ff; /* Color al pasar el mouse sobre la fila */
-}
-`;
-
-// Inyectamos estilos en el documento
-const styleElement = document.createElement('style');
-styleElement.innerHTML = css;
-document.head.appendChild(styleElement);
 
 export default RolesF;
