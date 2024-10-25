@@ -64,9 +64,9 @@ function FormularioRegistro() {
         let errors = { ...formErrors };
 
         if (name === "datos_cliente.nombre" || name === "datos_cliente.apellidoPaterno" || name === "datos_cliente.apellidoMaterno") {
-            const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{4,15}$/;
+            const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{4,16}$/;
             if (!nameRegex.test(value)) {
-                errors[name] = "Debe contener solo letras y entre 4 y 15 caracteres.";
+                errors[name] = "Debe contener solo letras entre 4 a 16 caracteres.";
             } else {
                 delete errors[name];
             }
@@ -82,18 +82,18 @@ function FormularioRegistro() {
         }
 
         if (name === "username") {
-            const usernameRegex = /^[a-zA-Z0-9]{4,15}$/;
+            const usernameRegex = /^[a-zA-Z0-9]{4,10}$/;
             if (!usernameRegex.test(value)) {
-                errors[name] = "Debe contener entre 4 y 15 caracteres alfanuméricos.";
+                errors[name] = "Debe contener entre 4 y 10 caracteres alfanuméricos.";
             } else {
                 delete errors[name];
             }
         }
 
         if (name === "password") {
-            const passwordRegex = /^.{6,15}$/;
+            const passwordRegex = /^.{8,15}$/;
             if (!passwordRegex.test(value)) {
-                errors[name] = "Debe tener entre 6 y 15 caracteres.";
+                errors[name] = "Debe tener entre 8 a 15 caracteres.";
             } else {
                 delete errors[name];
             }
