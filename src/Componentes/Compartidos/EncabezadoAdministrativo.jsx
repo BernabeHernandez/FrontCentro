@@ -233,7 +233,7 @@ const EncabezadoAdministrativo = () => {
 
           
         .logo h1 {
-            font-size: 1.3rem; 
+            font-size: 1.2rem; 
             white-space: nowrap; 
         }
 
