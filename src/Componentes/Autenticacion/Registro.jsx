@@ -64,7 +64,7 @@ function FormularioRegistro() {
         let errors = { ...formErrors };
 
         if (name === "datos_cliente.nombre" || name === "datos_cliente.apellidoPaterno" || name === "datos_cliente.apellidoMaterno") {
-            const nameRegex = /^[a-zA-Z]{4,15}$/;
+            const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]{4,15}$/;
             if (!nameRegex.test(value)) {
                 errors[name] = "Debe contener solo letras y entre 4 y 15 caracteres.";
             } else {
