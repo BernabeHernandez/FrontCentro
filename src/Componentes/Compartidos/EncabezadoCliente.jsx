@@ -155,7 +155,7 @@ const EncabezadoCliente = () => {
 
       <header className="header">
         <div className="logo">
-          <h1>Centro de Rehabilitación</h1>
+          <h1>Centro de Rehabilitación Integral</h1>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
