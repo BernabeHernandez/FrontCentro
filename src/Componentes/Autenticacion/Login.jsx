@@ -143,7 +143,7 @@ function Login() {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '5vh',
-      padding: '44px',
+      padding: '48px',
       backgroundColor: '#ffffff',
     },
     contenedorLogin: {
