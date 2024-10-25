@@ -98,10 +98,10 @@ function VerificarCorreo() {
 
   return (
     <div style={estilos.contenedor}>
-      <h1 style={estilos.titulo}>Verificación de Correo</h1>
+      <h1 style={estilos.titulo}>Verificar Código</h1>
       <form onSubmit={handleSubmit}>
         <div style={estilos.campo}>
-          <label style={estilos.etiqueta}>Código de Verificación</label>
+          <label style={estilos.etiqueta}></label>
           <input
             type="text"
             placeholder="Introduce tu código"

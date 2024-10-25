@@ -84,7 +84,7 @@ function SolicitarCodigo() {
 
     return (
         <div style={estilos.contenedor}>
-            <h1 style={estilos.titulo}>Cambiar Contraseña</h1>
+            <h1 style={estilos.titulo}>Verificación de Correo</h1>
             <form onSubmit={handleSubmit}>
                 <div style={estilos.campo}>
                     <input
