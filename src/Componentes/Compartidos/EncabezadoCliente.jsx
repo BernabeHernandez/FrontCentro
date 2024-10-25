@@ -81,7 +81,7 @@ const EncabezadoCliente = () => {
         }
 
         .logo h1 {
-          font-size: 1.5rem;
+          font-size: 1.2rem;
           font-weight: bold;
           color: var(--color-secondary);
         }
