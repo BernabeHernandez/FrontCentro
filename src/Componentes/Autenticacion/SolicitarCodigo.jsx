@@ -23,13 +23,22 @@ function SolicitarCodigo() {
             navigate('/validar_codigo', { state: { email: gmail } });
 
         } catch (error) {
-            MySwal.fire({
-                title: "Error",
-                text: "No se pudo enviar el correo de recuperación.",
-                icon: "error",
-            });
+            if (error.response && error.response.status === 404) {
+                MySwal.fire({
+                    title: "Correo no registrado",
+                    text: "El correo electrónico proporcionado no está registrado en nuestro sistema.",
+                    icon: "error",
+                });
+            } else {
+                MySwal.fire({
+                    title: "Error",
+                    text: "No se pudo enviar el correo de recuperación.",
+                    icon: "error",
+                });
+            }
         }
     };
+
     const estilos = {
         contenedor: {
             textAlign: 'center',
@@ -75,7 +84,7 @@ function SolicitarCodigo() {
 
     return (
         <div style={estilos.contenedor}>
-            <h1 style={estilos.titulo}>Recuperar Contraseña</h1>
+            <h1 style={estilos.titulo}>Cambiar Contraseña</h1>
             <form onSubmit={handleSubmit}>
                 <div style={estilos.campo}>
                     <input
