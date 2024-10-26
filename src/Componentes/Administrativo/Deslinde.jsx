@@ -14,7 +14,7 @@ const Deslinde = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
 
-  const apiUrl = 'https://back-rq8v.onrender.com/api/deslinde';
+  const apiUrl = 'https://backendcentro.onrender.com/api/deslinde';
 
   useEffect(() => {
     fetchDeslindes();

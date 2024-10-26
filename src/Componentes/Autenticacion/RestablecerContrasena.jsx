@@ -16,7 +16,7 @@ function RestablecerContrasena() {
         e.preventDefault();
 
         try {
-            await axios.post("https://back-rq8v.onrender.com/api/cambio/reset-password", formData);
+            await axios.post("https://backendcentro.onrender.com/api/cambio/reset-password", formData);
             MySwal.fire({
                 title: "Contraseña restablecida",
                 text: "Tu contraseña ha sido cambiada correctamente.",

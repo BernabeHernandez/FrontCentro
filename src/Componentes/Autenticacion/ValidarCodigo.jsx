@@ -16,7 +16,7 @@ function ValidarCodigo() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/codigo/validar_codigo', { email, codigo });
+      const response = await axios.post('https://backendcentro.onrender.com/api/codigo/validar_codigo', { email, codigo });
 
       if (response.data.success) {
         MySwal.fire({

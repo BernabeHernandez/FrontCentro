@@ -14,9 +14,9 @@ const EncabezadoAdministrativo = () => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await axios.get('https://back-rq8v.onrender.com/api/perfilF');
+        const response = await axios.get('https://backendcentro.onrender.com/api/perfilF');
         const data = response.data;
-        setLogoUrl(`https://back-rq8v.onrender.com/images/${data.logo}`);
+        setLogoUrl(`https://backendcentro.onrender.com/images/${data.logo}`);
       } catch (error) {
         console.error('Error al obtener datos del perfil:', error);
       }

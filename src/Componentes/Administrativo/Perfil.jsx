@@ -21,7 +21,7 @@ const Perfil = () => {
     useEffect(() => {
         const fetchPerfiles = async () => {
             try {
-                const response = await axios.get('https://back-rq8v.onrender.com/api/perfil');
+                const response = await axios.get('https://backendcentro.onrender.com/api/perfil');
                 setPerfiles(response.data);
             } catch (error) {
                 console.error('Error al obtener perfiles:', error.message);
@@ -101,13 +101,13 @@ const Perfil = () => {
 
         try {
             if (editingId) {
-                await axios.put(`https://back-rq8v.onrender.com/api/perfil/${editingId}`, formData, {
+                await axios.put(`https://backendcentro.onrender.com/api/perfil/${editingId}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
             } else {
-                await axios.post('https://back-rq8v.onrender.com/api/perfil', formData, {
+                await axios.post('https://backendcentro.onrender.com/api/perfil', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -128,7 +128,7 @@ const Perfil = () => {
                 }
             });
             setEditingId(null);
-            const response = await axios.get('https://back-rq8v.onrender.com/api/perfil');
+            const response = await axios.get('https://backendcentro.onrender.com/api/perfil');
             setPerfiles(response.data);
         } catch (error) {
             console.error('Error al guardar perfil:', error.message);
@@ -137,7 +137,7 @@ const Perfil = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://back-rq8v.onrender.com/api/perfil/${id}`);
+            await axios.delete(`https://backendcentro.onrender.com/api/perfil/${id}`);
             setPerfiles(perfiles.filter(p => p._id !== id));
         } catch (error) {
             console.error('Error al eliminar perfil:', error.message);

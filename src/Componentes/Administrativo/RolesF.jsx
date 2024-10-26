@@ -10,7 +10,7 @@ const RolesF = () => {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const response = await fetch('https://back-rq8v.onrender.com/api/roles');
+        const response = await fetch('https://backendcentro.onrender.com/api/roles');
         if (!response.ok) {
           throw new Error('Error al cargar los usuarios');
         }

@@ -14,7 +14,7 @@ const Terminos = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
 
-  const apiUrl = 'https://back-rq8v.onrender.com/api/terminos';
+  const apiUrl = 'https://backendcentro.onrender.com/api/terminos';
 
   useEffect(() => {
     fetchTerminos();

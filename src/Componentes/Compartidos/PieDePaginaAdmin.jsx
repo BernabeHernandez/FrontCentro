@@ -29,7 +29,7 @@ const PieDePaginaAdmin = () => {
   });
 
   useEffect(() => {
-    fetch('https://back-rq8v.onrender.com/api/perfilF')
+    fetch('https://backendcentro.onrender.com/api/perfilF')
       .then(response => {
         if (!response.ok) {
           throw new Error(`Error fetching perfil: ${response.status}`);

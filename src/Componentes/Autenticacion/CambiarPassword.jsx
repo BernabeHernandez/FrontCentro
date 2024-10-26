@@ -97,7 +97,7 @@ function CambiarPassword() {
     }
 
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/cambio/reset-password', {
+      const response = await axios.post('https://backendcentro.onrender.com/api/cambio/reset-password', {
         email,
         newPassword,
       });

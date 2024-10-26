@@ -51,7 +51,7 @@ function Login() {
     }
 
     try {
-      const response = await axios.post('https://back-rq8v.onrender.com/api/login', {
+      const response = await axios.post('https://backendcentro.onrender.com/api/login', {
         user: username,
         password: password,
         captchaToken,

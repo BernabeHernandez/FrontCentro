@@ -27,7 +27,7 @@ function VerificarCorreo() {
     }
 
     try {
-      const response = await axios.get(`https://back-rq8v.onrender.com/api/registro/verify/${verificationCode}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/registro/verify/${verificationCode}`);
       MySwal.fire({
         icon: "success",
         title: "Verificación exitosa",
@@ -112,7 +112,7 @@ function VerificarCorreo() {
             required
             maxLength="6" 
             onKeyPress={(e) => {
-              
+            
               if (!/[0-9]/.test(e.key)) {
                 e.preventDefault();
               }

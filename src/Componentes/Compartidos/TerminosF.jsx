@@ -9,7 +9,7 @@ const TerminosF = () => {
   useEffect(() => {
     const fetchTerminos = async () => {
       try {
-        const response = await fetch('https://back-rq8v.onrender.com/api/terminos/ultimo'); 
+        const response = await fetch('https://backendcentro.onrender.com/api/terminos/ultimo'); 
         if (!response.ok) {
           throw new Error('Error al cargar los términos');
         }
