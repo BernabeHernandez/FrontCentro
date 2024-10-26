@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from './Componentes/Temas/ThemeContext'; // Importa el ThemeProvider
+import { ThemeProvider } from './Componentes/Temas/ThemeContext'; 
 
 ReactDOM.render(
   <React.StrictMode>
-    <ThemeProvider> {/* Envuelve la app con ThemeProvider */}
+    <ThemeProvider> 
       <BrowserRouter>
         <App />
       </BrowserRouter>

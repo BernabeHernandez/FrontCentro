@@ -341,9 +341,9 @@ function FormularioRegistro() {
                         style={estilos.input}
                         placeholder="Ingresa tu teléfono"
                         required
-                        maxLength="10" // Limita a 10 caracteres
+                        maxLength="10" 
                         onKeyPress={(e) => {
-                            // Permitir solo números
+                           
                             if (!/[0-9]/.test(e.key)) {
                                 e.preventDefault();
                             }

@@ -178,9 +178,9 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   font-family: Arial, sans-serif;
-  background-color: #e8f5e9; /* Color de fondo suave */
+  background-color: #e8f5e9; 
   padding: 20px;
-  min-height: 100vh; /* Asegura que la página ocupe al menos el alto de la pantalla */
+  min-height: 100vh; 
 `;
 
 const Header = styled.header`
@@ -189,22 +189,22 @@ const Header = styled.header`
 
   h1 {
     font-size: 2.5rem;
-    color: #00796b; /* Color verde para el título */
-    margin: 0; /* Quitar margen */
+    color: #00796b; 
+    margin: 0; 
   }
 
   p {
     font-size: 1.2rem;
-    color: #555; /* Color gris para el subtítulo */
+    color: #555;
   }
 `;
 
 const Widgets = styled.div`
   display: flex;
-  flex-wrap: wrap; /* Permitir que los widgets se ajusten a nuevas líneas en pantallas pequeñas */
-  justify-content: space-around; /* Espacio entre widgets */
+  flex-wrap: wrap; 
+  justify-content: space-around; 
   width: 100%;
-  max-width: 1200px; /* Ancho máximo de los widgets */
+  max-width: 1200px; 
   margin-top: 20px;
 `;
 
@@ -215,9 +215,9 @@ const Widget = styled.div`
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
   flex: 1;
-  margin: 10px; /* Espacio entre widgets */
-  animation: ${fadeIn} 0.5s ease-in-out; /* Animación de entrada */
-  animation: ${moveAnimation} 3s ease-in-out infinite; /* Efecto de movimiento */
+  margin: 10px; 
+  animation: ${fadeIn} 0.5s ease-in-out; 
+  animation: ${moveAnimation} 3s ease-in-out infinite; 
 `;
 
 const CalendarDisplay = styled.div`
@@ -226,7 +226,7 @@ const CalendarDisplay = styled.div`
 
 const CalendarHeader = styled.div`
   font-size: 1.5rem;
-  color: #00796b; /* Color para el encabezado del calendario */
+  color: #00796b; 
   margin-bottom: 10px;
 `;
 
@@ -238,7 +238,7 @@ const DateGrid = styled.div`
 `;
 
 const DateCell = styled.div`
-  background-color: ${(props) => (props.isToday ? '#ffeb3b' : '#e0e0e0')}; /* Amarillo para hoy */
+  background-color: ${(props) => (props.isToday ? '#ffeb3b' : '#e0e0e0')}; 
   border-radius: 50%;
   text-align: center;
   padding: 10px;
@@ -251,9 +251,9 @@ const ServiceList = styled.ul`
 `;
 
 const ServiceItem = styled.li`
-  color: #00796b; /* Color para el texto de los servicios */
+  color: #00796b; 
   opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.5s ease; /* Transición suave */
+  transition: opacity 0.5s ease; 
 `;
 
 const HistorialList = styled.ul`
@@ -262,9 +262,9 @@ const HistorialList = styled.ul`
 `;
 
 const HistorialItem = styled.li`
-  color: #d32f2f; /* Color del texto */
+  color: #d32f2f; 
   opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.5s ease; /* Transición suave al cambiar la visibilidad */
+  transition: opacity 0.5s ease; 
 `;
 
 const ClinicosList = styled.ul`
@@ -273,9 +273,9 @@ const ClinicosList = styled.ul`
 `;
 
 const ClinicoItem = styled.li`
-  color: #1976d2; /* Color para los historiales clínicos */
+  color: #1976d2; 
   opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.5s ease; /* Transición suave al cambiar la visibilidad */
+  transition: opacity 0.5s ease; 
 `;
 
 export default PaginaPrincipalCliente;

@@ -240,14 +240,14 @@ const styles = {
   },
   actionCell: {
     display: 'flex',
-    justifyContent: 'flex-start', // Ajusta el alineamiento
-    alignItems: 'center', // Centra verticalmente
+    justifyContent: 'flex-start', 
+    alignItems: 'center', 
     padding: '10px',
   },
   buttonActionContainer: {
     display: 'flex',
-    flexDirection: 'row', // Asegura que los botones estén en fila
-    gap: '5px', // Espacio entre los botones
+    flexDirection: 'row', 
+    gap: '5px', 
   },
   title: {
     textAlign: 'center',
@@ -304,7 +304,7 @@ const styles = {
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
-    flexWrap: 'wrap', // Agrega esta línea
+    flexWrap: 'wrap', 
   },
   submitButton: {
     padding: '10px 15px',
@@ -371,7 +371,7 @@ const styles = {
     cursor: 'pointer',
     marginLeft: '5px',
   },
-  // Estilos para móviles
+  
   '@media (max-width: 768px)': {
     tableCell: {
       fontSize: '12px',
@@ -384,15 +384,15 @@ const styles = {
       padding: '8px',
     },
     buttonContainer: {
-      flexDirection: 'column', // Cambiado a column para móviles
-      alignItems: 'stretch', // Asegura que los botones ocupen todo el ancho
+      flexDirection: 'column', 
+      alignItems: 'stretch', 
     },
     submitButton: {
       marginRight: '0',
       marginBottom: '10px',
     },
     cancelButton: {
-      marginBottom: '10px', // Espacio entre botones
+      marginBottom: '10px',
     },
   },
 };

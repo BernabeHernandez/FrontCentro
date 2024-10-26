@@ -113,7 +113,7 @@ const Perfil = () => {
                     }
                 });
             }
-            // Reiniciar el formulario
+           
             setPerfil({
                 eslogan: '',
                 logo: null,
@@ -322,8 +322,8 @@ const styles = {
     },
     formGrid: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)', // Cambiado a 2 columnas
-        gap: '35px', // Aumentado el espacio entre columnas
+        gridTemplateColumns: 'repeat(2, 1fr)', 
+        gap: '35px', 
     },
     inputGroup: {
         display: 'flex',
@@ -407,7 +407,7 @@ const styles = {
         borderRadius: '4px',
         cursor: 'pointer',
     },
-    // Estilos para pantallas pequeñas
+    
     '@media (max-width: 600px)': {
         formGrid: {
             gridTemplateColumns: '1fr',

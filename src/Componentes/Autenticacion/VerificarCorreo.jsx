@@ -110,9 +110,9 @@ function VerificarCorreo() {
             value={verificationCode}
             onChange={handleChange}
             required
-            maxLength="6" // Limita a 6 caracteres
+            maxLength="6" 
             onKeyPress={(e) => {
-              // Permitir solo números
+              
               if (!/[0-9]/.test(e.key)) {
                 e.preventDefault();
               }

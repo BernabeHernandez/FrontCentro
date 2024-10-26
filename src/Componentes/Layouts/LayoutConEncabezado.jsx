@@ -17,7 +17,7 @@ const LayoutConEncabezado = ({ children }) => {
   let encabezado;
   let pieDePagina;
 
-  // Verifica el acceso basado en el usuario
+  
   if (location.pathname.startsWith('/admin')) {
     if (!user || user.tipo !== 'Administrador') {
       return <Navigate to="/login" replace />; 
@@ -43,7 +43,7 @@ const LayoutConEncabezado = ({ children }) => {
 
       <style>{`
         :root {
-          --min-header-footer-height: 60px; /* Mínimo alto para el encabezado y pie de página */
+          --min-header-footer-height: 60px; 
         }
 
         body, html {

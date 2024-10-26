@@ -17,7 +17,7 @@ const TerminosF = () => {
         setTermino(data);
       } catch (err) {
         setError(err.message);
-        message.error('Error al cargar los términos'); // Mensaje de error
+        message.error('Error al cargar los términos'); 
       } finally {
         setLoading(false);
       }
@@ -53,7 +53,7 @@ const TerminosF = () => {
   );
 };
 
-// Estilos en un objeto
+
 const styles = {
   terminosContainer: {
     maxWidth: '800px',
@@ -62,7 +62,7 @@ const styles = {
     backgroundColor: '#f9f9f9',
     borderRadius: '10px',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden', // Evita que el contenido sobresalga
+    overflow: 'hidden', 
   },
   terminosTitle: {
     fontSize: '2rem',
@@ -77,7 +77,7 @@ const styles = {
     lineHeight: '1.6',
     color: '#555',
     margin: '15px 0',
-    wordWrap: 'break-word', // Permite el ajuste de palabra
+    wordWrap: 'break-word', 
   },
   section: {
     marginTop: '20px',
@@ -91,7 +91,7 @@ const styles = {
     fontSize: '1.1rem',
     lineHeight: '1.4',
     color: '#555',
-    wordWrap: 'break-word', // Permite el ajuste de palabra
+    wordWrap: 'break-word',
   },
   loadingMessage: {
     textAlign: 'center',

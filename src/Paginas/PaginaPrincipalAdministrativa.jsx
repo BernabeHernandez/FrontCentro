@@ -78,7 +78,7 @@ const PaginaPrincipalAdministrativa = () => {
   );
 };
 
-// Animaciones
+
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -107,9 +107,9 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   font-family: Arial, sans-serif;
-  background-color: #f5f5f5; /* Color de fondo suave */
+  background-color: #f5f5f5; 
   padding: 20px;
-  min-height: 100vh; /* Asegura que la página ocupe al menos el alto de la pantalla */
+  min-height: 100vh; 
 `;
 
 const Header = styled.header`
@@ -118,15 +118,15 @@ const Header = styled.header`
 
   h1 {
     font-size: 2.5rem;
-    color: #00796b; /* Color verde para el título */
-    margin: 0; /* Quitar margen */
+    color: #00796b; 
+    margin: 0; 
   }
 `;
 
 const Widgets = styled.div`
   display: flex;
   justify-content: space-around;
-  flex-wrap: wrap; /* Permitir que los widgets se ajusten */
+  flex-wrap: wrap; 
   width: 100%;
   max-width: 1000px;
   margin-top: 20px;
@@ -138,24 +138,24 @@ const Widget = styled.div`
   padding: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-  flex: 1 1 250px; /* Establece un ancho base y permite que los widgets se ajusten */
-  min-height: 250px; /* Altura mínima para mantener uniformidad */
+  flex: 1 1 250px; 
+  min-height: 250px; 
   margin: 10px;
-  animation: ${fadeIn} 0.5s ease-in-out; /* Animación de entrada */
+  animation: ${fadeIn} 0.5s ease-in-out; 
   transition: transform 0.3s;
 
   &:hover {
-    animation: ${pulse} 1.5s infinite; /* Pulso en hover */
+    animation: ${pulse} 1.5s infinite; 
   }
 
   h2 {
-    margin: 10px 0; /* Añadir margen vertical */
+    margin: 10px 0; 
   }
 `;
 
 const Icon = styled.div`
   margin-bottom: 15px;
-  color: ${(props) => props.color || '#000'}; /* Usar color del props */
+  color: ${(props) => props.color || '#000'}; 
 `;
 
 const AnimatedButton = styled.button`

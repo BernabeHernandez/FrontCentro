@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, message, Spin } from 'antd'; // Importamos componentes de Ant Design
-import { UserOutlined, CrownOutlined } from '@ant-design/icons'; // Importamos iconos de Ant Design
+import { Table, message, Spin } from 'antd'; 
+import { UserOutlined, CrownOutlined } from '@ant-design/icons'; 
 
 const RolesF = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -18,7 +18,7 @@ const RolesF = () => {
         setUsuarios(data);
       } catch (err) {
         setError(err.message);
-        message.error('Error al cargar los usuarios'); // Mensaje de error
+        message.error('Error al cargar los usuarios'); 
       } finally {
         setLoading(false);
       }
@@ -109,14 +109,14 @@ const RolesF = () => {
           columns={columns}
           rowKey="id"
           rowClassName={rowClassName}
-          pagination={false} // Desactivar paginación si no se necesita
-          bordered // Añade bordes a la tabla
-          style={styles.table} // Aplicar estilos a la tabla
-          scroll={{ x: 'max-content' }} // Permitir desplazamiento horizontal
+          pagination={false} 
+          bordered 
+          style={styles.table} 
+          scroll={{ x: 'max-content' }} 
         />
       </div>
       <style>{`
-        /* Estilos para el contenedor */
+       
         .container {
           max-width: 1200px;
           margin: 20px auto;
@@ -126,7 +126,7 @@ const RolesF = () => {
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         
-        /* Estilos del título */
+       
         .title {
           font-size: 2rem;
           color: #333;
@@ -134,41 +134,41 @@ const RolesF = () => {
           margin-bottom: 20px;
         }
         
-        /* Estilos para el contenedor de carga */
+       
         .loadingContainer {
           text-align: center;
           padding: 50px 0;
         }
         
-        /* Estilos para mensajes de error */
+       
         .errorMessage {
           text-align: center;
           font-size: 1.2rem;
           color: #ff4d4f;
         }
         
-        /* Estilos para el título del encabezado */
+       
         .headerTitle {
           display: flex;
           align-items: center;
-          color: #000; /* Cambiado a negro */
+          color: #000; 
           font-weight: bold;
         }
         
-        /* Estilos para la tabla */
+       
         .table {
           background-color: #fff;
           border-radius: 8px;
           overflow: hidden;
-          margin-top: 20px; /* Espaciado para evitar superposición */
+          margin-top: 20px; 
         }
 
-        /* Estilos del contenedor de la tabla */
+        
         .tableContainer {
-          padding-bottom: 50px; /* Espacio adicional para que no cubra otros elementos */
+          padding-bottom: 50px; 
         }
         
-        /* Estilos para las filas de los usuarios */
+        
         .cliente-row {
           background-color: rgba(63, 134, 0, 0.1);
         }
@@ -177,32 +177,32 @@ const RolesF = () => {
           background-color: rgba(250, 173, 20, 0.1);
         }
         
-        /* Estilos para el encabezado de la tabla */
+        
         .ant-table-header {
-          background-color: #1890ff; /* Color azul para el encabezado */
+          background-color: #1890ff; 
         }
         
         .ant-table-header-column {
-          color: #000; /* Color negro para el texto del encabezado */
-          font-weight: bold; /* Negrita */
-          padding: 16px; /* Espaciado interno */
+          color: #000; 
+          font-weight: bold; 
+          padding: 16px; 
         }
         
         .ant-table-header > tr > th {
-          background-color: #1890ff; /* Color azul del encabezado */
-          color: #000; /* Color negro del texto del encabezado */
-          font-weight: bold; /* Negrita */
+          background-color: #1890ff; 
+          color: #000; 
+          font-weight: bold; 
         }
         
         .ant-table-cell {
-          border-bottom: 1px solid #e8e8e8; /* Borde entre filas */
+          border-bottom: 1px solid #e8e8e8; 
         }
         
         .ant-table-row:hover {
-          background-color: #f0f5ff; /* Color al pasar el mouse sobre la fila */
+          background-color: #f0f5ff; 
         }
         
-        /* Media Queries para Responsividad */
+
         @media (max-width: 1024px) {
           .title {
             font-size: 1.8rem;
@@ -283,17 +283,17 @@ const styles = {
   headerTitle: {
     display: 'flex',
     alignItems: 'center',
-    color: '#000', // Cambiado a negro
+    color: '#000', 
     fontWeight: 'bold',
   },
   tableContainer: {
-    paddingBottom: '50px', // Espacio adicional para evitar superposición
+    paddingBottom: '50px', 
   },
   table: {
     backgroundColor: '#fff',
     borderRadius: '8px',
     overflow: 'hidden',
-    marginTop: '20px', // Espaciado para evitar superposición
+    marginTop: '20px', 
   },
 };
 

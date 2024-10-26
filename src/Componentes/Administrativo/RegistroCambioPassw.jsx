@@ -60,38 +60,38 @@ const RegistroCambioPassw = () => {
         .filter-container {
           display: flex;
           justify-content: space-between;
-          align-items: center; /* Alinear verticalmente */
+          align-items: center; 
           margin-bottom: 20px;
           padding: 10px;
-          border: 1px solid #ddd; /* Bordes para resaltar la sección */
-          border-radius: 8px; /* Bordes redondeados */
-          background-color: #fff; /* Fondo blanco para el filtro */
+          border: 1px solid #ddd; 
+          border-radius: 8px; 
+          background-color: #fff; 
         }
 
         .filter-container label {
-          margin-right: 10px; /* Espacio entre la etiqueta y el campo de fecha */
+          margin-right: 10px; 
           font-weight: bold;
-          color: #333; /* Color por defecto */
+          color: #333; 
         }
 
         .filter-container input {
           padding: 8px;
-          border: 1px solid #ccc; /* Bordes para los campos de entrada */
-          border-radius: 4px; /* Bordes redondeados */
-          width: 150px; /* Ancho fijo para los campos de fecha */
+          border: 1px solid #ccc; 
+          border-radius: 4px; 
+          width: 150px; 
         }
 
-        /* Estilos para modo oscuro */
+    
         body.dark-mode .filter-container label {
-          color: #f9f9f9; /* Color claro para modo oscuro */
+          color: #f9f9f9; 
         }
 
         .table-container {
-          max-height: 400px; /* Altura máxima para el deslizador */
-          overflow-y: auto; /* Permitir desplazamiento vertical */
+          max-height: 400px; 
+          overflow-y: auto; 
           border: 1px solid #ddd;
           border-radius: 8px;
-          background-color: #fff; /* Fondo blanco para la tabla */
+          background-color: #fff; 
         }
 
         table {
@@ -107,27 +107,27 @@ const RegistroCambioPassw = () => {
         }
 
         th {
-          background-color: #007bff; /* Color de fondo para los encabezados */
+          background-color: #007bff; 
           color: white;
           font-weight: bold;
         }
 
         tr:hover {
-          background-color: #f1f1f1; /* Color de fondo en hover */
+          background-color: #f1f1f1; 
         }
 
         .status-success {
-          background-color: #d4edda; /* Fondo verde claro para "success" */
-          color: #155724; /* Color de texto verde oscuro */
+          background-color: #d4edda; 
+          color: #155724; 
         }
 
         .status-failed {
-          background-color: #f8d7da; /* Fondo rojo claro para "failed" */
-          color: #721c24; /* Color de texto rojo oscuro */
+          background-color: #f8d7da; 
+          color: #721c24; 
         }
 
         .status-icon {
-          margin-right: 8px; /* Espacio entre el ícono y el texto */
+          margin-right: 8px; 
         }
 
         .no-data {
@@ -143,7 +143,7 @@ const RegistroCambioPassw = () => {
 
         @media (max-width: 600px) {
           table {
-            font-size: 14px; /* Tamaño de fuente para dispositivos pequeños */
+            font-size: 14px; 
           }
         }
       `}</style>

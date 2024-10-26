@@ -125,7 +125,7 @@ const linkStyle = {
 const iconStyle = {
   fontSize: '18px',
   marginRight: '5px',
-  color: '#2E8B57',  // Color verde para todos los iconos
+  color: '#2E8B57',  
 };
 
 const textStyle = {

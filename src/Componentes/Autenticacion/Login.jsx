@@ -223,7 +223,7 @@ function Login() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prevImage) => (prevImage + 1) % images.length);
-    }, 5000); // Cambiar imagen cada 5 segundos
+    }, 5000); 
 
     return () => clearInterval(interval);
   }, [images.length]);
