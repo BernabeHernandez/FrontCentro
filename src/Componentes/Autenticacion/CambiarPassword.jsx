@@ -13,9 +13,10 @@ function CambiarPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordError, setPasswordError] = useState('');
+  const [passwordHistoryError, setPasswordHistoryError] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const { email } = location.state; 
+  const { email } = location.state;
 
   const validatePasswordStrength = (password) => {
     const strength = zxcvbn(password);
@@ -41,6 +42,35 @@ function CambiarPassword() {
 
     setPasswordError(errorMessage);
   };
+
+  const checkPasswordHistory = async (password) => {
+    try {
+        const response = await axios.post('https://backendcentro.onrender.com/api/cambio/check-password-history', {
+            email,
+            password
+        });
+    
+        if (response.data.success === false) {
+            console.log("Contraseña ya utilizada. Mostrando alerta.");
+            MySwal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La contraseña ya se utilizo anteriormente. Prueba con otra.',
+            });
+            return false;  
+        }
+        return true;  
+    } catch (error) {
+        console.error("Error al verificar el historial de contraseñas:", error);
+        MySwal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'La contraseña ya se utilizó anteriormente. Prueba con otra.',
+        });
+        return false;
+    }
+};
+
 
   const checkPasswordCompromised = async (password) => {
     const hash = sha1(password);
@@ -96,6 +126,11 @@ function CambiarPassword() {
       return;
     }
 
+    const isPasswordValid = await checkPasswordHistory(newPassword);
+    if (!isPasswordValid) {
+      return;  
+    }
+
     try {
       const response = await axios.post('https://backendcentro.onrender.com/api/cambio/reset-password', {
         email,
@@ -109,13 +144,19 @@ function CambiarPassword() {
           text: 'Tu contraseña ha sido actualizada correctamente.',
         });
         navigate('/login');
+      } else {
+        MySwal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'La contraseña ya se está utilizando actualmente.Prueba con otra.',
+        });
       }
     } catch (error) {
       console.error('Error al cambiar la contraseña:', error);
       MySwal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Hubo un error al cambiar la contraseña. Inténtalo de nuevo.',
+        text: 'La contraseña ya se está utilizando actualmente.Prueba con otra',
       });
     }
   };
@@ -182,6 +223,11 @@ function CambiarPassword() {
       fontWeight: 'bold',
       color: passwordStrength < 2 ? "red" : passwordStrength < 3 ? "orange" : "green",
     },
+    errorMensaje: {
+      color: 'red',
+      fontSize: '14px',
+      marginTop: '5px',
+    },
   };
 
   return (
@@ -216,6 +262,10 @@ function CambiarPassword() {
             style={estilos.input}
           />
         </div>
+        {passwordHistoryError && (
+          <p style={estilos.errorMensaje}>{passwordHistoryError}</p>
+        )}
+
         <button type="submit" style={estilos.boton}>Cambiar Contraseña</button>
       </form>
     </div>

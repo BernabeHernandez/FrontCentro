@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Link } from 'react-router-dom';
 
 const MySwal = withReactContent(Swal);
 
@@ -9,10 +10,12 @@ const Deslinde = () => {
   const [deslindes, setDeslindes] = useState([]);
   const [titulo, setTitulo] = useState('');
   const [contenido, setContenido] = useState('');
-  const [fecha, setFecha] = useState('');
-  const [subtitulos, setSubtitulos] = useState([{ titulo: '', contenido: '' }]);
+  const [fechaVigencia, setFechaVigencia] = useState('');
+  const [secciones, setSecciones] = useState([{ titulo: '', contenido: '' }]);
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
+  const [fechaCreacion, setFechaCreacion] = useState('');
+  const [version, setVersion] = useState('');
 
   const apiUrl = 'https://backendcentro.onrender.com/api/deslinde';
 
@@ -20,15 +23,40 @@ const Deslinde = () => {
     fetchDeslindes();
   }, []);
 
+
   const fetchDeslindes = async () => {
     try {
       const response = await axios.get(apiUrl);
-      setDeslindes(response.data);
+      const deslindesData = response.data;
+
+      if (deslindesData.length === 0) {
+        setDeslindes([]);
+        return;
+      }
+
+      const maxVersionDeslinde = deslindesData.reduce((maxDes, currentDes) => {
+        return currentDes.version > maxDes.version ? currentDes : maxDes;
+      });
+
+      const updatedDeslindes = deslindesData.map(deslinde => {
+        return {
+          ...deslinde,
+          estado: deslinde.version === maxVersionDeslinde.version ? 'Vigente' : 'No Vigente',
+        };
+      });
+
+      setDeslindes(updatedDeslindes);
     } catch (error) {
       console.error('Error al obtener deslindes:', error);
-      MySwal.fire('Error', 'No se pudo obtener la lista de deslindes', 'error');
+      if (error.response) {
+        MySwal.fire('Error', 'No se pudo obtener la lista de deslindes', 'error');
+      }
     }
   };
+
+
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +71,7 @@ const Deslinde = () => {
 
   const createDeslinde = async () => {
     try {
-      await axios.post(apiUrl, { titulo, contenido, fecha, subtitulos });
+      await axios.post(apiUrl, { titulo, contenido, fechaVigencia, secciones });
       MySwal.fire('Éxito', 'Se insertó correctamente', 'success');
     } catch (error) {
       console.error('Error al crear deslinde:', error);
@@ -53,7 +81,7 @@ const Deslinde = () => {
 
   const updateDeslinde = async (id) => {
     try {
-      await axios.put(`${apiUrl}/${id}`, { titulo, contenido, fecha, subtitulos });
+      await axios.put(`${apiUrl}/${id}`, { titulo, contenido, fechaVigencia, secciones });
       MySwal.fire('Éxito', 'Actualizado correctamente', 'success');
     } catch (error) {
       console.error('Error al actualizar deslinde:', error);
@@ -70,7 +98,7 @@ const Deslinde = () => {
       confirmButtonColor: '#4caf50',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     });
 
     if (confirm.isConfirmed) {
@@ -85,37 +113,52 @@ const Deslinde = () => {
     }
   };
 
+  const EliminarDeslindeDeLaTabla = async (id) => {
+    try {
+      await axios.put(`${apiUrl}/eliminar-tabla/${id}`);
+      MySwal.fire('Éxito', 'Término marcado como eliminado en la tabla', 'success');
+      fetchDeslindes();
+    } catch (error) {
+      console.error('Error al eliminar término de la tabla:', error);
+      MySwal.fire('Error', 'No se pudo eliminar el término de la tabla', 'error');
+    }
+  };
+
   const editDeslinde = (id, deslinde) => {
     setCurrentId(id);
     setTitulo(deslinde.titulo);
     setContenido(deslinde.contenido);
-    setFecha(deslinde.fecha);
-    setSubtitulos(deslinde.subtitulos || []);
+    setFechaVigencia(deslinde.fechaVigencia);
+    setSecciones(deslinde.secciones || []);
+    setFechaCreacion(deslinde.fechaCreacion);
+    setVersion(deslinde.version);
     setEditMode(true);
   };
 
   const resetForm = () => {
     setTitulo('');
     setContenido('');
-    setFecha('');
-    setSubtitulos([{ titulo: '', contenido: '' }]);
+    setFechaVigencia('');
+    setSecciones([{ titulo: '', contenido: '' }]);
     setEditMode(false);
     setCurrentId('');
+    setFechaCreacion('');
+    setVersion('');
   };
 
-  const handleAddSubtitle = () => {
-    setSubtitulos([...subtitulos, { titulo: '', contenido: '' }]);
+  const handleAddSection = () => {
+    setSecciones([...secciones, { titulo: '', contenido: '' }]);
   };
 
-  const handleRemoveSubtitle = (index) => {
-    const newSubtitles = subtitulos.filter((_, i) => i !== index);
-    setSubtitulos(newSubtitles);
+  const handleRemoveSection = (index) => {
+    const newSections = secciones.filter((_, i) => i !== index);
+    setSecciones(newSections);
   };
 
-  const handleSubtitleChange = (index, field, value) => {
-    const newSubtitles = [...subtitulos];
-    newSubtitles[index][field] = value;
-    setSubtitulos(newSubtitles);
+  const handleSectionChange = (index, field, value) => {
+    const newSections = [...secciones];
+    newSections[index][field] = value;
+    setSecciones(newSections);
   };
 
   return (
@@ -139,49 +182,49 @@ const Deslinde = () => {
         />
         <input
           type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
+          value={fechaVigencia}
+          onChange={(e) => setFechaVigencia(e.target.value)}
           required
           style={styles.input}
         />
-        
-        {subtitulos.map((subtitle, index) => (
-          <div key={index} style={styles.subtitle}>
-            <div style={styles.subtitleInputContainer}>
+
+        {secciones.map((section, index) => (
+          <div key={index} style={styles.section}>
+            <div style={styles.sectionInputContainer}>
               <input
                 type="text"
-                value={subtitle.titulo}
-                onChange={(e) => handleSubtitleChange(index, 'titulo', e.target.value)}
+                value={section.titulo}
+                onChange={(e) => handleSectionChange(index, 'titulo', e.target.value)}
                 placeholder="Ingrese subtítulo"
                 required
                 style={styles.input}
               />
               <textarea
-                value={subtitle.contenido}
-                onChange={(e) => handleSubtitleChange(index, 'contenido', e.target.value)}
+                value={section.contenido}
+                onChange={(e) => handleSectionChange(index, 'contenido', e.target.value)}
                 placeholder="Ingrese contenido del subtítulo"
                 required
                 style={styles.textarea}
               />
             </div>
             <div style={styles.removeButtonContainer}>
-              <button 
-                type="button" 
-                onClick={() => handleRemoveSubtitle(index)} 
+              <button
+                type="button"
+                onClick={() => handleRemoveSection(index)}
                 style={styles.removeButton}>
-                Eliminar Subtítulo
+                Eliminar Sección
               </button>
             </div>
           </div>
         ))}
-        
-        <button type="button" onClick={handleAddSubtitle} style={styles.addButton}>
-          Agregar Subtítulo
+
+        <button type="button" onClick={handleAddSection} style={styles.addButton}>
+          Agregar Sección
         </button>
 
         <div style={styles.buttonContainer}>
           <button type="submit" style={styles.submitButton}>
-            {editMode ? 'Actualizar' : 'Crear'}
+            {editMode ? 'Actualizar Deslinde' : 'Agregar Deslinde'}
           </button>
           {editMode && (
             <button type="button" onClick={resetForm} style={styles.cancelButton}>
@@ -190,28 +233,47 @@ const Deslinde = () => {
           )}
         </div>
       </form>
+
+      <h2 style={styles.subTitle}>Lista de Deslindes</h2>
       <div style={styles.tableContainer}>
         <table style={styles.table}>
           <thead>
             <tr style={styles.tableHeader}>
               <th style={styles.tableHeaderCell}>Título</th>
               <th style={styles.tableHeaderCell}>Contenido</th>
-              <th style={styles.tableHeaderCell}>Fecha</th>
+              <th style={styles.tableHeaderCell}>Fecha de Vigencia</th>
+              <th style={styles.tableHeaderCell}>Fecha de Creación</th>
+              <th style={styles.tableHeaderCell}>Versión</th>
+              <th style={styles.tableHeaderCell}>Estado</th>
               <th style={styles.tableHeaderCell}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {deslindes.map((item) => (
-              <tr key={item._id} style={styles.tableRow}>
-                <td style={styles.tableCell}>{item.titulo}</td>
-                <td style={styles.tableCell}>{item.contenido}</td>
-                <td style={styles.tableCell}>{new Date(item.fecha).toLocaleDateString()}</td>
+            {deslindes.map((deslinde) => (
+              <tr key={deslinde._id} style={styles.tableRow}>
+                <td style={styles.tableCell}>{deslinde.titulo}</td>
+                <td style={styles.tableCell}>{deslinde.contenido}</td>
+                <td style={styles.tableCell}>{deslinde.fechaVigencia}</td>
+                <td style={styles.tableCell}>{new Date(deslinde.fechaCreacion).toISOString().split('T')[0]}</td>
+                <td style={styles.tableCell}>{deslinde.version}</td>
+                <td style={styles.tableCell}>{deslinde.estado}</td>
                 <td style={styles.tableCell}>
-                  <button onClick={() => editDeslinde(item._id, item)} style={styles.editButton}>
+                  <button
+                    onClick={() => editDeslinde(deslinde._id, deslinde)}
+                    style={styles.editButton}>
                     Editar
                   </button>
-                  <button onClick={() => deleteDeslinde(item._id)} style={styles.deleteButton}>
+                  <button
+                    onClick={() => deleteDeslinde(deslinde._id)}
+                    style={styles.deleteButton}>
                     Eliminar
+                  </button>
+                  <button
+                    onClick={() => EliminarDeslindeDeLaTabla(deslinde._id)}
+                    style={deslinde.estado === 'Vigente' ? styles.disabledButton : styles.softDeleteButton}
+                    disabled={deslinde.estado === 'Vigente'} 
+                  >
+                    Quitar
                   </button>
                 </td>
               </tr>
@@ -219,6 +281,11 @@ const Deslinde = () => {
           </tbody>
         </table>
       </div>
+      <Link to="/admin/historial-deslindes" style={styles.linkButton}>
+        <button style={styles.historialButton}>
+          Ir al Historial
+        </button>
+      </Link>
     </div>
   );
 };
@@ -231,6 +298,17 @@ const styles = {
     border: '1px solid #ccc',
     borderRadius: '8px',
     backgroundColor: '#f9f9f9',
+  },
+  actionCell: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    padding: '10px',
+  },
+  buttonActionContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '5px',
   },
   title: {
     textAlign: 'center',
@@ -255,10 +333,10 @@ const styles = {
     borderRadius: '4px',
     border: '1px solid #ccc',
   },
-  subtitle: {
+  section: {
     marginBottom: '15px',
   },
-  subtitleInputContainer: {
+  sectionInputContainer: {
     display: 'flex',
     flexDirection: 'column',
   },
@@ -270,10 +348,10 @@ const styles = {
     borderRadius: '8px',
     cursor: 'pointer',
     marginBottom: '10px',
-    alignSelf: 'flex-start', 
+    alignSelf: 'flex-start',
   },
   removeButton: {
-    padding: '5px 10px', 
+    padding: '5px 10px',
     backgroundColor: '#f44336',
     color: 'white',
     border: 'none',
@@ -281,22 +359,23 @@ const styles = {
     cursor: 'pointer',
   },
   removeButtonContainer: {
-    textAlign: 'center', 
+    textAlign: 'center',
     marginTop: '5px',
   },
   buttonContainer: {
     display: 'flex',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   submitButton: {
     padding: '10px 15px',
-    backgroundColor: '#4CAF50', 
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    flex: 1, 
-    marginRight: '10px', 
+    flex: 1,
+    marginRight: '10px',
   },
   cancelButton: {
     padding: '10px 15px',
@@ -305,10 +384,10 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    flex: 1, 
+    flex: 1,
   },
   tableContainer: {
-    overflowX: 'auto', 
+    overflowX: 'auto',
   },
   table: {
     width: '100%',
@@ -322,7 +401,7 @@ const styles = {
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    width: '25%', 
+    width: '20%',
   },
   tableRow: {
     borderBottom: '1px solid #ccc',
@@ -330,11 +409,11 @@ const styles = {
   tableCell: {
     padding: '10px',
     verticalAlign: 'top',
-    color: '#333', 
+    color: '#333',
     maxWidth: '200px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap', 
+    whiteSpace: 'nowrap',
   },
   editButton: {
     padding: '5px 10px',
@@ -353,10 +432,41 @@ const styles = {
     cursor: 'pointer',
     marginLeft: '5px',
   },
+  linkButton: {
+    textDecoration: 'none',
+  },
+  historialButton: {
+    backgroundColor: '#007bff',
+    color: 'white',
+    padding: '10px 10px',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    marginTop: '20px',
+  },
+  softDeleteButton: {
+    padding: '5px 10px',
+    backgroundColor: '#FFC107',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginLeft: '10px',
+  },
+  disabledButton: {
+    padding: '5px 10px',
+    backgroundColor: '#B0B0B0',  
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'not-allowed',  
+    marginLeft: '10px',
+  },
+
   '@media (max-width: 768px)': {
     tableCell: {
-      fontSize: '12px', 
-      display: 'block', 
+      fontSize: '12px',
+      display: 'block',
     },
     input: {
       padding: '8px',
@@ -365,10 +475,14 @@ const styles = {
       padding: '8px',
     },
     buttonContainer: {
-      flexDirection: 'column', 
+      flexDirection: 'column',
+      alignItems: 'stretch',
     },
     submitButton: {
-      marginRight: '0', 
+      marginRight: '0',
+      marginBottom: '10px',
+    },
+    cancelButton: {
       marginBottom: '10px',
     },
   },

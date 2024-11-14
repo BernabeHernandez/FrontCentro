@@ -1,20 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HomeOutlined, LoginOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const EncabezadoPublico = () => {
   const [active, setActive] = useState('inicio');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('');
+  const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [eslogan, setEslogan] = useState('');
   const navigate = useNavigate();
-  const menuRef = useRef(null); 
+  const menuRef = useRef(null);
 
   const handleClick = (option) => {
     setActive(option);
-    setIsMobileMenuOpen(false); 
+    setIsMobileMenuOpen(false);
   };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen); 
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const handleMenuClick = (key) => {
@@ -35,6 +39,26 @@ const EncabezadoPublico = () => {
       setIsMobileMenuOpen(false);
     }
   };
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const response = await axios.get('https://backendcentro.onrender.com/api/perfilF');
+        const data = response.data;
+
+        setLogoUrl(data.logo);
+        setNombreEmpresa(data.nombreEmpresa);
+        setEslogan(data.eslogan);
+      } catch (error) {
+        console.error('Error al obtener datos del perfil:', error);
+      }
+    };
+
+    fetchPerfil();
+    const intervalId = setInterval(fetchPerfil, 10000);
+    return () => clearInterval(intervalId);
+  }, []);
+
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -69,6 +93,22 @@ const EncabezadoPublico = () => {
           font-size: 1.2rem; 
           font-weight: bold;
           color: var(--color-secondary);
+        }
+          .logo img {
+          width: 60px; 
+          height: 10px; 
+          border-radius: 50%; 
+          margin-right: 10px; 
+        }
+        .logo {
+          display: flex;
+          align-items: center;
+          flex: 1; 
+        }
+          .eslogan {
+          display: flex;
+          align-items: center;
+          flex: 2; 
         }
 
         .menu ul {
@@ -148,12 +188,18 @@ const EncabezadoPublico = () => {
       `}</style>
 
       <header className="header">
-        <div className="logo">
-          <h1>Centro de Rehabilitación Integral</h1>
+      <div className="logo">
+          {logoUrl && (
+            <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '60px', marginRight: '10px' }} />
+          )}
+          <h3>{nombreEmpresa}</h3>
+        </div>
+        <div className='eslogan'>
+          <h4>{eslogan}</h4>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
-          <li className={active === 'home' ? 'active' : ''} onClick={() => { handleClick('home'); handleMenuClick('home'); }}>
+            <li className={active === 'home' ? 'active' : ''} onClick={() => { handleClick('home'); handleMenuClick('home'); }}>
               <HomeOutlined style={{ color: '#00B300' }} />
               Home
             </li>

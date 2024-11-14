@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Link } from 'react-router-dom'; 
 
 const MySwal = withReactContent(Swal);
 
@@ -13,6 +14,8 @@ const Terminos = () => {
   const [secciones, setSecciones] = useState([{ titulo: '', contenido: '' }]);
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState('');
+  const [fechaCreacion, setFechaCreacion] = useState('');
+  const [version, setVersion] = useState('');
 
   const apiUrl = 'https://backendcentro.onrender.com/api/terminos';
 
@@ -23,12 +26,33 @@ const Terminos = () => {
   const fetchTerminos = async () => {
     try {
       const response = await axios.get(apiUrl);
-      setTerminos(response.data);
+      const terminosData = response.data;
+
+      if (terminosData.length === 0) {
+        setTerminos([]);
+        return;
+      }
+
+      const maxVersionTermino = terminosData.reduce((maxTerm, currentTerm) => {
+        return currentTerm.version > maxTerm.version ? currentTerm : maxTerm;
+      });
+
+      const updatedTerminos = terminosData.map(termino => {
+        return {
+          ...termino,
+          estado: termino.version === maxVersionTermino.version ? 'Vigente' : 'No Vigente',
+        };
+      });
+
+      setTerminos(updatedTerminos);
     } catch (error) {
       console.error('Error al obtener términos:', error);
-      MySwal.fire('Error', 'No se pudo obtener la lista de términos', 'error');
+      if (error.response) {
+        MySwal.fire('Error', 'No se pudo obtener la lista de términos', 'error');
+      }
     }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,7 +94,7 @@ const Terminos = () => {
       confirmButtonColor: '#4caf50',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     });
 
     if (confirm.isConfirmed) {
@@ -85,12 +109,25 @@ const Terminos = () => {
     }
   };
 
+  const deleteTerminoTabla = async (id) => {
+    try {
+      await axios.put(`${apiUrl}/eliminar-tabla/${id}`);
+      MySwal.fire('Éxito', 'Término marcado como eliminado en la tabla', 'success');
+      fetchTerminos();
+    } catch (error) {
+      console.error('Error al eliminar término de la tabla:', error);
+      MySwal.fire('Error', 'No se pudo eliminar el término de la tabla', 'error');
+    }
+  };
+
   const editTermino = (id, termino) => {
     setCurrentId(id);
     setTitulo(termino.titulo);
     setContenido(termino.contenido);
     setFechaVigencia(termino.fechaVigencia);
     setSecciones(termino.secciones || []);
+    setFechaCreacion(termino.fechaCreacion);
+    setVersion(termino.version);
     setEditMode(true);
   };
 
@@ -101,6 +138,8 @@ const Terminos = () => {
     setSecciones([{ titulo: '', contenido: '' }]);
     setEditMode(false);
     setCurrentId('');
+    setFechaCreacion('');
+    setVersion('');
   };
 
   const handleAddSection = () => {
@@ -199,6 +238,9 @@ const Terminos = () => {
               <th style={styles.tableHeaderCell}>Título</th>
               <th style={styles.tableHeaderCell}>Contenido</th>
               <th style={styles.tableHeaderCell}>Fecha de Vigencia</th>
+              <th style={styles.tableHeaderCell}>Fecha de Creación</th>
+              <th style={styles.tableHeaderCell}>Versión</th>
+              <th style={styles.tableHeaderCell}>Estado</th>
               <th style={styles.tableHeaderCell}>Acciones</th>
             </tr>
           </thead>
@@ -207,28 +249,43 @@ const Terminos = () => {
               <tr key={termino._id} style={styles.tableRow}>
                 <td style={styles.tableCell}>{termino.titulo}</td>
                 <td style={styles.tableCell}>{termino.contenido}</td>
-                <td style={styles.tableCell}>{new Date(termino.fechaVigencia).toLocaleDateString()}</td>
-                <td style={styles.actionCell}> {/* Agregar un nuevo estilo para la celda de acciones */}
-                  <div style={styles.buttonActionContainer}> {/* Contenedor para los botones */}
-                    <button onClick={() => editTermino(termino._id, termino)} style={styles.editButton}>
-                      Editar
-                    </button>
-                    <button onClick={() => deleteTermino(termino._id)} style={styles.deleteButton}>
-                      Eliminar
-                    </button>
-                  </div>
+                <td style={styles.tableCell}>{termino.fechaVigencia}</td>
+                <td style={styles.tableCell}>{new Date(termino.fechaCreacion).toISOString().split('T')[0]}</td>
+                <td style={styles.tableCell}>{termino.version}</td>
+                <td style={styles.tableCell}>{termino.estado}</td>
+                <td style={styles.tableCell}>
+                  <button
+                    onClick={() => editTermino(termino._id, termino)}
+                    style={styles.editButton}>
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => deleteTermino(termino._id)}
+                    style={styles.deleteButton}>
+                    Eliminar
+                  </button>
+                  <button
+                    onClick={() => deleteTerminoTabla(termino._id)}
+                    style={termino.estado === 'Vigente' ? styles.disabledButton : styles.softDeleteButton}
+                    disabled={termino.estado === 'Vigente'} 
+                  >
+                    Quitar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <Link to="/admin/historial-terminos" style={styles.linkButton}>
+        <button style={styles.historialButton}>
+          Ir al Historial
+        </button>
+      </Link>
     </div>
   );
 };
-// Component code remains the same...
 
-// Estilos para el componente
 const styles = {
   container: {
     maxWidth: '800px',
@@ -340,7 +397,7 @@ const styles = {
   tableHeaderCell: {
     padding: '10px',
     textAlign: 'left',
-    width: '25%',
+    width: '20%',
   },
   tableRow: {
     borderBottom: '1px solid #ccc',
@@ -369,8 +426,39 @@ const styles = {
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
-    marginLeft: '5px',
+    marginLeft: '10px',
   },
+  linkButton: {
+    textDecoration: 'none',
+  },
+  historialButton: {
+    backgroundColor: '#007bff',
+    color: 'white',
+    padding: '10px 10px',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    marginTop: '20px',
+  },
+  softDeleteButton: {
+    padding: '5px 10px',
+    backgroundColor: '#FFC107',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginLeft: '10px',
+  },
+  disabledButton: {
+    padding: '5px 10px',
+    backgroundColor: '#B0B0B0',  
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'not-allowed',  
+    marginLeft: '10px',
+  },
+
   
   '@media (max-width: 768px)': {
     tableCell: {

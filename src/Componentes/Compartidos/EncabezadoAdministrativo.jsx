@@ -8,20 +8,28 @@ const EncabezadoAdministrativo = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');
+  const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [eslogan, setEslogan] = useState('');
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
   useEffect(() => {
-    const fetchLogo = async () => {
+    const fetchPerfil = async () => {
       try {
         const response = await axios.get('https://backendcentro.onrender.com/api/perfilF');
         const data = response.data;
-        setLogoUrl(`https://backendcentro.onrender.com/images/${data.logo}`);
+
+        setLogoUrl(data.logo);
+        setNombreEmpresa(data.nombreEmpresa);
+        setEslogan(data.eslogan);
       } catch (error) {
         console.error('Error al obtener datos del perfil:', error);
       }
     };
-    fetchLogo();
+
+    fetchPerfil();
+    const intervalId = setInterval(fetchPerfil, 10000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleClick = (option) => {
@@ -64,6 +72,9 @@ const EncabezadoAdministrativo = () => {
       case "roles":
         navigate('/admin/roles');
         break;
+      case "registro-sospechosos":
+        navigate('/admin/registro-sospechosos');
+        break;
       case "cerrarSesion":
         handleLogout();
         break;
@@ -92,6 +103,7 @@ const EncabezadoAdministrativo = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
 
   return (
     <>
@@ -123,15 +135,25 @@ const EncabezadoAdministrativo = () => {
           flex: 1; 
         }
 
+
         .logo img {
-          height: 50px; 
+          width: 60px; 
+          height: 10px; 
+          border-radius: 50%; 
           margin-right: 10px; 
         }
+          
+
 
         .logo h1 {
           font-size: 1.5rem; 
           font-weight: bold;
           color: var(--color-secondary);
+        }
+          .eslogan {
+          display: flex;
+          align-items: center;
+          flex: 2; 
         }
 
         .menu {
@@ -233,8 +255,8 @@ const EncabezadoAdministrativo = () => {
 
           
         .logo h1 {
-            font-size: 1.2rem; 
-            white-space: nowrap; 
+            
+          
         }
 
           .mobile-menu-icon {
@@ -245,8 +267,16 @@ const EncabezadoAdministrativo = () => {
 
       <header className="header">
         <div className="logo">
-          <h1>Centro de Rehabilitación Integral</h1>
+          {logoUrl && (
+            <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '60px', marginRight: '10px' }} />
+          )}
+          <h3>{nombreEmpresa}</h3>
         </div>
+        <div>
+          <h4>{eslogan}</h4>
+        </div>
+
+
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
             <li onClick={() => handleMenuClick('home')}>
@@ -277,6 +307,7 @@ const EncabezadoAdministrativo = () => {
                 <ul className="dropdown-menu">
                   <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>Registro de logeos</li>
                   <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>Registro de Contraseña</li>
+                  <li onClick={() => { handleClick('registro-sospechosos'); handleMenuClick('registro-sospechosos'); }}>Lista negra</li>
                 </ul>
               )}
             </li>

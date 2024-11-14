@@ -25,6 +25,12 @@ import DeslindeF from './Componentes/Compartidos/DeslindeF';
 import RolesF from './Componentes/Administrativo/RolesF';
 import { AuthProvider } from './Componentes/Autenticacion/AuthContext';
 import ProtectedRoute from './Componentes/Autenticacion/ProtectedRoute';
+import TerminosHi from './Componentes/Administrativo/TerminosHi';
+import PoliticasHi from './Componentes/Administrativo/PoliticasHi';
+import DeslindesHi from './Componentes/Administrativo/DeslindesHi';
+import UserSospechosos from './Componentes/Administrativo/UserSospechosos';
+import VerificarCodigo from './Componentes/Autenticacion/MFA';
+
 
 const ThemeToggleButton = () => {
   const { toggleTheme, theme } = useTheme();
@@ -89,6 +95,10 @@ const App = () => {
             <Route path="/admin/terminos-condiciones" element={<ProtectedRoute allowedRoles={['Administrador']}><TerminosF /></ProtectedRoute>} />
             <Route path="/admin/politicass" element={<ProtectedRoute allowedRoles={['Administrador']}><PoliticasF /></ProtectedRoute>} />
             <Route path="/admin/deslindes" element={<ProtectedRoute allowedRoles={['Administrador']}><DeslindeF /></ProtectedRoute>} />
+            <Route path="/admin/historial-terminos" element={<ProtectedRoute allowedRoles={['Administrador']}><TerminosHi /></ProtectedRoute>} />
+            <Route path="/admin/historial-politicas" element={<ProtectedRoute allowedRoles={['Administrador']}><PoliticasHi/></ProtectedRoute>} />
+            <Route path="/admin/historial-deslindes" element={<ProtectedRoute allowedRoles={['Administrador']}><DeslindesHi/></ProtectedRoute>} />
+            <Route path="/admin/registro-sospechosos" element={<ProtectedRoute allowedRoles={['Administrador']}><UserSospechosos/></ProtectedRoute>} />
 
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
@@ -101,6 +111,7 @@ const App = () => {
             <Route path="/validar_codigo" element={<ValidarCodigo />} />
             <Route path="/cambiar_password" element={<CambiarPassword />} />
             <Route path="/verificar-correo" element={<VerificarCorreo />} />
+            <Route path="/verificacion-codigo" element={<VerificarCodigo />} />
             <Route path="/terminos-condiciones" element={<TerminosF />} />
             <Route path="/politicass" element={<PoliticasF />} />
             <Route path="/deslindes" element={<DeslindeF />} />

@@ -31,16 +31,16 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (isLocked) {
       MySwal.fire({
         icon: 'error',
         title: 'Cuenta Bloqueada',
-        text: 'Tu cuenta está bloqueada. Espera un momento para intentar de nuevo.',
+        text: 'Tu cuenta está bloqueada temporalmente. Espera un momento para intentar de nuevo.',
       });
       return;
     }
-
+  
     if (!captchaToken) {
       MySwal.fire({
         icon: 'warning',
@@ -49,20 +49,45 @@ function Login() {
       });
       return;
     }
-
+  
     try {
       const response = await axios.post('https://backendcentro.onrender.com/api/login', {
         user: username,
         password: password,
         captchaToken,
       });
-
+  
+      console.log('Respuesta del servidor:', response.data);
+  
+      if (response.data.message === "Código de verificación enviado. Por favor verifica tu correo.") {
+        MySwal.fire({
+          position: 'center',
+          icon: 'info',
+          title: 'Código de Verificación MFA Enviado',
+          text: 'Hemos enviado un código de verificación MFA a tu correo electrónico.',
+          showConfirmButton: true,
+        }).then(() => {
+          navigate('/verificacion-codigo');
+        });
+        return;
+      }
+  
       const { tipo } = response.data;
-      login(response.data); 
-
+      if (!tipo) {
+        console.error('Error: `tipo` no está definido en la respuesta del servidor');
+        MySwal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Tipo de usuario desconocido en la respuesta del servidor.',
+        });
+        return;
+      }
+  
+      login(response.data);
+  
       let ruta = '/';
       let mensaje = 'Has iniciado sesión correctamente.';
-
+  
       switch (tipo) {
         case "Cliente":
           ruta = '/cliente';
@@ -79,7 +104,7 @@ function Login() {
           });
           return;
       }
-
+  
       MySwal.fire({
         position: 'center',
         icon: 'success',
@@ -90,12 +115,25 @@ function Login() {
       }).then(() => {
         navigate(ruta);
       });
-
+  
       setLockTimeLeft(0);
     } catch (error) {
       if (error.response) {
-        const { lockTimeLeft, attemptsLeft } = error.response.data;
-        if (lockTimeLeft) {
+        const { lockTimeLeft, attemptsLeft, error: serverError } = error.response.data;
+  
+        if (serverError === 'La cuenta no está verificada. Por favor, revisa tu correo para activar tu cuenta.') {
+          MySwal.fire({
+            icon: 'warning',
+            title: 'Cuenta No Verificada',
+            text: 'La cuenta no está verificada. Revisa tu correo para activar la cuenta antes de iniciar sesión.',
+          });
+        } else if (serverError && serverError === 'Tu cuenta está permanentemente bloqueada. Por favor, contacta con el administrador.') {
+          MySwal.fire({
+            icon: 'error',
+            title: 'Cuenta Bloqueada Permanentemente',
+            text: 'Tu cuenta está permanentemente bloqueada. Por favor, contacta con el administrador.',
+          });
+        } else if (lockTimeLeft) {
           setIsLocked(true);
           setLockTimeLeft(lockTimeLeft);
         } else {
@@ -114,6 +152,8 @@ function Login() {
       }
     }
   };
+  
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
