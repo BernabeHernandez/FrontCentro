@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import zxcvbn from 'zxcvbn';
 import sha1 from 'js-sha1';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const MySwal = withReactContent(Swal);
 
@@ -14,9 +16,20 @@ function CambiarPassword() {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordError, setPasswordError] = useState('');
   const [passwordHistoryError, setPasswordHistoryError] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const location = useLocation();
   const navigate = useNavigate();
   const { email } = location.state;
+
+  useEffect(() => {
+    MySwal.fire({
+      icon: 'info',
+      title: 'Aviso importante',
+      text: 'Las contraseñas anteriormente utilizadas no se pueden volver a utilizar, ni la actual. Se requiere un cambio de contraseña.',
+    });
+  }, []);
 
   const validatePasswordStrength = (password) => {
     const strength = zxcvbn(password);
@@ -45,32 +58,31 @@ function CambiarPassword() {
 
   const checkPasswordHistory = async (password) => {
     try {
-        const response = await axios.post('https://backendcentro.onrender.com/api/cambio/check-password-history', {
-            email,
-            password
-        });
-    
-        if (response.data.success === false) {
-            console.log("Contraseña ya utilizada. Mostrando alerta.");
-            MySwal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'La contraseña ya se utilizo anteriormente. Prueba con otra.',
-            });
-            return false;  
-        }
-        return true;  
-    } catch (error) {
-        console.error("Error al verificar el historial de contraseñas:", error);
-        MySwal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'La contraseña ya se utilizó anteriormente. Prueba con otra.',
-        });
-        return false;
-    }
-};
+      const response = await axios.post('https://backendcentro.onrender.com/api/cambio/check-password-history', {
+        email,
+        password
+      });
 
+      if (response.data.success === false) {
+        console.log("Contraseña ya utilizada. Mostrando alerta.");
+        MySwal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'La contraseña ya se utilizó anteriormente. Prueba con otra.',
+        });
+        return false;  
+      }
+      return true;  
+    } catch (error) {
+      console.error("Error al verificar el historial de contraseñas:", error);
+      MySwal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'La contraseña ya se utilizó anteriormente. Prueba con otra.',
+      });
+      return false;
+    }
+  };
 
   const checkPasswordCompromised = async (password) => {
     const hash = sha1(password);
@@ -148,7 +160,7 @@ function CambiarPassword() {
         MySwal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'La contraseña ya se está utilizando actualmente.Prueba con otra.',
+          text: 'La contraseña ya se está utilizando actualmente. Prueba con otra.',
         });
       }
     } catch (error) {
@@ -156,7 +168,7 @@ function CambiarPassword() {
       MySwal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'La contraseña ya se está utilizando actualmente.Prueba con otra',
+        text: 'La contraseña ya se está utilizando actualmente. Prueba con otra.',
       });
     }
   };
@@ -174,6 +186,14 @@ function CambiarPassword() {
         return "Muy Fuerte";
       default:
         return "";
+    }
+  };
+
+  const togglePasswordVisibility = (field) => {
+    if (field === "new") {
+      setShowNewPassword(!showNewPassword);
+    } else {
+      setShowConfirmPassword(!showConfirmPassword);
     }
   };
 
@@ -195,14 +215,16 @@ function CambiarPassword() {
     campo: {
       marginBottom: '15px',
       textAlign: 'center',
+      position: 'relative',
     },
     input: {
       width: '100%',
-      padding: '12px',
+      padding: '12px 40px 12px 12px', 
       borderRadius: '8px',
       border: '1px solid #b2dfdb',
       fontSize: '16px',
       boxSizing: 'border-box',
+      height: '50px', 
     },
     boton: {
       backgroundColor: '#00796b',
@@ -228,6 +250,14 @@ function CambiarPassword() {
       fontSize: '14px',
       marginTop: '5px',
     },
+    icono: {
+      position: 'absolute',
+      right: '10px',
+      top: '40%',
+      transform: 'translateY(-50%)',
+      cursor: 'pointer',
+      color: '#00796b',
+    },
   };
 
   return (
@@ -236,7 +266,7 @@ function CambiarPassword() {
       <form onSubmit={handleSubmit}>
         <div style={estilos.campo}>
           <input
-            type="password"
+            type={showNewPassword ? "text" : "password"}
             placeholder="Nueva contraseña"
             value={newPassword}
             onChange={(e) => {
@@ -246,6 +276,11 @@ function CambiarPassword() {
             required
             style={estilos.input}
           />
+          <FontAwesomeIcon
+            icon={showNewPassword ? faEyeSlash : faEye}
+            style={estilos.icono}
+            onClick={() => togglePasswordVisibility('new')}
+          />
           {passwordStrength > 0 && (
             <p style={estilos.medidor}>
               Fuerza de la contraseña: {getPasswordStrengthText(passwordStrength)}
@@ -254,12 +289,17 @@ function CambiarPassword() {
         </div>
         <div style={estilos.campo}>
           <input
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirmar nueva contraseña"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             style={estilos.input}
+          />
+          <FontAwesomeIcon
+            icon={showConfirmPassword ? faEyeSlash : faEye}
+            style={estilos.icono}
+            onClick={() => togglePasswordVisibility('confirm')}
           />
         </div>
         {passwordHistoryError && (

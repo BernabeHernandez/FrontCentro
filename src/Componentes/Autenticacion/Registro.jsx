@@ -6,7 +6,7 @@ import axios from "axios";
 import zxcvbn from "zxcvbn";
 import sha1 from "js-sha1";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEnvelope, faLock, faPhone, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEnvelope, faLock, faPhone, faSignInAlt, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const MySwal = withReactContent(Swal);
 
@@ -15,6 +15,8 @@ function FormularioRegistro() {
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [formErrors, setFormErrors] = useState({});
     const [passwordError, setPasswordError] = useState("");
+    const [passwordVisible, setPasswordVisible] = useState(false);
+
     const [formData, setFormData] = useState({
         username: "",
         password: "",
@@ -29,7 +31,7 @@ function FormularioRegistro() {
     });
 
     useEffect(() => {
-       
+
     }, []);
 
     const handleChange = (e) => {
@@ -57,7 +59,7 @@ function FormularioRegistro() {
             }));
         }
 
-        validateField(name, value); 
+        validateField(name, value);
     };
 
     const validateField = (name, value) => {
@@ -114,11 +116,20 @@ function FormularioRegistro() {
         for (const pattern of commonPatterns) {
             if (password.includes(pattern)) {
                 errorMessage = "Evita usar secuencias comunes como '12345' o 'password'.";
+                MySwal.fire({
+                    icon: "error",
+                    title: "Contraseña no válida",
+                    text: errorMessage,
+                });
                 break;
             }
         }
-
+    
         setPasswordError(errorMessage);
+    };
+
+    const handlePasswordVisibility = () => {
+        setPasswordVisible(!passwordVisible);
     };
 
     const checkPasswordCompromised = async (password) => {
@@ -145,7 +156,7 @@ function FormularioRegistro() {
             MySwal.fire({
                 icon: "error",
                 title: "Errores en el formulario",
-                text: "Por favor, corrige los errores antes de continuar.",
+                text: passwordError || "Por favor, corrige los errores antes de continuar.",
             });
             return;
         }
@@ -182,12 +193,12 @@ function FormularioRegistro() {
             navigate("/verificar-correo");
         } catch (error) {
             console.error("Error al registrar el usuario:", error);
-        
+
             if (error.response && error.response.data.error) {
                 MySwal.fire({
                     icon: "error",
                     title: "ERROR.",
-                    text: error.response.data.error, 
+                    text: error.response.data.error,
                 });
             } else {
                 MySwal.fire({
@@ -198,7 +209,7 @@ function FormularioRegistro() {
             }
         }
     }
-        
+
 
     const getPasswordStrengthText = (strength) => {
         switch (strength) {
@@ -272,6 +283,27 @@ function FormularioRegistro() {
             fontWeight: "bold",
             color: passwordStrength < 2 ? "red" : passwordStrength < 3 ? "orange" : "green",
         },
+        inputPasswordContainer: {
+            position: "relative", 
+            width: "100%", 
+        },
+        input: {
+            width: "100%", 
+            padding: "10px",
+            paddingRight: "40px", 
+            borderRadius: "8px",
+            border: "1px solid #b2dfdb",
+            fontSize: "16px",
+            boxSizing: "border-box",
+        },
+        toggleIcon: {
+            position: "absolute",
+            top: "50%",
+            right: "10px", 
+            transform: "translateY(-50%)",
+            cursor: "pointer",
+            color: "#00695c",
+        },
     };
 
     return (
@@ -341,9 +373,9 @@ function FormularioRegistro() {
                         style={estilos.input}
                         placeholder="Ingresa tu teléfono"
                         required
-                        maxLength="10" 
+                        maxLength="10"
                         onKeyPress={(e) => {
-                           
+
                             if (!/[0-9]/.test(e.key)) {
                                 e.preventDefault();
                             }
@@ -389,15 +421,22 @@ function FormularioRegistro() {
                     <label style={estilos.etiqueta}>
                         <FontAwesomeIcon icon={faLock} /> Contraseña
                     </label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        style={estilos.input}
-                        placeholder="Crea una contraseña"
-                        required
-                    />
+                    <div style={estilos.inputPasswordContainer}>
+                        <input
+                            type={passwordVisible ? "text" : "password"}
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            style={estilos.input}
+                            placeholder="Crea una contraseña"
+                            required
+                        />
+                        <FontAwesomeIcon
+                            icon={passwordVisible ? faEyeSlash : faEye}
+                            style={estilos.toggleIcon}
+                            onClick={handlePasswordVisibility}
+                        />
+                    </div>
                     {passwordStrength > 0 && (
                         <p style={estilos.medidor}>
                             Fuerza de la contraseña: {getPasswordStrengthText(passwordStrength)}

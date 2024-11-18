@@ -10,6 +10,7 @@ import imagen1 from '../Imagenes/ImagenV1.jpg';
 import imagen3 from '../Imagenes/Image4.jpg';
 import imagen4 from '../Imagenes/Image2.png';
 import imagen5 from '../Imagenes/Imagen1.png';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';  
 
 const MySwal = withReactContent(Swal);
 
@@ -21,6 +22,7 @@ function Login() {
   const [isLocked, setIsLocked] = useState(false);
   const [lockTimeLeft, setLockTimeLeft] = useState(0);
   const [captchaToken, setCaptchaToken] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
 
   const images = [imagen1, imagen3, imagen4, imagen5];
@@ -31,116 +33,79 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (isLocked) {
-      MySwal.fire({
-        icon: 'error',
-        title: 'Cuenta Bloqueada',
-        text: 'Tu cuenta está bloqueada temporalmente. Espera un momento para intentar de nuevo.',
-      });
-      return;
-    }
-  
-    if (!captchaToken) {
-      MySwal.fire({
-        icon: 'warning',
-        title: 'CAPTCHA Requerido',
-        text: 'Por favor, completa el CAPTCHA para continuar.',
-      });
-      return;
-    }
-  
-    try {
-      const response = await axios.post('https://backendcentro.onrender.com/api/login', {
-        user: username,
-        password: password,
-        captchaToken,
-      });
-  
-      console.log('Respuesta del servidor:', response.data);
-  
-      if (response.data.message === "Código de verificación enviado. Por favor verifica tu correo.") {
         MySwal.fire({
-          position: 'center',
-          icon: 'info',
-          title: 'Código de Verificación MFA Enviado',
-          text: 'Hemos enviado un código de verificación MFA a tu correo electrónico.',
-          showConfirmButton: true,
-        }).then(() => {
-          navigate('/verificacion-codigo');
-        });
-        return;
-      }
-  
-      const { tipo } = response.data;
-      if (!tipo) {
-        console.error('Error: `tipo` no está definido en la respuesta del servidor');
-        MySwal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Tipo de usuario desconocido en la respuesta del servidor.',
-        });
-        return;
-      }
-  
-      login(response.data);
-  
-      let ruta = '/';
-      let mensaje = 'Has iniciado sesión correctamente.';
-  
-      switch (tipo) {
-        case "Cliente":
-          ruta = '/cliente';
-          break;
-        case "Administrador":
-          ruta = '/admin';
-          break;
-        default:
-          console.log('Tipo de usuario no reconocido:', tipo);
-          MySwal.fire({
             icon: 'error',
-            title: 'Error',
-            text: 'Tipo de usuario desconocido',
-          });
-          return;
-      }
-  
-      MySwal.fire({
-        position: 'center',
-        icon: 'success',
-        title: mensaje,
-        showConfirmButton: false,
-        timer: 2000,
-        backdrop: true,
-      }).then(() => {
-        navigate(ruta);
-      });
-  
-      setLockTimeLeft(0);
+            title: 'Cuenta Bloqueada',
+            text: 'Tu cuenta está bloqueada temporalmente. Espera un momento para intentar de nuevo.',
+        });
+        return;
+    }
+
+    if (!captchaToken) {
+        MySwal.fire({
+            icon: 'warning',
+            title: 'CAPTCHA Requerido',
+            text: 'Por favor, completa el CAPTCHA para continuar.',
+        });
+        return;
+    }
+
+    try {
+        const response = await axios.post('https://backendcentro.onrender.com/api/login', {
+            user: username,
+            password: password,
+            captchaToken,
+        });
+
+        const { tipo, qrCodeUrl, message } = response.data;
+
+        if (qrCodeUrl) {
+            
+            navigate('/codigo-mfa', { state: { qrCodeUrl, user: username, tipo } });
+            return;
+        }
+
+        
     } catch (error) {
       if (error.response) {
         const { lockTimeLeft, attemptsLeft, error: serverError } = error.response.data;
   
-        if (serverError === 'La cuenta no está verificada. Por favor, revisa tu correo para activar tu cuenta.') {
+        
+        if (serverError === 'Usuario no encontrado') {
+          MySwal.fire({
+            icon: 'error',
+            title: 'Usuario No Encontrado',
+            text: 'El usuario ingresado no existe.',
+          });
+          
+          MySwal.fire({
+            icon: 'info',
+            title: 'Intentos restantes: 0',
+          });
+        } else if (serverError === 'La cuenta no está verificada. Por favor, revisa tu correo para activar tu cuenta.') {
           MySwal.fire({
             icon: 'warning',
             title: 'Cuenta No Verificada',
-            text: 'La cuenta no está verificada. Revisa tu correo para activar la cuenta antes de iniciar sesión.',
+            text: serverError,
           });
         } else if (serverError && serverError === 'Tu cuenta está permanentemente bloqueada. Por favor, contacta con el administrador.') {
           MySwal.fire({
             icon: 'error',
             title: 'Cuenta Bloqueada Permanentemente',
-            text: 'Tu cuenta está permanentemente bloqueada. Por favor, contacta con el administrador.',
+            text: serverError,
           });
         } else if (lockTimeLeft) {
           setIsLocked(true);
           setLockTimeLeft(lockTimeLeft);
         } else {
+          
+          const attempts = attemptsLeft || 0;
           MySwal.fire({
             icon: 'error',
             title: 'Usuario o Contraseña Incorrecta',
-            text: `Intentos restantes: ${attemptsLeft}`,
+            text: `Intentos restantes: ${attempts}`,
           });
         }
       } else {
@@ -152,6 +117,8 @@ function Login() {
       }
     }
   };
+
+
   
   
 
@@ -258,6 +225,13 @@ function Login() {
       backgroundPosition: 'center',
       minHeight: '350px',
     },
+    icono: {
+      position: 'absolute',
+      top: '50%',
+      right: '10px',
+      transform: 'translateY(-50%)',
+      cursor: 'pointer',
+    },
   };
 
   useEffect(() => {
@@ -287,13 +261,21 @@ function Login() {
             </div>
             <div style={estilos.campo}>
               <label style={estilos.etiqueta}>Contraseña:</label>
-              <input
-                type="password"
-                style={estilos.input}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  style={estilos.input}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <div
+                  style={estilos.icono}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </div>
+              </div>
             </div>
             <ReCAPTCHA
               sitekey="6Lc_u2EqAAAAAG8Jg_KW2Rf6qLF0mFY8j79Lifjk" 

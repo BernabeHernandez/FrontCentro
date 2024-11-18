@@ -30,6 +30,8 @@ import PoliticasHi from './Componentes/Administrativo/PoliticasHi';
 import DeslindesHi from './Componentes/Administrativo/DeslindesHi';
 import UserSospechosos from './Componentes/Administrativo/UserSospechosos';
 import VerificarCodigo from './Componentes/Autenticacion/MFA';
+import MFASetup from './Componentes/Autenticacion/MFASetup';
+import VerifyMFA from './Componentes/Autenticacion/VerifyMFA';
 
 
 const ThemeToggleButton = () => {
@@ -52,10 +54,7 @@ const ThemeToggleButton = () => {
       }}
       aria-label="Toggle theme"
     >
-      <FontAwesomeIcon 
-        icon={theme === 'dark' ? faSun : faMoon} 
-        style={{ color: theme === 'dark' ? 'yellow' : 'black' }}
-      />
+
       <style>{`
         @media (max-width: 768px) {
           button {
@@ -115,6 +114,9 @@ const App = () => {
             <Route path="/terminos-condiciones" element={<TerminosF />} />
             <Route path="/politicass" element={<PoliticasF />} />
             <Route path="/deslindes" element={<DeslindeF />} />
+            <Route path="/MFAS" element={<MFASetup />} />
+            <Route path="/codigo-mfa" element={<VerifyMFA />} />
+
           </Routes>
         </LayoutConEncabezado>
       </ThemeProvider>
