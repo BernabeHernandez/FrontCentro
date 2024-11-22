@@ -38,7 +38,7 @@ const TerminosHi = () => {
 
   const manejarMostrar = async (id) => {
     try {
-      await axios.patch(`http://localhost:5000/api/historialterminos/${id}`, { Estado: "activo" });
+      await axios.patch(`https://backendcentro.onrender.com/api/historialterminos/${id}`, { Estado: "activo" });
       setHistorial((prevHistorial) => 
         prevHistorial.map((termino) => 
           termino._id === id ? { ...termino, estado: "No vigente" } : termino
