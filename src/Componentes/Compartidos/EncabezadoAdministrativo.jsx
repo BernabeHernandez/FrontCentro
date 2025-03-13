@@ -75,6 +75,30 @@ const EncabezadoAdministrativo = () => {
       case "registro-sospechosos":
         navigate('/admin/registro-sospechosos');
         break;
+      case "productos":
+        navigate('/admin/productos');
+        break;
+      case "inventarioproductos":
+        navigate('/admin/inventario');
+        break;
+      case "servicios":
+        navigate('/admin/servicios');
+        break;
+      case "inventarioservicios":
+        navigate('/admin/inventarioser');
+        break;
+      case "categoria":
+        navigate('/admin/categoria');
+        break;
+      case "registroHo":
+        navigate('/admin/registroH');
+        break;
+      case "horariosDis":
+        navigate('/admin/horariosD');
+        break;
+        case "promociones":
+          navigate('/admin/promociones');
+          break;
       case "cerrarSesion":
         handleLogout();
         break;
@@ -205,11 +229,12 @@ const EncabezadoAdministrativo = () => {
           z-index: 10; 
         }
 
-        .menu ul .dropdown-menu li {
-          padding: 8.5px 12px;
-          cursor: pointer;
-          color: var(--color-secondary);
-        }
+       .menu ul .dropdown-menu li {
+          white-space: nowrap; 
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 250px; 
+       }
 
         .mobile-menu-icon {
           display: none;
@@ -238,12 +263,12 @@ const EncabezadoAdministrativo = () => {
             padding: 20px;
             transition: left 0.3s ease-in-out;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-            z-index: 999; 
+              z-index: 1000;
           }
 
           .menu.menu-open ul {
             display: flex;
-            left: 0; 
+              z-index: 1000;
           }
 
           .menu ul li {
@@ -251,14 +276,10 @@ const EncabezadoAdministrativo = () => {
             border-bottom: 1px solid var(--color-hover);
             text-align: right; 
             color: var(--color-mobile-text);
+              z-index: 1000;
           }
-
-          
-        .logo h1 {
-            
-          
+        .logo h1 { 
         }
-
           .mobile-menu-icon {
             display: flex; 
           }
@@ -270,10 +291,8 @@ const EncabezadoAdministrativo = () => {
           {logoUrl && (
             <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '60px', marginRight: '10px' }} />
           )}
-          <h3>{nombreEmpresa}</h3>
         </div>
         <div>
-          <h4>{eslogan}</h4>
         </div>
 
 
@@ -283,6 +302,27 @@ const EncabezadoAdministrativo = () => {
               <HomeOutlined style={{ color: '#00B300', marginRight: '8px' }} />
               Home
             </li>
+
+            <li className="dropdown" onClick={() => toggleDropdown('control')}>
+              <span>
+                <AppstoreOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+                Control
+              </span>
+              {openDropdown === 'control' && (
+                <ul className="dropdown-menu">
+                  <li onClick={() => { handleClick('productos'); handleMenuClick('productos'); }}>Productos</li>
+                  <li onClick={() => { handleClick('inventarioproductos'); handleMenuClick('inventarioproductos'); }}>Inventario de Productos</li>
+                  <li onClick={() => { handleClick('servicios'); handleMenuClick('servicios'); }}>Servicios</li>
+                  <li onClick={() => { handleClick('inventarioservicios'); handleMenuClick('inventarioservicios'); }}>Inventario de Servicios</li>
+                  <li onClick={() => { handleClick('categoria'); handleMenuClick('categoria'); }}>Categorias</li>
+                  <li onClick={() => { handleClick('registroHo'); handleMenuClick('registroHo'); }}>Regsitro Horario</li>
+                  <li onClick={() => { handleClick('horariosDis'); handleMenuClick('horariosDis'); }}>Disponibilidad</li>
+                  <li onClick={() => { handleClick('promociones'); handleMenuClick('promociones'); }}>Promociones</li>
+                </ul>
+              )}
+            </li>
+
+
             <li className="dropdown" onClick={() => toggleDropdown('empresa')}>
               <span>
                 <FileTextOutlined style={{ color: '#00B300', marginRight: '8px' }} />

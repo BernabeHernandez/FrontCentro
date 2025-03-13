@@ -1,281 +1,262 @@
-import React, { useEffect, useState } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { Calendar, List, CheckCircle, FileText } from 'react-feather'; 
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import product1 from "../Componentes/Imagenes/Image2.png";
+import product2 from "../Componentes/Imagenes/Imagen1.png";
+import product3 from "../Componentes/Imagenes/wavy_background_4.jpg";
+import imageForBlackBackground1 from "../Componentes/Imagenes/fht6.jpg";
+import imageForBlackBackground2 from "../Componentes/Imagenes/347317299795.jpg";
+import imageForBlackBackground3 from "../Componentes/Imagenes/SL_0210121_40570_75.jpg";
+import imageForBlackBackground4 from "../Componentes/Imagenes/wavy_background_4.jpg";
+import Breadcrumbs from '../Componentes/Navegacion/BreadcrumbsProductos';
 
-const servicios = [
-  'Terapia Física',
-  'Terapia Ocupacional',
-  'Psicología',
-  'Nutrición',
-  'Fisioterapia',
-  'Terapia del Habla',
-  'Acupuntura',
-  'Masajes Terapéuticos',
-];
+const Home = () => {
+  const sections = [
+    {
+      id: 1,
+      title: 'Centro de Rehabilitación Integral San Juan',
+      description: 'En nuestro centro, nos dedicamos a mejorar tu bienestar físico y mental a través de tratamientos personalizados. Ofrecemos masajes terapéuticos, fisioterapia especializada y programas de rehabilitación diseñados para ayudarte a recuperar tu salud y calidad de vida de manera integral.',
+      backgroundImage: product1,
+    },
+    {
+      id: 2,
+      title: 'Misión',
+      description: 'Nuestra misión es proporcionar atención de calidad y programas de rehabilitación adaptados a las necesidades de cada paciente, promoviendo su bienestar integral.',
+      backgroundImage: imageForBlackBackground1,
+    },
+    {
+      id: 3,
+      title: 'Visión',
+      description: 'Ser el centro de rehabilitación líder, reconocido por su compromiso con la salud y el bienestar, utilizando técnicas innovadoras para la recuperación de nuestros pacientes.',
+      backgroundImage: imageForBlackBackground3,
+    },
+    {
+      id: 4,
+      title: 'Productos de Limpieza Facial',
+      description: 'Contamos con productos de alta calidad diseñados para purificar y cuidar la piel del rostro, ayudando a mantener un cutis saludable y libre de impurezas.',
+      backgroundImage: imageForBlackBackground2,
+    },
+    {
+      id: 5,
+      title: 'Servicios de Rehabilitación',
+      description: 'Ofrecemos una amplia gama de servicios, como fisioterapia, masajes terapéuticos y programas personalizados, para mejorar tu calidad de vida y bienestar.',
+      backgroundImage: imageForBlackBackground3,
+    },
+  ];
 
-const historiales = [
-  'Cita con el Dr. Pérez - 01/10/2024',
-  'Cita con la Dra. Gómez - 05/10/2024',
-  'Terapia de grupo - 10/10/2024',
-  'Consulta nutricional - 15/10/2024',
-  'Revisar resultados de análisis - 20/10/2024',
-];
-
-const historialesClinicos = [
-  'Consulta Médica - 01/09/2024',
-  'Terapia Física - 15/09/2024',
-  'Evaluación Psicológica - 20/09/2024',
-  'Nutrición - 25/09/2024',
-  'Revisión de Exámenes - 30/09/2024',
-];
-
-const PaginaPrincipal = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [servicesIndex, setServicesIndex] = useState(0);
-  const [historialIndex, setHistorialIndex] = useState(0);
-  const [clinicoIndex, setClinicoIndex] = useState(0);
-  const [visibleServices, setVisibleServices] = useState([]); 
-  const [visibleHistorial, setVisibleHistorial] = useState([]); 
-  const [visibleClinicos, setVisibleClinicos] = useState([]); 
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [titleText, setTitleText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const nextDate = new Date(currentDate);
-      nextDate.setDate(currentDate.getDate() + 1);
-      setCurrentDate(nextDate);
-    }, 600);
+      setDirection(1); // Dirección hacia la derecha
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % sections.length);
+    }, 8000); // Permanencia de cada imagen (8 segundos)
 
     return () => clearInterval(interval);
-  }, [currentDate]);
+  }, [sections.length]);
 
   useEffect(() => {
-    const serviceInterval = setInterval(() => {
-      if (servicesIndex < servicios.length) {
-        setVisibleServices((prev) => [...prev, servicios[servicesIndex]]);
-        setServicesIndex((prev) => prev + 1);
-      } else {
-        setVisibleServices([]);
-        setServicesIndex(0);
+    const section = sections[currentIndex];
+    let index = 0;
+    setTitleText('');
+    setIsTyping(true);
+
+    const typingInterval = setInterval(() => {
+      setTitleText((prev) => prev + section.title[index]);
+      index++;
+
+      if (index === section.title.length) {
+        clearInterval(typingInterval);
+        setIsTyping(false);
       }
-    }, 400);
+    }, 100); // Velocidad de escritura (130ms por letra)
 
-    return () => clearInterval(serviceInterval);
-  }, [servicesIndex]);
+    return () => clearInterval(typingInterval);
+  }, [currentIndex]);
 
-  useEffect(() => {
-    const historialInterval = setInterval(() => {
-      if (historialIndex < historiales.length) {
-        setVisibleHistorial((prev) => [...prev, historiales[historialIndex]]);
-        setHistorialIndex((prev) => prev + 1);
-      } else {
-        setVisibleHistorial([]);
-        setHistorialIndex(0);
-      }
-    }, 400);
-
-    return () => clearInterval(historialInterval);
-  }, [historialIndex]);
-
-  useEffect(() => {
-    const clinicoInterval = setInterval(() => {
-      if (clinicoIndex < historialesClinicos.length) {
-        setVisibleClinicos((prev) => [...prev, historialesClinicos[clinicoIndex]]);
-        setClinicoIndex((prev) => prev + 1);
-      } else {
-        setVisibleClinicos([]); 
-        setClinicoIndex(0);
-      }
-    }, 400);
-
-    return () => clearInterval(clinicoInterval);
-  }, [clinicoIndex]);
+  const variants = {
+    enter: (direction) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 1,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction > 0 ? '-100%' : '100%',
+      opacity: 1,
+    }),
+  };
 
   return (
-    <Container>
-      <h1>Bienvenido al Centro de Rehabilitación Integral</h1>
+    <div>
+      {/* Contenedor del carrusel */}
+      <div style={{
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
+        position: 'relative',
+        margin: 0,
+        padding: 0,
+      }}>
+        <Breadcrumbs />
+        <AnimatePresence custom={direction}>
+          {sections.map((section, index) => (
+            index === currentIndex && (
+              <motion.div
+                key={section.id}
+                custom={direction}  
+                initial="enter"
+                animate="center"
+                exit="exit"
+                variants={variants}
+                transition={{ duration: 1, ease: 'easeInOut' }} // Transición rápida
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100vh',
+                  color: '#fff',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  zIndex: 1,
+                  margin: 0,
+                  padding: 0,
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  zIndex: 2,
+                }}></div>
+                <div style={{
+                  zIndex: 3,
+                  position: 'relative',
+                  textAlign: 'center',
+                  maxWidth: '800px',
+                  padding: '10px',
+                  width: '90%',
+                  wordWrap: 'break-word', // Asegura que el texto largo se divida en varias líneas
+                  lineHeight: '1.5',
+                }}>
+                  <h1 style={{
+                    fontSize: '2rem',
+                    fontWeight: 'bold',
+                    marginBottom: '10px',
+                    textTransform: 'uppercase',
+                    wordWrap: 'break-word', // Asegura que el título también se divida
+                    whiteSpace: 'normal', // Permite el ajuste de línea en títulos largos
+                  }}>
+                    {titleText}
+                  </h1>
+                  <p style={{
+                    fontSize: '1rem',
+                    whiteSpace: 'normal', // Permite que el texto se ajuste
+                  }}>
+                    {section.description}
+                  </p>
+                </div>
+                <img
+                  src={section.backgroundImage}
+                  alt={`Slide ${section.id}`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    zIndex: 0,
+                  }}
+                />
+              </motion.div>
+            )
+          ))}
+        </AnimatePresence>
+      </div>
 
-      <Widgets>
-        <Widget>
-          <h2><Calendar /> Calendario</h2>
-          <CalendarDisplay>
-            <CalendarHeader>{currentDate.toLocaleDateString()}</CalendarHeader>
-            <DateGrid>
-              {Array.from({ length: 30 }, (_, index) => {
-                const day = new Date(currentDate);
-                day.setDate(currentDate.getDate() + index);
-                return (
-                  <DateCell key={index} isToday={day.toDateString() === currentDate.toDateString()}>
-                    {day.getDate()}
-                  </DateCell>
-                );
-              })}
-            </DateGrid>
-          </CalendarDisplay>
-        </Widget>
+      {/* Nueva sección debajo del carrusel */}
+      <div style={{
+        width: '100%',
+        minHeight: '100vh', // Asegura que ocupe al menos el alto de la pantalla
+        background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5))',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '40px 20px',
+        boxSizing: 'border-box',
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '80%',
+          maxWidth: '1200px',
+          gap: '40px', // Espacio entre los recuadros
+        }}>
+          {/* Recuadro de horario de atención */}
+          <div style={{
+            background: 'hsla(0, 0.00%, 47.80%, 0.90)',
+            padding: '20px',
+            borderRadius: '15px',
+            width: '50%',
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+          }}>
+            <h2 style={{ fontSize: '1.8rem', marginBottom: '20px', color: '#fff', textAlign: 'center' }}>Horario de Atención</h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+              gap: '15px',
+            }}>
+              {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((day) => (
+                <div key={day} style={{
+                  background: 'rgba(182, 249, 175, 0.9)',
+                  padding: '15px',
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                  textAlign: 'center',
+                }}>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px', color: '#555' }}>{day}</h3>
+                  <p style={{ fontSize: '1rem', color: '#777' }}>8:00 AM - 6:00 PM</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <Widget>
-          <h2><CheckCircle /> Servicios Disponibles</h2>
-          <ServiceList>
-            {servicios.map((servicio, index) => (
-              <ServiceItem key={index} visible={visibleServices.includes(servicio)}>
-                {servicio}
-              </ServiceItem>
-            ))}
-          </ServiceList>
-        </Widget>
-
-        <Widget>
-          <h2><List /> Historial de Citas</h2>
-          <HistorialList>
-            {historiales.map((historial, index) => (
-              <HistorialItem key={index} visible={visibleHistorial.includes(historial)}>
-                {historial}
-              </HistorialItem>
-            ))}
-          </HistorialList>
-        </Widget>
-
-        <Widget>
-          <h2><FileText /> Historial Clínico</h2>
-          <ClinicosList>
-            {historialesClinicos.map((clinico, index) => (
-              <ClinicoItem key={index} visible={visibleClinicos.includes(clinico)}>
-                {clinico}
-              </ClinicoItem>
-            ))}
-          </ClinicosList>
-        </Widget>
-      </Widgets>
-    </Container>
+          {/* Recuadro del mapa */}
+          <div style={{
+            background: 'rgba(79, 81, 80, 0.9)',
+            padding: '20px',
+            borderRadius: '15px',
+            width: '50%',
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+          }}>
+            <h2 style={{ fontSize: '1.8rem', marginBottom: '20px', color: '#fff', textAlign: 'center' }}>Centro de Rehabilitación Integral San Juan</h2>
+            <div style={{ width: '100%', height: '400px', background: '#ccc', borderRadius: '10px', overflow: 'hidden' }}>
+              {/* Aquí puedes integrar un mapa usando una API como Google Maps */}
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d930.3116289179378!2d-98.40923193041279!3d21.14258569878345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d726976bcbeec9%3A0x46764bc322c8c614!2sCiber%20Melas!5e0!3m2!1ses!2smx!4v1740551723799!5m2!1ses!2smx"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const moveAnimation = keyframes`
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: Arial, sans-serif;
-  background-color: #e8f5e9;
-  padding: 20px;
-  min-height: 100vh; 
-`;
-
-const Header = styled.header`
-  text-align: center;
-  margin-bottom: 20px;
-
-  h1 {
-    font-size: 2.5rem;
-    color: #00796b; 
-    margin: 0; 
-  }
-
-  p {
-    font-size: 1.2rem;
-    color: #555; 
-  }
-`;
-
-const Widgets = styled.div`
-  display: flex;
-  flex-wrap: wrap; 
-  justify-content: space-around; 
-  width: 100%;
-  max-width: 1200px; 
-  margin-top: 20px;
-`;
-
-const Widget = styled.div`
-  background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  flex: 1;
-  margin: 10px; 
-  animation: ${fadeIn} 0.5s ease-in-out; 
-  animation: ${moveAnimation} 3s ease-in-out infinite; 
-`;
-
-const CalendarDisplay = styled.div`
-  margin-top: 10px;
-`;
-
-const CalendarHeader = styled.div`
-  font-size: 1.5rem;
-  color: #00796b; 
-  margin-bottom: 10px;
-`;
-
-const DateGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-top: 10px;
-`;
-
-const DateCell = styled.div`
-  background-color: ${(props) => (props.isToday ? '#ffeb3b' : '#e0e0e0')}; 
-  border-radius: 50%;
-  text-align: center;
-  padding: 10px;
-  transition: background-color 0.3s;
-`;
-
-const ServiceList = styled.ul`
-  list-style-type: none;
-  padding: 0;
-`;
-
-const ServiceItem = styled.li`
-  color: #00796b; 
-  opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.5s ease; 
-`;
-
-const HistorialList = styled.ul`
-  list-style-type: none;
-  padding: 0;
-`;
-
-const HistorialItem = styled.li`
-  color: #d32f2f; 
-  opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.5s ease; 
-`;
-
-const ClinicosList = styled.ul`
-  list-style-type: none;
-  padding: 0;
-`;
-
-const ClinicoItem = styled.li`
-  color: #1976d2; 
-  opacity: ${(props) => (props.visible ? 1 : 0)};
-  transition: opacity 0.5s ease; 
-`;
-
-export default PaginaPrincipal;
+export default Home;

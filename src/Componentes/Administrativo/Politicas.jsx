@@ -243,10 +243,10 @@ const Politicas = () => {
           </thead>
           <tbody>
             {politicas.map((politica) => (
-              <tr key={politica._id} style={styles.tableRow}>
+              <tr key={politica.id} style={styles.tableRow}>
                 <td style={styles.tableCell}>{politica.titulo}</td>
                 <td style={styles.tableCell}>{politica.contenido}</td>
-                <td style={styles.tableCell}>{politica.fechaVigencia}</td>
+                <td style={styles.tableCell}>{new Date (politica.fechaVigencia).toISOString().split('T')[0]}</td>
                 <td style={styles.tableCell}>
                   {politica.fechaCreacion && !isNaN(new Date(politica.fechaCreacion))
                     ? new Date(politica.fechaCreacion).toISOString().split('T')[0]
@@ -257,17 +257,17 @@ const Politicas = () => {
                 <td style={styles.tableCell}>{politica.estado}</td>
                 <td style={styles.tableCell}>
                   <button
-                    onClick={() => editPolitica(politica._id, politica)}
+                    onClick={() => editPolitica(politica.id, politica)}
                     style={styles.editButton}>
                     Editar
                   </button>
                   <button
-                    onClick={() => deletePolitica(politica._id)}
+                    onClick={() => deletePolitica(politica.id)}
                     style={styles.deleteButton}>
                     Eliminar
                   </button>
                   <button
-                    onClick={() => EliminarPoliticaDeLaTabla(politica._id)}
+                    onClick={() => EliminarPoliticaDeLaTabla(politica.id)}
                     style={politica.estado === 'Vigente' ? styles.disabledButton : styles.softDeleteButton}
                     disabled={politica.estado === 'Vigente'} 
                   >

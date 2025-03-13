@@ -16,7 +16,7 @@ const DeslindesHi = () => {
 
         const datosActualizados = datosOrdenados.map((deslinde, indice) => {
           let estado = "No Vigente"; 
-          if (deslinde.Estado === "eliminado") {
+          if (deslinde.estado === "eliminado") {
             estado = "Eliminado";  
           } else if (indice === 0) {
             estado = "Vigente";
@@ -41,7 +41,7 @@ const DeslindesHi = () => {
       await axios.patch(`https://backendcentro.onrender.com/api/historialdeslindes/${id}`, { Estado: "activo" });
       setHistorial((prevHistorial) => 
         prevHistorial.map((deslinde) => 
-          deslinde._id === id ? { ...deslinde, estado: "No vigente" } : deslinde
+          deslinde.id === id ? { ...deslinde, estado: "No vigente" } : deslinde
         )
       );
     } catch (error) {
@@ -71,7 +71,7 @@ const DeslindesHi = () => {
             <tbody>
               {historial.map((deslinde, indice) => (
                 <tr
-                  key={deslinde._id}
+                  key={deslinde.id}
                   style={{
                     ...estilos.filaTabla,
                     backgroundColor: indice % 2 === 0 ? '#f9fafb' : '#ffffff',
@@ -104,7 +104,7 @@ const DeslindesHi = () => {
                     {deslinde.estado === 'Eliminado' && (
                       <button 
                         style={estilos.botonMostrar} 
-                        onClick={() => manejarMostrar(deslinde._id)}
+                        onClick={() => manejarMostrar(deslinde.id)}
                       >
                         Mostrar
                       </button>

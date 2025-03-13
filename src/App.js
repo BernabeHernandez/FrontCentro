@@ -10,9 +10,6 @@ import Politicas from './Componentes/Administrativo/Politicas';
 import Terminos from './Componentes/Administrativo/Terminos';
 import Perfil from './Componentes/Administrativo/Perfil';
 import Deslinde from './Componentes/Administrativo/Deslinde';
-import { ThemeProvider, useTheme } from './Componentes/Temas/ThemeContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 import ValidarCodigo from './Componentes/Autenticacion/ValidarCodigo';
 import CambiarPassword from './Componentes/Autenticacion/CambiarPassword';
 import SolicitarCodigo from './Componentes/Autenticacion/SolicitarCodigo';
@@ -32,56 +29,46 @@ import UserSospechosos from './Componentes/Administrativo/UserSospechosos';
 import VerificarCodigo from './Componentes/Autenticacion/MFA';
 import MFASetup from './Componentes/Autenticacion/MFASetup';
 import VerifyMFA from './Componentes/Autenticacion/VerifyMFA';
-
-
-const ThemeToggleButton = () => {
-  const { toggleTheme, theme } = useTheme();
-
-  return (
-    <button 
-      onClick={toggleTheme} 
-      style={{ 
-        marginLeft: 'auto', 
-        background: 'none', 
-        border: 'none', 
-        cursor: 'pointer', 
-        padding: '10px',
-        fontSize: '1.2rem', 
-        verticalAlign: 'middle', 
-        lineHeight: '1.5', 
-        display: 'flex', 
-        alignItems: 'center', 
-      }}
-      aria-label="Toggle theme"
-    >
-
-      <style>{`
-        @media (max-width: 768px) {
-          button {
-            font-size: 1.3rem;
-          }
-        }
-        @media (max-width: 480px) {
-          button {
-            font-size: 1.1rem;
-          }
-        }
-      `}</style>
-    </button>
-  );
-};
+import Productos from './Componentes/Publico/Productos';
+import Servicios from './Componentes/Publico/Servicios';
+import DetalleProducto from './Componentes/Publico/DetalleProducto';
+import OpcionPago from './Componentes/Pagos/OpcionPago';
+import DetallesServicio from './Componentes/Publico/DetalleServicios';
+import OpcionPagoD from './Componentes/Pagos/OpcionPagoD';
+import PaginaError400 from './Paginas/PaginaError400';
+import PaginaError404 from './Paginas/PaginaError404';
+import PaginaError500j from './Paginas/PaginaError500';
+import ErrorBoundary from './Paginas/Error505Global';
+import SimularError from './Paginas/SimularError';
+import CrearProducto from './Componentes/Administrativo/CrearProducto';
+import CrearServicio from './Componentes/Administrativo/CrearServicio';
+import ResultadosBusqueda from './Componentes/Publico/ResultadoBusqueda';
+import Inventario from './Componentes/Administrativo/Inventario';
+import InventarioServicios from './Componentes/Administrativo/InventarioServicios';
+import MapaSitio from './Paginas/MapaSitio';
+import Ayuda from './Componentes/Ayuda/Ayuda';
+import ChatGPT from './Componentes/Ayuda/ChatGPT';
+import Categoria from './Componentes/Administrativo/Categoria';
+import RegistroHorario from './Componentes/Administrativo/RegsitroHorario';
+import HorariosDis from './Componentes/Administrativo/horariosDis';
+import CitasCliente from './Componentes/Cliente/citasCliente';
+import ProductosC from './Componentes/Cliente/ProductosC';
+import ServiciosC from './Componentes/Cliente/ServiciosC';
+import DetallesServicioC from './Componentes/Cliente/DetalleServicioC';
+import DetalleProductoC from './Componentes/Cliente/DetalleProductoC';
+import Carrito from './Componentes/Cliente/Carrito';
+import Promociones from './Componentes/Administrativo/Promociones';
+import PerfilCliente from './Componentes/Cliente/PerfilCliente';
 
 const App = () => {
   return (
     <AuthProvider>
-      <ThemeProvider>
         <LayoutConEncabezado>
-          <ThemeToggleButton />
+        <ErrorBoundary fallback={<PaginaError500j />}>
           <Routes>
             <Route path="/" element={<PaginaPrincipal />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
-
             {/* Rutas protegidas para la sección administrativa */}
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['Administrador']}><PaginaPrincipalAdministrativa /></ProtectedRoute>} />
             <Route path="/admin/politicas" element={<ProtectedRoute allowedRoles={['Administrador']}><Politicas /></ProtectedRoute>} />
@@ -98,12 +85,34 @@ const App = () => {
             <Route path="/admin/historial-politicas" element={<ProtectedRoute allowedRoles={['Administrador']}><PoliticasHi/></ProtectedRoute>} />
             <Route path="/admin/historial-deslindes" element={<ProtectedRoute allowedRoles={['Administrador']}><DeslindesHi/></ProtectedRoute>} />
             <Route path="/admin/registro-sospechosos" element={<ProtectedRoute allowedRoles={['Administrador']}><UserSospechosos/></ProtectedRoute>} />
-
+            <Route path="/admin/productos" element={<ProtectedRoute allowedRoles={['Administrador']}><CrearProducto/></ProtectedRoute>} />
+            <Route path="/admin/servicios" element={<ProtectedRoute allowedRoles={['Administrador']}><CrearServicio/></ProtectedRoute>} />
+            <Route path="/admin/inventario" element={<ProtectedRoute allowedRoles={['Administrador']}><Inventario/></ProtectedRoute>} />
+            <Route path="/admin/inventarioser" element={<ProtectedRoute allowedRoles={['Administrador']}><InventarioServicios/></ProtectedRoute>} />
+            <Route path="/admin/categoria" element={<ProtectedRoute allowedRoles={['Administrador']}><Categoria/></ProtectedRoute>} />
+            <Route path="/admin/registroH" element={<ProtectedRoute allowedRoles={['Administrador']}><RegistroHorario/></ProtectedRoute>} />
+            <Route path="/admin/horariosD" element={<ProtectedRoute allowedRoles={['Administrador']}><HorariosDis /></ProtectedRoute>} />
+            <Route path="/admin/promociones" element={<ProtectedRoute allowedRoles={['Administrador']}><Promociones /></ProtectedRoute>} />
+            
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
             <Route path="/cliente/terminos-condiciones" element={<ProtectedRoute allowedRoles={['Cliente']}><TerminosF /></ProtectedRoute>} />
             <Route path="/cliente/politicass" element={<ProtectedRoute allowedRoles={['Cliente']}><PoliticasF /></ProtectedRoute>} />
             <Route path="/cliente/deslindes" element={<ProtectedRoute allowedRoles={['Cliente']}><DeslindeF /></ProtectedRoute>} />
+            <Route path="/cliente/productos" element={<ProtectedRoute allowedRoles={['Cliente']}><ProductosC /></ProtectedRoute>} />
+            <Route path="/cliente/detalles/:id" element={<ProtectedRoute allowedRoles={['Cliente']}><DetalleProductoC /></ProtectedRoute>} />
+            <Route path="/cliente/servicios" element={<ProtectedRoute allowedRoles={['Cliente']}><ServiciosC /></ProtectedRoute>} />
+            <Route path="/cliente/detalle/:id" element={<ProtectedRoute allowedRoles={['Cliente']}><DetallesServicioC /></ProtectedRoute>} />
+            <Route path="/cliente/detalles/:id/opcionpago" element={<ProtectedRoute allowedRoles={['Cliente']}><OpcionPago /></ProtectedRoute>} />
+            <Route path="/cliente/detalle/:id/opcionpagos" element={<ProtectedRoute allowedRoles={['Cliente']}><OpcionPagoD /></ProtectedRoute>} />
+            <Route path="/cliente/error400" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaError400 /></ProtectedRoute>} />
+            <Route path="/cliente/error500" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaError404 /></ProtectedRoute>} />
+            <Route path="/cliente/resultados" element={<ProtectedRoute allowedRoles={['Cliente']}><ResultadosBusqueda /></ProtectedRoute>} />
+            <Route path="/cliente/ayuda" element={<ProtectedRoute allowedRoles={['Cliente']}><Ayuda /></ProtectedRoute>} />
+            <Route path="/cliente/chats" element={<ProtectedRoute allowedRoles={['Cliente']}><ChatGPT /></ProtectedRoute>} />
+            <Route path="/cliente/citasCliente" element={<ProtectedRoute allowedRoles={['Cliente']}><CitasCliente /></ProtectedRoute>} />
+            <Route path="/cliente/carrito" element={<ProtectedRoute allowedRoles={['Cliente']}><Carrito /></ProtectedRoute>} />
+            <Route path="/cliente/perfilUsuario" element={<ProtectedRoute allowedRoles={['Cliente']}><PerfilCliente /></ProtectedRoute>} />            
 
             {/* Rutas públicas */}
             <Route path="/verificar_correo" element={<SolicitarCodigo />} />
@@ -116,11 +125,31 @@ const App = () => {
             <Route path="/deslindes" element={<DeslindeF />} />
             <Route path="/MFAS" element={<MFASetup />} />
             <Route path="/codigo-mfa" element={<VerifyMFA />} />
+            <Route path="/productos" element={<Productos />} />
+            <Route path="/detalles/:id" element={<DetalleProducto />} />
+            <Route path="/servicios" element={<Servicios />} />
+            <Route path="/detalle/:id" element={<DetallesServicio />} />
+            <Route path="/detalles/:id/opcionpago" element={<OpcionPago />} />
+            <Route path="/detalle/:id/opcionpagos" element={<OpcionPagoD />} />
+            <Route path="/error400" element={<PaginaError400 />} />  
+            <Route path="/error500" element={<PaginaError500j />} /> 
+            <Route path="/simularError500" element={<SimularError />} /> 
+            <Route path="/resultados" element={<ResultadosBusqueda />} />
+            <Route path="/mapasitio" element={<MapaSitio />} />
+            <Route path="/ayuda" element={<Ayuda />} />
+            <Route path="/chats" element={<ChatGPT/>} />
+            <Route path="/citasCliente" element={<CitasCliente/>} />
+            <Route path="/carrito" element={<Carrito/>} />
+            
 
+            <Route path="*" element={<PaginaError404 />} />  
+         
           </Routes>
+          </ErrorBoundary>  
         </LayoutConEncabezado>
-      </ThemeProvider>
+        
     </AuthProvider>
+   
   );
 };
 

@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HomeOutlined, LoginOutlined } from '@ant-design/icons';
+import {
+  HomeOutlined, LoginOutlined, CustomerServiceOutlined, ShoppingCartOutlined, AppstoreOutlined, SearchOutlined
+  , QuestionCircleOutlined, EnvironmentOutlined,  // Mapa
+  PhoneOutlined, ShoppingOutlined
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -9,8 +13,11 @@ const EncabezadoPublico = () => {
   const [logoUrl, setLogoUrl] = useState('');
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [eslogan, setEslogan] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const menuRef = useRef(null);
+  const contactoRef = useRef(null);
+
 
   const handleClick = (option) => {
     setActive(option);
@@ -26,11 +33,29 @@ const EncabezadoPublico = () => {
       case "home":
         navigate('/');
         break;
+      case "productos":
+        navigate('/productos');
+        break;
+      case "servicios":
+        navigate('/servicios');
+        break;
+      case "ayuda":
+        navigate('/ayuda');
+        break;
+      case "carrito":
+        navigate('/carrito');
+        break;
       case "login":
         navigate('/login');
         break;
       default:
         console.log("No se reconoce la acción del menú");
+    }
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim() !== '') {
+      navigate(`/resultados?query=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -47,8 +72,7 @@ const EncabezadoPublico = () => {
         const data = response.data;
 
         setLogoUrl(data.logo);
-        setNombreEmpresa(data.nombreEmpresa);
-        setEslogan(data.eslogan);
+
       } catch (error) {
         console.error('Error al obtener datos del perfil:', error);
       }
@@ -58,7 +82,6 @@ const EncabezadoPublico = () => {
     const intervalId = setInterval(fetchPerfil, 10000);
     return () => clearInterval(intervalId);
   }, []);
-
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -84,7 +107,7 @@ const EncabezadoPublico = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-           padding: 20px 15px; 
+          padding: 5px 7px; 
           background-color: var(--color-primary);
           color: var(--color-secondary);
         }
@@ -94,26 +117,28 @@ const EncabezadoPublico = () => {
           font-weight: bold;
           color: var(--color-secondary);
         }
-          .logo img {
-          width: 60px; 
+
+        .logo img {
+          width: 61%; 
           height: 10px; 
           border-radius: 50%; 
-          margin-right: 10px; 
         }
+
         .logo {
           display: flex;
           align-items: center;
           flex: 1; 
         }
-          .eslogan {
+
+        .eslogan {
           display: flex;
           align-items: center;
-          flex: 2; 
+          flex: 0.5; 
         }
 
         .menu ul {
           display: flex;
-          gap: 15px; 
+          gap: 1px; 
           list-style-type: none;
           margin: 0;
           padding: 0;
@@ -140,6 +165,34 @@ const EncabezadoPublico = () => {
           border-radius: 5px;
         }
 
+        .search-container {
+          flex: 1.3; 
+          display: flex;
+          align-items: center;
+          margin-left: -250px; 
+        }
+
+        .search-input {
+          width: 80%;
+          padding: 4px;
+          font-size: 0.9rem;
+          border-radius: 25px;
+          border: 2px solid var(--color-secondary);
+          outline: none;
+          margin-right: 1px;
+        }
+
+        .search-button {
+          background-color: var(--color-black);
+          border: none;
+          padding: 10px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
         .mobile-menu-icon {
           display: none;
           cursor: pointer;
@@ -156,7 +209,7 @@ const EncabezadoPublico = () => {
 
         @media (max-width: 768px) {
           .menu ul {
-            display: none;
+            display: flex;
             flex-direction: column;
             position: fixed;
             top: 0;
@@ -170,8 +223,8 @@ const EncabezadoPublico = () => {
           }
 
           .menu.menu-open ul {
-            display: flex;
             left: 0;
+              z-index: 1000;
           }
 
           .menu ul li {
@@ -188,14 +241,26 @@ const EncabezadoPublico = () => {
       `}</style>
 
       <header className="header">
-      <div className="logo">
+        <div className="logo">
           {logoUrl && (
-            <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '60px', marginRight: '10px' }} />
+            <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '75px', width: '75px', marginRight: '10px' }} />
           )}
-          <h3>{nombreEmpresa}</h3>
         </div>
         <div className='eslogan'>
           <h4>{eslogan}</h4>
+        </div>
+        <div className="search-container">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Buscar producto o servicio"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button className="search-button" onClick={handleSearch}>
+            <SearchOutlined style={{ color: '#FFFFFF', fontSize: '18px' }} />
+          </button>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
@@ -203,7 +268,24 @@ const EncabezadoPublico = () => {
               <HomeOutlined style={{ color: '#00B300' }} />
               Home
             </li>
+            <li className={active === 'servicios' ? 'active' : ''} onClick={() => { handleClick('servicios'); handleMenuClick('servicios'); }}>
+              <AppstoreOutlined style={{ color: '#00B300' }} />
+              Servicios
+            </li>
+            <li className={active === 'productos' ? 'active' : ''} onClick={() => { handleClick('productos'); handleMenuClick('productos'); }}>
+              <ShoppingOutlined style={{ color: '#00B300' }} />
+              Productos
+            </li>
 
+            <li className={active === 'carrito' ? 'active' : ''} onClick={() => { handleClick('carrito'); handleMenuClick('carrito'); }}>
+              <ShoppingCartOutlined style={{ color: '#00B300' }} />
+              Carrito
+            </li>
+
+            <li className={active === 'ayuda' ? 'active' : ''} onClick={() => { handleClick('ayuda'); handleMenuClick('ayuda'); }}>
+              <QuestionCircleOutlined style={{ color: '#00B300' }} />
+              Ayuda
+            </li>
             <li className={active === 'login' ? 'active' : ''} onClick={() => { handleClick('login'); handleMenuClick('login'); }}>
               <LoginOutlined style={{ color: '#00B300' }} />
               Iniciar sesión

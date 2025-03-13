@@ -246,26 +246,26 @@ const Terminos = () => {
           </thead>
           <tbody>
             {terminos.map((termino) => (
-              <tr key={termino._id} style={styles.tableRow}>
+              <tr key={termino.id} style={styles.tableRow}>
                 <td style={styles.tableCell}>{termino.titulo}</td>
                 <td style={styles.tableCell}>{termino.contenido}</td>
-                <td style={styles.tableCell}>{termino.fechaVigencia}</td>
+                <td style={styles.tableCell}>{new Date (termino.fechaVigencia).toISOString().split('T')[0]}</td>
                 <td style={styles.tableCell}>{new Date(termino.fechaCreacion).toISOString().split('T')[0]}</td>
                 <td style={styles.tableCell}>{termino.version}</td>
                 <td style={styles.tableCell}>{termino.estado}</td>
                 <td style={styles.tableCell}>
                   <button
-                    onClick={() => editTermino(termino._id, termino)}
+                    onClick={() => editTermino(termino.id, termino)}
                     style={styles.editButton}>
                     Editar
                   </button>
                   <button
-                    onClick={() => deleteTermino(termino._id)}
+                    onClick={() => deleteTermino(termino.id)}
                     style={styles.deleteButton}>
                     Eliminar
                   </button>
                   <button
-                    onClick={() => deleteTerminoTabla(termino._id)}
+                    onClick={() => deleteTerminoTabla(termino.id)}
                     style={termino.estado === 'Vigente' ? styles.disabledButton : styles.softDeleteButton}
                     disabled={termino.estado === 'Vigente'} 
                   >

@@ -16,7 +16,7 @@ const PoliticasHi = () => {
 
         const datosActualizados = datosOrdenados.map((politica, indice) => {
           let estado = "No Vigente"; 
-          if (politica.Estado === "eliminado") {
+          if (politica.estado === "eliminado") {
             estado = "Eliminado";  
           } else if (indice === 0) {
             estado = "Vigente";
@@ -41,7 +41,7 @@ const PoliticasHi = () => {
       await axios.patch(`https://backendcentro.onrender.com/api/historialpoliticas/${id}`, { Estado: "activo" });
       setHistorial((prevHistorial) => 
         prevHistorial.map((politica) => 
-          politica._id === id ? { ...politica, estado: "No vigente" } : politica
+          politica.id === id ? { ...politica, estado: "No vigente" } : politica
         )
       );
     } catch (error) {
@@ -71,7 +71,7 @@ const PoliticasHi = () => {
             <tbody>
               {historial.map((politica, indice) => (
                 <tr
-                  key={politica._id}
+                  key={politica.id}
                   style={{
                     ...estilos.filaTabla,
                     backgroundColor: indice % 2 === 0 ? '#f9fafb' : '#ffffff',
@@ -104,7 +104,7 @@ const PoliticasHi = () => {
                     {politica.estado === 'Eliminado' && (
                       <button 
                         style={estilos.botonMostrar} 
-                        onClick={() => manejarMostrar(politica._id)}
+                        onClick={() => manejarMostrar(politica.id)}
                       >
                         Mostrar
                       </button>

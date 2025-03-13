@@ -16,7 +16,7 @@ const TerminosHi = () => {
 
         const datosActualizados = datosOrdenados.map((termino, indice) => {
           let estado = "No Vigente"; 
-          if (termino.Estado === "eliminado") {
+          if (termino.estado === "eliminado") {
             estado = "Eliminado";  
           } else if (indice === 0) {
             estado = "Vigente";
@@ -41,7 +41,7 @@ const TerminosHi = () => {
       await axios.patch(`https://backendcentro.onrender.com/api/historialterminos/${id}`, { Estado: "activo" });
       setHistorial((prevHistorial) => 
         prevHistorial.map((termino) => 
-          termino._id === id ? { ...termino, estado: "No vigente" } : termino
+          termino.id === id ? { ...termino, estado: "No vigente" } : termino
         )
       );
     } catch (error) {
@@ -71,7 +71,7 @@ const TerminosHi = () => {
             <tbody>
               {historial.map((termino, indice) => (
                 <tr
-                  key={termino._id}
+                  key={termino.id}
                   style={{
                     ...estilos.filaTabla,
                     backgroundColor: indice % 2 === 0 ? '#f9fafb' : '#ffffff',
@@ -104,7 +104,7 @@ const TerminosHi = () => {
                     {termino.estado === 'Eliminado' && (
                       <button 
                         style={estilos.botonMostrar} 
-                        onClick={() => manejarMostrar(termino._id)}
+                        onClick={() => manejarMostrar(termino.id)}
                       >
                         Mostrar
                       </button>

@@ -250,26 +250,26 @@ const Deslinde = () => {
           </thead>
           <tbody>
             {deslindes.map((deslinde) => (
-              <tr key={deslinde._id} style={styles.tableRow}>
+              <tr key={deslinde.id} style={styles.tableRow}>
                 <td style={styles.tableCell}>{deslinde.titulo}</td>
                 <td style={styles.tableCell}>{deslinde.contenido}</td>
-                <td style={styles.tableCell}>{deslinde.fechaVigencia}</td>
+                <td style={styles.tableCell}>{new Date (deslinde.fechaVigencia).toISOString().split('T')[0]}</td>
                 <td style={styles.tableCell}>{new Date(deslinde.fechaCreacion).toISOString().split('T')[0]}</td>
                 <td style={styles.tableCell}>{deslinde.version}</td>
                 <td style={styles.tableCell}>{deslinde.estado}</td>
                 <td style={styles.tableCell}>
                   <button
-                    onClick={() => editDeslinde(deslinde._id, deslinde)}
+                    onClick={() => editDeslinde(deslinde.id, deslinde)}
                     style={styles.editButton}>
                     Editar
                   </button>
                   <button
-                    onClick={() => deleteDeslinde(deslinde._id)}
+                    onClick={() => deleteDeslinde(deslinde.id)}
                     style={styles.deleteButton}>
                     Eliminar
                   </button>
                   <button
-                    onClick={() => EliminarDeslindeDeLaTabla(deslinde._id)}
+                    onClick={() => EliminarDeslindeDeLaTabla(deslinde.id)}
                     style={deslinde.estado === 'Vigente' ? styles.disabledButton : styles.softDeleteButton}
                     disabled={deslinde.estado === 'Vigente'} 
                   >

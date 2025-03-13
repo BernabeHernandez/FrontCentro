@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Layout, Typography } from 'antd';
 import {
   FacebookOutlined,
@@ -17,6 +17,7 @@ const { Footer } = Layout;
 const { Text } = Typography;
 
 const PieDePagina = () => {
+  const contactoRef = useRef(null);
   const [datosEmpresa, setDatosEmpresa] = useState({
     redesSociales: {
       facebook: "",
@@ -56,7 +57,7 @@ const PieDePagina = () => {
 
   return (
     <Layout>
-      <Footer style={{
+      <Footer ref={contactoRef} style={{
         backgroundColor: '#000000',
         textAlign: 'center',
         padding: '40px 20px',
@@ -90,12 +91,16 @@ const PieDePagina = () => {
             <p style={textStyle}><PhoneOutlined style={iconStyle} /> Teléfono: {datosEmpresa.telefono || 'No disponible'}</p>
             <p style={textStyle}><MailOutlined style={iconStyle} /> Correo electrónico: {datosEmpresa.correo || 'No disponible'}</p>
             <p style={textStyle}><EnvironmentOutlined style={iconStyle} /> Ubicación: {datosEmpresa.direccion || 'No disponible'}</p>
+            <Link to="/chats" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Chats</Link>
           </div>
           <div>
             <h2 style={headerStyle}>Datos de la empresa</h2>
             <Link to="/deslindes" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Deslinde legal</Link>
             <Link to="/politicass" style={linkStyle}><LockOutlined style={iconStyle} /> Política de Privacidad</Link>
             <Link to="/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Términos y condiciones</Link>
+            <Link to="/terminos-condiciones" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Misión</Link>
+            <Link to="/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Visión</Link>
+            
           </div>
         </div>
       </Footer>

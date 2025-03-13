@@ -3,16 +3,16 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { useAuth } from './AuthContext'; 
+import { useAuth } from './AuthContext';
 
 const MySwal = withReactContent(Swal);
 
 function VerifyMFA({ onLoginSuccess }) {
-  const location = useLocation();  
-  const navigate = useNavigate(); 
-  const { login } = useAuth(); 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const { qrCodeUrl, user, tipo: tipoUsuario } = location.state || {}; 
+  const { qrCodeUrl, user, tipo: tipoUsuario, id } = location.state || {};
 
 
   const [mfaCode, setMfaCode] = useState('');
@@ -22,53 +22,61 @@ function VerifyMFA({ onLoginSuccess }) {
   const handleMfaSubmit = async (e) => {
     e.preventDefault();
     setIsVerifying(true);
-  
+
     try {
-      const response = await axios.post('https://backendcentro.onrender.com/api/login/verify-mfa', {
-        user: user,
-        token: mfaCode,
-      });
-  
-      const { tipo, error } = response.data;
-  
-      if (error) {
-        console.error("Error desde el servidor:", error);
-        MySwal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error,
+        const response = await axios.post('https://backendcentro.onrender.com/api/login/verify-mfa', {
+            user: user,
+            token: mfaCode,
         });
-        setIsVerifying(false);
-        return;
-      }
-  
-      login({ tipo }); 
-      const ruta = tipo === 'Administrador' ? '/admin' : '/cliente';
-  
-      MySwal.fire({
-        position: 'center',
-        icon: 'success',
-        title: 'Has iniciado sesión correctamente.',
-        showConfirmButton: false,
-        timer: 2000,
-      }).then(() => {
-        navigate(ruta);
-      });
+
+        const { tipo, error } = response.data;
+
+        if (error) {
+            console.error("Error desde el servidor:", error);
+            MySwal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error,
+            });
+            setIsVerifying(false);
+            return;
+        }
+
+        // Guardar el nombre de usuario, id_usuario y rol en localStorage
+        localStorage.setItem('usuario', user);
+        localStorage.setItem('usuario_id', id); // Usar el id_usuario recibido desde location.state
+        localStorage.setItem('rol', tipo);
+
+        // Llamar a la función de login del contexto de autenticación
+        login({ user, id,tipo });
+
+        // Redirigir al usuario según su rol
+        const ruta = tipo === 'Administrador' ? '/admin' : '/cliente';
+
+        MySwal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Has iniciado sesión correctamente.',
+            showConfirmButton: false,
+            timer: 2000,
+        }).then(() => {
+            navigate(ruta);
+        });
     } catch (error) {
-      console.error('Error verificando MFA:', error);
-      MySwal.fire({
-        icon: 'error',
-        title: 'Error al verificar MFA',
-        text: 'Código incorrecto. Intenta nuevamente.',
-      });
+        console.error('Error verificando MFA:', error);
+        MySwal.fire({
+            icon: 'error',
+            title: 'Error al verificar MFA',
+            text: 'Código incorrecto. Intenta nuevamente.',
+        });
     } finally {
-      setIsVerifying(false);
+        setIsVerifying(false);
     }
-  };
+};
 
   const handleMfaCodeChange = (e) => {
     const value = e.target.value;
-    
+
     if (/^\d{0,6}$/.test(value)) {
       setMfaCode(value);
       setMfaCodeError('');

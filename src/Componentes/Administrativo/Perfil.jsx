@@ -27,6 +27,7 @@ const Perfil = () => {
         const fetchPerfiles = async () => {
             try {
                 const response = await axios.get('https://backendcentro.onrender.com/api/perfil');
+                console.log('Respuesta de la API:', response.data); 
                 setPerfiles(response.data);
             } catch (error) {
                 console.error('Error al obtener perfiles:', error.message);
@@ -216,7 +217,7 @@ const Perfil = () => {
         if (result.isConfirmed) {
             try {
                 await axios.delete(`https://backendcentro.onrender.com/api/perfil/${id}`);
-                setPerfiles(perfiles.filter(p => p._id !== id));
+                setPerfiles(perfiles.filter(p => p.id !== id));
                 Swal.fire(
                     'Eliminado!',
                     'El perfil ha sido eliminado.',
@@ -232,11 +233,12 @@ const Perfil = () => {
             }
         }
     };
-
+    
 
     const handleEdit = (perfil) => {
+        console.log('Perfil para editar:', perfil); 
         setPerfil(perfil);
-        setEditingId(perfil._id);
+        setEditingId(perfil.id);
     };
     const handleCancel = () => {
         setPerfil({
@@ -395,7 +397,7 @@ const Perfil = () => {
             <div style={styles.profileList}>
                 <h2>Perfiles Guardados</h2>
                 {perfiles.map((perfil) => (
-                    <div key={perfil._id} style={styles.profileItem}>
+                    <div key={perfil.id} style={styles.profileItem}>
                         {perfil.logo && (
                             <img
                                 src={perfil.logo}
@@ -413,7 +415,7 @@ const Perfil = () => {
                         <p><strong>LinkedIn:</strong> {perfil.redesSociales.linkedin}</p>
                         <p><strong>Instagram:</strong> {perfil.redesSociales.instagram}</p>
                         <button onClick={() => handleEdit(perfil)} style={styles.editButton}>Editar</button>
-                        <button onClick={() => handleDelete(perfil._id)} style={styles.cancelButton}>Eliminar</button>
+                        <button onClick={() => handleDelete(perfil.id)} style={styles.cancelButton}>Eliminar</button>
                     </div>
                 ))}
             </div>

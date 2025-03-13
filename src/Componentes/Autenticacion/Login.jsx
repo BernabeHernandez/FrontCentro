@@ -59,68 +59,77 @@ function Login() {
             captchaToken,
         });
 
-        const { tipo, qrCodeUrl, message } = response.data;
+        const { tipo, qrCodeUrl, message, id_usuario } = response.data;
 
         if (qrCodeUrl) {
-            
-            navigate('/codigo-mfa', { state: { qrCodeUrl, user: username, tipo } });
+            // Si se requiere autenticación de dos factores, redirigir a la página de MFA
+            navigate('/codigo-mfa', {
+                state: {
+                    qrCodeUrl,
+                    user: username,
+                    tipo,
+                    id: id_usuario, // Pasar el id_usuario al componente VerifyMFA
+                },
+            });
             return;
         }
 
-        
+        // Guardar el nombre de usuario y el id_usuario en localStorage
+        localStorage.setItem('usuario', username);
+        localStorage.setItem('usuario_id', id_usuario);
+
+        // Llamar a la función de login del contexto de autenticación
+        login({ user: username, id: id_usuario, tipo });
+
+        // Redirigir al usuario a la página de citas
+        navigate('/citas');
     } catch (error) {
-      if (error.response) {
-        const { lockTimeLeft, attemptsLeft, error: serverError } = error.response.data;
-  
-        
-        if (serverError === 'Usuario no encontrado') {
-          MySwal.fire({
-            icon: 'error',
-            title: 'Usuario No Encontrado',
-            text: 'El usuario ingresado no existe.',
-          });
-          
-          MySwal.fire({
-            icon: 'info',
-            title: 'Intentos restantes: 0',
-          });
-        } else if (serverError === 'La cuenta no está verificada. Por favor, revisa tu correo para activar tu cuenta.') {
-          MySwal.fire({
-            icon: 'warning',
-            title: 'Cuenta No Verificada',
-            text: serverError,
-          });
-        } else if (serverError && serverError === 'Tu cuenta está permanentemente bloqueada. Por favor, contacta con el administrador.') {
-          MySwal.fire({
-            icon: 'error',
-            title: 'Cuenta Bloqueada Permanentemente',
-            text: serverError,
-          });
-        } else if (lockTimeLeft) {
-          setIsLocked(true);
-          setLockTimeLeft(lockTimeLeft);
+        if (error.response) {
+            const { lockTimeLeft, attemptsLeft, error: serverError } = error.response.data;
+
+            if (serverError === 'Usuario no encontrado') {
+                MySwal.fire({
+                    icon: 'error',
+                    title: 'Usuario No Encontrado',
+                    text: 'El usuario ingresado no existe.',
+                });
+
+                MySwal.fire({
+                    icon: 'info',
+                    title: 'Intentos restantes: 0',
+                });
+            } else if (serverError === 'La cuenta no está verificada. Por favor, revisa tu correo para activar tu cuenta.') {
+                MySwal.fire({
+                    icon: 'warning',
+                    title: 'Cuenta No Verificada',
+                    text: serverError,
+                });
+            } else if (serverError && serverError === 'Tu cuenta está permanentemente bloqueada. Por favor, contacta con el administrador.') {
+                MySwal.fire({
+                    icon: 'error',
+                    title: 'Cuenta Bloqueada Permanentemente',
+                    text: serverError,
+                });
+            } else if (lockTimeLeft) {
+                setIsLocked(true);
+                setLockTimeLeft(lockTimeLeft);
+            } else {
+                const attempts = attemptsLeft || 0;
+                MySwal.fire({
+                    icon: 'error',
+                    title: 'Usuario o Contraseña Incorrecta',
+                    text: `Intentos restantes: ${attempts}`,
+                });
+            }
         } else {
-          
-          const attempts = attemptsLeft || 0;
-          MySwal.fire({
-            icon: 'error',
-            title: 'Usuario o Contraseña Incorrecta',
-            text: `Intentos restantes: ${attempts}`,
-          });
+            MySwal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al iniciar sesión. Inténtalo de nuevo más tarde.',
+            });
         }
-      } else {
-        MySwal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al iniciar sesión. Inténtalo de nuevo más tarde.',
-        });
-      }
     }
-  };
-
-
-  
-  
+};
 
   useEffect(() => {
     const interval = setInterval(() => {

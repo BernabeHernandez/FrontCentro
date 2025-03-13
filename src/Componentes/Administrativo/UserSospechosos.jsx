@@ -11,10 +11,13 @@ const UserSospechosos = () => {
     const fetchUsuariosSospechosos = async () => {
       try {
         const response = await axios.get('https://backendcentro.onrender.com/api/sospechoso');
-        setUsuarios(response.data);
+        if (response.data.length === 0) {
+          
+        } else {
+          setUsuarios(response.data);
+        }
       } catch (err) {
-        setError('No se pudieron cargar los usuarios sospechosos');
-        message.error('Error al cargar los usuarios');
+        message.info('No se encontraron usuarios sospechosos');
       } finally {
         setLoading(false);
       }
@@ -22,6 +25,7 @@ const UserSospechosos = () => {
 
     fetchUsuariosSospechosos();
   }, []);
+
 
   const handleBloquearDesbloquear = async (userId, estadoBloqueo) => {
     try {
@@ -32,7 +36,7 @@ const UserSospechosos = () => {
 
       
       const updatedUsuarios = usuarios.map(user => 
-        user._id === userId ? { ...user, estadoBloqueo: response.data.estadoBloqueo } : user
+        user.id === userId ? { ...user, estadoBloqueo: response.data.estadoBloqueo } : user
       );
       setUsuarios(updatedUsuarios);
       message.success(`Usuario ${estadoBloqueo ? 'desbloqueado' : 'bloqueado'} con éxito`);
@@ -90,7 +94,7 @@ const UserSospechosos = () => {
       render: (text, record) => (
         <Button
           type="primary"
-          onClick={() => handleBloquearDesbloquear(record._id, record.estadoBloqueo)}
+          onClick={() => handleBloquearDesbloquear(record.id, record.estadoBloqueo)}
         >
           {record.estadoBloqueo ? 'Desbloquear' : 'Bloquear'}
         </Button>

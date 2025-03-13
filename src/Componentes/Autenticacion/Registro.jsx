@@ -201,11 +201,7 @@ function FormularioRegistro() {
                     text: error.response.data.error,
                 });
             } else {
-                MySwal.fire({
-                    icon: "error",
-                    title: "ERROR.",
-                    text: "No te pudiste registrar.",
-                });
+                navigate('/error400');
             }
         }
     }
