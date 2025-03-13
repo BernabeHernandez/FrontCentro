@@ -287,7 +287,7 @@ function Login() {
               </div>
             </div>
             <ReCAPTCHA
-              sitekey="6Lc_u2EqAAAAAG8Jg_KW2Rf6qLF0mFY8j79Lifjk" 
+              sitekey="6LexEPMqAAAAAMbw4d8KeEwxa4kwlFWV6m2midhT" 
               onChange={onCaptchaChange}
               style={{ marginBottom: '10px' }}
             />
