@@ -1,6 +1,29 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Swal from "sweetalert2"; // Importamos SweetAlert2
+import Swal from "sweetalert2";
+import {
+  Box,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  IconButton,
+  Tooltip,
+  Modal,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 const RegistroHorario = () => {
   const [newHorario, setNewHorario] = useState({
@@ -13,6 +36,10 @@ const RegistroHorario = () => {
   const [horarios, setHorarios] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [editandoId, setEditandoId] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     fetchHorarios();
@@ -68,6 +95,7 @@ const RegistroHorario = () => {
 
       fetchHorarios();
       limpiarFormulario();
+      setModalAbierto(false);
     } catch (error) {
       console.error("Error al registrar o actualizar el horario:", error);
       Swal.fire({
@@ -86,6 +114,7 @@ const RegistroHorario = () => {
       intervalo: horario.intervalo,
     });
     setEditandoId(horario.id_horario);
+    setModalAbierto(true);
   };
 
   const handleDelete = async (id) => {
@@ -127,235 +156,165 @@ const RegistroHorario = () => {
   const limpiarFormulario = () => {
     setNewHorario({ dia: "", hora_inicio: "", hora_fin: "", intervalo: 30 });
     setEditandoId(null);
+    setModalAbierto(false);
   };
 
   return (
-    <div className="inventario-container">
-      {/* Formulario */}
-      <div className="edit-form-container">
-        <h1>{editandoId ? "Editar Horario" : "Registro de Horario"}</h1>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Día:
-            <select
-              name="dia"
-              value={newHorario.dia}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccione un día</option>
-              {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((dia) => (
-                <option key={dia} value={dia}>{dia}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Hora Inicio:
-            <input
+    <Box sx={{ padding: 3 }}>
+      <Typography variant="h4" component="h1" align="center" gutterBottom>
+        Registro de Horarios
+      </Typography>
+
+      {/* Botón para abrir el modal de registro */}
+      <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setModalAbierto(true)}
+        >
+          Agregar Horario
+        </Button>
+      </Box>
+
+      {/* Modal para agregar o editar horario */}
+      <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: isMobile ? "90%" : 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            {editandoId ? "Editar Horario" : "Registrar Horario"}
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          >
+            <FormControl fullWidth>
+              <InputLabel>Día</InputLabel>
+              <Select
+                name="dia"
+                value={newHorario.dia}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="">Seleccione un día</MenuItem>
+                {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((dia) => (
+                  <MenuItem key={dia} value={dia}>{dia}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Hora Inicio"
               type="time"
               name="hora_inicio"
               value={newHorario.hora_inicio}
               onChange={handleChange}
               required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
             />
-          </label>
-          <label>
-            Hora Fin:
-            <input
+            <TextField
+              label="Hora Fin"
               type="time"
               name="hora_fin"
               value={newHorario.hora_fin}
               onChange={handleChange}
               required
+              fullWidth
+              InputLabelProps={{ shrink: true }}
             />
-          </label>
-          <label>
-            Duración (minutos):
-            <input
+            <TextField
+              label="Duración (minutos)"
               type="number"
               name="intervalo"
               value={newHorario.intervalo}
               onChange={handleChange}
-              min={10}
               required
+              fullWidth
+              inputProps={{ min: 10 }}
             />
-          </label>
-          <div className="form-actions">
-            <button type="submit" className="btn-submit">
-              {editandoId ? "Actualizar" : "Registrar"}
-            </button>
-            {editandoId && (
-              <button type="button" onClick={limpiarFormulario} className="btn-cancel">
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button type="submit" variant="contained" color="primary">
+                {editandoId ? "Actualizar" : "Registrar"}
+              </Button>
+              <Button
+                type="button"
+                variant="contained"
+                color="secondary"
+                onClick={limpiarFormulario}
+              >
                 Cancelar
-              </button>
-            )}
-          </div>
-        </form>
-        {mensaje && <p className="mensaje-error">{mensaje}</p>}
-      </div>
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
 
       {/* Tabla de Horarios */}
-      <div>
-        <h1>Horarios Registrados</h1>
-        <table className="inventario-table">
-          <thead>
-            <tr>
-              <th>Día</th>
-              <th>Inicio</th>
-              <th>Fin</th>
-              <th>Duración</th>
-              <th>Disponible</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Día</TableCell>
+              <TableCell>Inicio</TableCell>
+              <TableCell>Fin</TableCell>
+              <TableCell>Duración</TableCell>
+              <TableCell>Disponible</TableCell>
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {horarios.length > 0 ? (
               horarios.map((horario) => (
-                <tr key={horario.id_horario}>
-                  <td>{horario.dia}</td>
-                  <td>{horario.hora_inicio}</td>
-                  <td>{horario.hora_fin}</td>
-                  <td>{horario.intervalo} min</td>
-                  <td>{parseInt(horario.disponible) === 1 ? "Sí" : "No"}</td>
-                  <td className="acciones">
-                    <button
-                      onClick={() => handleEdit(horario)}
-                      className="btn-editar"
-                    >
-                      ✏️ Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(horario.id_horario)}
-                      className="btn-eliminar-producto"
-                    >
-                      🗑️ Eliminar
-                    </button>
-                  </td>
-                </tr>
+                <TableRow key={horario.id_horario}>
+                  <TableCell>{horario.dia}</TableCell>
+                  <TableCell>{horario.hora_inicio}</TableCell>
+                  <TableCell>{horario.hora_fin}</TableCell>
+                  <TableCell>{horario.intervalo} min</TableCell>
+                  <TableCell>{parseInt(horario.disponible) === 1 ? "Sí" : "No"}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Tooltip title="Editar">
+                        <IconButton
+                          color="warning"
+                          onClick={() => handleEdit(horario)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDelete(horario.id_horario)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="6">No hay horarios registrados.</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  No hay horarios registrados.
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-
-        </table>
-      </div>
-
-      <style jsx>{`
-        .inventario-container {
-          padding: 20px;
-          font-family: Arial, sans-serif;
-        }
-
-        h1 {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-
-        .edit-form-container {
-          background: white;
-          padding: 30px;
-          border-radius: 8px;
-          width: 300px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          margin: 0 auto 20px;
-        }
-
-        input, select {
-          width: 100%;
-          padding: 10px;
-          margin: 10px 0;
-          border-radius: 5px;
-          border: 1px solid #ccc;
-        }
-
-        .form-actions {
-          display: flex;
-          justify-content: space-between;
-          gap: 10px;
-        }
-
-        .btn-submit,
-        .btn-cancel {
-          padding: 10px;
-          margin: 5px;
-          border-radius: 5px;
-          border: none;
-          cursor: pointer;
-        }
-
-        .btn-submit {
-          background-color: #28a745;
-          color: white;
-        }
-
-        .btn-cancel {
-          background-color: #dc3545;
-          color: white;
-        }
-
-        .acciones {
-          display: flex;
-          gap: 10px;
-          text-align: right;
-        }
-
-        .acciones button {
-          padding: 8px 16px;
-          border-radius: 5px;
-          cursor: pointer;
-          color: white;
-          border: none;
-        }
-
-        .btn-editar {
-          background-color: #ffc107;
-        }
-
-        .btn-eliminar-producto {
-          background-color: #dc3545;
-        }
-
-        .inventario-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .inventario-table th,
-        .inventario-table td {
-          padding: 10px;
-          text-align: left;
-          border-bottom: 1px solid #ddd;
-        }
-
-        .inventario-table tr {
-          border-bottom: 2px solid #ddd;
-        }
-
-        .inventario-table th {
-          background-color: #f2f2f2;
-        }
-
-        .inventario-table tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-
-        .inventario-table tr:hover {
-          background-color: #f1f1f1;
-        }
-
-        .mensaje-error {
-          color: red;
-          text-align: center;
-        }
-         
-        select[name="dia"] {
-         width: 107%; 
-          }
-      `}</style>
-    </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

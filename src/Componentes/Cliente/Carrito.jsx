@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import { Button, Card, CardContent, Typography, Box, IconButton, Grid } from '@mui/material';
+import { Delete as DeleteIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 
 const Carrito = () => {
     const [carrito, setCarrito] = useState([]);
@@ -46,19 +48,19 @@ const Carrito = () => {
                 icon: 'error',
                 title: 'Cantidad no válida',
                 text: 'La cantidad no puede ser menor a 1.',
-                timer: 1500, // Se cierra automáticamente después de 2 segundos
-                showConfirmButton: false, // Elimina el botón de OK
+                timer: 1500,
+                showConfirmButton: false,
             });
             return;
         }
-    
+
         try {
             const response = await fetch('https://backendcentro.onrender.com/api/carrito/carrito', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_usuario: usuarioId, id_producto, cantidad: nuevaCantidad })
             });
-    
+
             if (response.ok) {
                 const nuevoCarrito = carrito.map(item =>
                     item.id === id_producto ? { ...item, cantidad_carrito: nuevaCantidad } : item
@@ -69,16 +71,16 @@ const Carrito = () => {
                     icon: 'success',
                     title: 'Cantidad actualizada',
                     text: 'La cantidad del producto se ha actualizado correctamente.',
-                    timer: 600, // Se cierra automáticamente después de 2 segundos
-                    showConfirmButton: false, // Elimina el botón de OK
+                    timer: 600,
+                    showConfirmButton: false,
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error al actualizar',
                     text: 'Hubo un problema al actualizar la cantidad del producto.',
-                    timer: 600, // Se cierra automáticamente después de 2 segundos
-                    showConfirmButton: false, // Elimina el botón de OK
+                    timer: 600,
+                    showConfirmButton: false,
                 });
             }
         } catch (error) {
@@ -87,13 +89,11 @@ const Carrito = () => {
                 icon: 'error',
                 title: 'Error',
                 text: 'No se pudo actualizar la cantidad debido a un error.',
-                timer: 600, // Se cierra automáticamente después de 2 segundos
-                showConfirmButton: false, // Elimina el botón de OK
+                timer: 600,
+                showConfirmButton: false,
             });
         }
     };
-    
-    
 
     const eliminarProducto = async (id_producto) => {
         const usuarioId = localStorage.getItem('usuario_id');
@@ -103,7 +103,7 @@ const Carrito = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_usuario: usuarioId, id_producto })
             });
-    
+
             if (response.ok) {
                 const nuevoCarrito = carrito.filter(item => item.id !== id_producto);
                 setCarrito(nuevoCarrito);
@@ -129,7 +129,6 @@ const Carrito = () => {
             });
         }
     };
-    
 
     const realizarCompra = async () => {
         if (carrito.length === 0) {
@@ -140,7 +139,7 @@ const Carrito = () => {
             });
             return;
         }
-    
+
         // Verificar si alguna cantidad sobrepasa el stock disponible
         for (let item of carrito) {
             const responseStock = await fetch(`https://backendcentro.onrender.com/api/productos/${item.id}`);
@@ -152,18 +151,18 @@ const Carrito = () => {
                 });
                 return;
             }
-    
+
             const producto = await responseStock.json();
             if (item.cantidad_carrito > producto.cantidad) {
                 Swal.fire({
                     icon: 'error',
                     title: '¡Stock insuficiente!',
                     html: `No hay suficiente stock de "<strong>${item.nombre}</strong>". Solo quedan <strong>${producto.cantidad}</strong> unidades disponibles. Has intentado comprar <strong>${item.cantidad_carrito}</strong> unidades.`,
-                });                
+                });
                 return;
             }
         }
-    
+
         // Si todo está bien, proceder con la compra
         try {
             const response = await fetch('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
@@ -171,14 +170,14 @@ const Carrito = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productos: carrito.map(item => ({ id: item.id, cantidad: item.cantidad_carrito })) })
             });
-    
+
             if (response.ok) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Compra realizada con éxito',
                     text: 'Tu compra ha sido procesada correctamente.',
-                    timer: 1500, // Se cierra automáticamente después de 1.5 segundos
-                    showConfirmButton: false, // Elimina el botón de OK
+                    timer: 1500,
+                    showConfirmButton: false,
                 });
             } else {
                 const errorData = await response.json();
@@ -197,277 +196,89 @@ const Carrito = () => {
             });
         }
     };
-    
+
     return (
-        <div className="carrito-container">
-            <h1 className="titulo">Mi Carrito</h1>
-            <div className="carrito-header">
-                <span className="agregados">Agregados ({carrito.length})</span>
-                <span className="guardados">Guardados (0)</span>
-            </div>
+        <Box sx={{ padding: 3, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+            <Typography variant="h4" gutterBottom>
+                Mi Carrito
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <Typography variant="h6">Agregados ({carrito.length})</Typography>
+                <Typography variant="h6">Guardados (0)</Typography>
+            </Box>
 
             {carrito.length === 0 ? (
-                <p className="carrito-vacio">Tu carrito está vacío</p>
+                <Typography variant="body1" color="textSecondary" align="center">
+                    Tu carrito está vacío
+                </Typography>
             ) : (
-                <div className="carrito-content">
-                    <div className="productos-lista">
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={8}>
                         {carrito.map((item) => (
-                            <div key={item.id} className="producto-item">
-                                <h3 className="producto-nombre">{item.nombre}</h3>
-                                <div className="producto-detalle">
-                                    <div className="imagen-contenedor">
-                                        <img src={item.imagen} alt={item.nombre} className="producto-imagen" />
-                                    </div>
-                                    <div className="producto-info">
-                                        <div className="producto-cantidad">
-                                            <p>Cantidad:</p>
-                                            <button 
-                                                onClick={() => actualizarCantidad(item.id, item.cantidad_carrito - 1)}
-                                                className="btn-cantidad"
-                                            >
-                                                -
-                                            </button>
-                                            <span>{item.cantidad_carrito}</span>
-                                            <button 
-                                                onClick={() => actualizarCantidad(item.id, item.cantidad_carrito + 1)}
-                                                className="btn-cantidad"
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-                                        <div className="precio-info">
-                                            <p>Precio:</p>
-                                            <p className="precio-actual">${item.precio.toFixed(2)}</p>
-                                            <p className="precio-anterior">${(item.precio * 1.1).toFixed(2)}</p>
-                                        </div>
-                                        <div className="producto-acciones">
-                                            <button 
-                                                onClick={() => eliminarProducto(item.id)} 
-                                                className="btn-eliminar"
+                            <Card key={item.id} sx={{ marginBottom: 2 }}>
+                                <CardContent>
+                                    <Box sx={{ display: 'flex', gap: 2 }}>
+                                        <Box sx={{
+                                            width: 120,
+                                            height: 120,
+                                            overflow: 'hidden',
+                                            borderRadius: 1,
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            }}>
+                                            <img
+                                                src={item.imagen}
+                                                alt={item.nombre}
+                                                style={{
+                                                    width: '50%',
+                                                    height: '100%',
+                                                
+                                                }}
+                                            />
+                                        </Box>
+                                        <Box sx={{ flex: 1 }}>
+                                            <Typography variant="h6">{item.nombre}</Typography>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', marginY: 1 }}>
+                                                <IconButton onClick={() => actualizarCantidad(item.id, item.cantidad_carrito - 1)}>
+                                                    <RemoveIcon />
+                                                </IconButton>
+                                                <Typography variant="body1">{item.cantidad_carrito}</Typography>
+                                                <IconButton onClick={() => actualizarCantidad(item.id, item.cantidad_carrito + 1)}>
+                                                    <AddIcon />
+                                                </IconButton>
+                                            </Box>
+                                            <Typography variant="body1">Precio: ${item.precio.toFixed(2)}</Typography>
+                                            <Button
+                                                onClick={() => eliminarProducto(item.id)}
+                                                color="error"
+                                                startIcon={<DeleteIcon />}
                                             >
                                                 Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                            </Button>
+                                        </Box>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         ))}
-                    </div>
-
-                    <div className="resumen-compra">
-                        <h3>Resumen de compra</h3>
-                        <div className="resumen-detalle">
-                            <p>Subtotal ({carrito.length} productos):</p>
-                            <p>${total.toFixed(2)}</p>
-                        </div>
-                        <div className="resumen-total">
-                            <p>Total:</p>
-                            <p>${total.toFixed(2)}</p>
-                        </div>
-                        <button onClick={realizarCompra} className="btn-continuar">
-                            Continuar
-                        </button>
-                    </div>
-                </div>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <Card sx={{ padding: 2 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Resumen
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                                <Typography variant="body1">Total</Typography>
+                                <Typography variant="body1">${total.toFixed(2)}</Typography>
+                            </Box>
+                            <Button variant="contained" color="primary" fullWidth onClick={realizarCompra}>
+                                Realizar compra
+                            </Button>
+                        </Card>
+                    </Grid>
+                </Grid>
             )}
-
-            <style>
-                {`
-                .carrito-container {
-                    padding: 20px;
-                    background-color: #f9f9f9;
-                    min-height: 100vh;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-
-                .titulo {
-                    font-size: 2rem;
-                    margin-bottom: 20px;
-                    color: #333;
-                    font-weight: bold;
-                }
-
-                .carrito-header {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 10px;
-                    font-size: 1.1rem;
-                    color: #555;
-                }
-
-                .carrito-vacio {
-                    text-align: center;
-                    color: #777;
-                    font-size: 1.2rem;
-                }
-
-                .carrito-content {
-                    display: flex;
-                    gap: 20px;
-                }
-
-                .productos-lista {
-                    flex: 2;
-                }
-
-                .producto-item {
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    margin-bottom: 20px;
-                }
-
-                .producto-nombre {
-                    font-size: 1.2rem;
-                    color: #333;
-                    margin-bottom: 10px;
-                }
-
-                .producto-detalle {
-                    display: flex;
-                    align-items: center;
-                    gap: 20px;
-                }
-
-                .imagen-contenedor {
-                    width: 120px;
-                    height: 120px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
-                    overflow: hidden;
-                }
-
-                .producto-imagen {
-                    width: 40%;
-                    height: 90%;
-                   
-                }
-
-                .producto-info {
-                    flex: 1;
-                }
-
-                .producto-cantidad {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin-bottom: 10px;
-                }
-
-                .producto-cantidad p {
-                    margin: 0;
-                    font-size: 0.9rem;
-                    color: #555;
-                }
-
-                .btn-cantidad {
-                    background-color: #1dd1a1;
-                    color: white;
-                    border: none;
-                    padding: 5px 10px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-
-                .precio-info {
-                    display: flex;
-                    gap: 10px;
-                    margin-bottom: 10px;
-                }
-
-                .precio-info p {
-                    margin: 0;
-                    font-size: 0.9rem;
-                    color: #555;
-                }
-
-                .precio-actual {
-                    font-size: 1.1rem;
-                    color: #333;
-                    font-weight: bold;
-                }
-
-                .precio-anterior {
-                    font-size: 0.9rem;
-                    color: #777;
-                    text-decoration: line-through;
-                }
-
-                .producto-acciones {
-                    display: flex;
-                    gap: 10px;
-                }
-
-                .btn-eliminar {
-                    background-color: #ff6b6b;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-
-                .resumen-compra {
-                    flex: 1;
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                }
-
-                .resumen-compra h3 {
-                    font-size: 1.2rem;
-                    color: #333;
-                    margin-bottom: 10px;
-                }
-
-                .resumen-detalle {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 10px;
-                    font-size: 0.9rem;
-                    color: #555;
-                }
-
-                .resumen-total {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 10px;
-                    font-size: 1.1rem;
-                    color: #333;
-                    font-weight: bold;
-                }
-
-                .btn-continuar {
-                    background-color: #3498db;
-                    color: white;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    width: 100%;
-                    font-size: 1.2rem;
-                    margin-top: 10px;
-                }
-
-                /* Responsividad */
-                @media (max-width: 768px) {
-                    .carrito-content {
-                        flex-direction: column;
-                    }
-
-                    .resumen-compra {
-                        order: -1;
-                    }
-                }
-                `}
-            </style>
-        </div>
+        </Box>
     );
 };
 

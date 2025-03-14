@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import {
+  Box,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Button,
+  CircularProgress,
+  IconButton,
+} from "@mui/material";
+import { CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 
 const CrearServicio = () => {
   const [formData, setFormData] = useState({
@@ -89,131 +102,117 @@ const CrearServicio = () => {
     }
   };
 
-  const estilos = {
-    contenedor: {
-      textAlign: "center",
-      backgroundColor: "#e0f7fa",
-      padding: "20px",
-      borderRadius: "15px",
-      maxWidth: "500px",
-      margin: "40px auto",
-      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    },
-    titulo: {
-      fontSize: "28px",
-      marginBottom: "20px",
-      color: "#004d40",
-    },
-    campo: {
-      marginBottom: "15px",
-      textAlign: "left",
-    },
-    input: {
-      width: "100%",
-      padding: "12px",
-      borderRadius: "8px",
-      border: "1px solid #b2dfdb",
-      fontSize: "16px",
-      boxSizing: "border-box",
-    },
-    boton: {
-      backgroundColor: "#00796b",
-      color: "white",
-      border: "none",
-      padding: "12px 20px",
-      borderRadius: "8px",
-      cursor: "pointer",
-      fontSize: "16px",
-      fontWeight: "bold",
-      transition: "background-color 0.3s ease",
-      display: "block",
-      margin: "20px auto 0",
-      width: "100%",
-    },
-  };
-
   return (
-    <div style={estilos.contenedor}>
-      <h1 style={estilos.titulo}>Crear Servicio</h1>
+    <Box
+      sx={{
+        maxWidth: 500,
+        margin: "40px auto",
+        padding: 3,
+        backgroundColor: "white",
+        borderRadius: 2,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h4" component="h1" align="center" gutterBottom>
+        Crear Servicio
+      </Typography>
       <form onSubmit={handleSubmit}>
-        <div style={estilos.campo}>
-          <label htmlFor="nombre">Nombre del Servicio</label>
-          <input
-            style={estilos.input}
-            type="text"
-            id="nombre"
-            name="nombre"
-            value={formData.nombre}
+        <TextField
+          fullWidth
+          label="Nombre del Servicio"
+          name="nombre"
+          value={formData.nombre}
+          onChange={handleInputChange}
+          required
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="Descripción"
+          name="descripcion"
+          value={formData.descripcion}
+          onChange={handleInputChange}
+          required
+          margin="normal"
+          multiline
+          rows={4}
+        />
+        <TextField
+          fullWidth
+          label="Precio"
+          name="precio"
+          type="number"
+          value={formData.precio}
+          onChange={handleInputChange}
+          required
+          margin="normal"
+        />
+        <FormControl fullWidth margin="normal" required>
+          <InputLabel>Categoría</InputLabel>
+          <Select
+            name="id_categoria"
+            value={formData.id_categoria}
             onChange={handleInputChange}
-            required
-          />
-        </div>
-
-        <div style={estilos.campo}>
-          <label htmlFor="descripcion">Descripción</label>
-          <textarea
-            style={estilos.input}
-            id="descripcion"
-            name="descripcion"
-            value={formData.descripcion}
-            onChange={handleInputChange}
-            required
-          ></textarea>
-        </div>
-
-        <div style={estilos.campo}>
-          <label htmlFor="precio">Precio</label>
-          <input
-            style={estilos.input}
-            type="number"
-            id="precio"
-            name="precio"
-            value={formData.precio}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-
-        <div style={estilos.campo}>
-          <label htmlFor="id_categoria">Categoría</label>
-          {loadingCategorias ? (
-            <p>Cargando categorías...</p>
-          ) : (
-            <select
-              style={estilos.input}
-              id="id_categoria"
-              name="id_categoria"
-              value={formData.id_categoria}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Seleccione una categoría</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.id} value={categoria.id}>
+            label="Categoría"
+          >
+            <MenuItem value="">Seleccione una categoría</MenuItem>
+            {loadingCategorias ? (
+              <MenuItem disabled>
+                <CircularProgress size={20} />
+              </MenuItem>
+            ) : (
+              categorias.map((categoria) => (
+                <MenuItem key={categoria.id} value={categoria.id}>
                   {categoria.nombre}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        <div style={estilos.campo}>
-          <label htmlFor="imagen">Imagen</label>
+                </MenuItem>
+              ))
+            )}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth margin="normal" required>
           <input
-            style={estilos.input}
             type="file"
             id="imagen"
             name="imagen"
             onChange={handleFileChange}
             accept="image/*"
+            style={{ display: "none" }}
           />
-        </div>
-
-        <button style={estilos.boton} type="submit">
+          <label htmlFor="imagen">
+            <Button
+              variant="outlined"
+              component="span"
+              fullWidth
+              startIcon={<CloudUploadIcon />}
+              sx={{
+                padding: 2,
+                borderStyle: "dashed",
+                borderColor: "primary.main",
+                "&:hover": {
+                  borderColor: "primary.dark",
+                },
+              }}
+            >
+              Subir Imagen
+            </Button>
+          </label>
+          {imagen && (
+            <Typography variant="body2" sx={{ marginTop: 1, textAlign: "center" }}>
+              {imagen.name}
+            </Typography>
+          )}
+        </FormControl>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ marginTop: 2 }}
+        >
           Crear Servicio
-        </button>
+        </Button>
       </form>
-    </div>
+    </Box>
   );
 };
 

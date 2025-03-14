@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { Button, TextField, Modal, Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 
 const InventarioServicios = () => {
     const [servicios, setServicios] = useState([]);
@@ -12,21 +14,24 @@ const InventarioServicios = () => {
         id_categoria: '',
     });
 
-    // Función para obtener los servicios desde la API
-    useEffect(() => {
-        const fetchServicios = async () => {
-            try {
-                const response = await axios.get('https://backendcentro.onrender.com/api/servicios');
-                setServicios(response.data);
-            } catch (error) {
-                console.error('Error al obtener los servicios:', error);
-            }
-        };
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Detectar si es móvil
 
+    // Obtener los servicios desde la API
+    useEffect(() => {
         fetchServicios();
     }, []);
 
-    // Función para manejar el formulario de edición
+    const fetchServicios = async () => {
+        try {
+            const response = await axios.get('https://backendcentro.onrender.com/api/servicios');
+            setServicios(response.data);
+        } catch (error) {
+            console.error('Error al obtener los servicios:', error);
+        }
+    };
+
+    // Manejar cambios en el formulario de edición
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -35,47 +40,55 @@ const InventarioServicios = () => {
         });
     };
 
-    const handleSubmitEdit = async (e) => {
-        e.preventDefault();
+    // Enviar el formulario de edición
+// Enviar el formulario de edición
+const handleSubmitEdit = async (e) => {
+    e.preventDefault();
 
-        // Confirmación antes de actualizar
-        const confirmUpdate = await Swal.fire({
-            title: '¿Estás seguro?',
-            text: '¿Deseas actualizar este servicio?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, actualizar',
-            cancelButtonText: 'No, cancelar',
-        });
+    // Cerrar el modal de edición antes de mostrar el cuadro de confirmación
+    setEditandoServicio(null);
 
-        if (confirmUpdate.isConfirmed) {
-            try {
-                const { nombre, descripcion, precio, id_categoria } = formData;
+    // Mostrar el cuadro de confirmación de Swal
+    const confirmUpdate = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¿Deseas actualizar este servicio?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'No, cancelar',
+    });
 
-                await axios.put(`https://backendcentro.onrender.com/api/servicios/${editandoServicio.id}`, {
-                    nombre,
-                    descripcion,
-                    precio,
-                    id_categoria,
-                });
+    if (confirmUpdate.isConfirmed) {
+        try {
+            const { nombre, descripcion, precio, id_categoria } = formData;
 
-                setServicios((prevServicios) =>
-                    prevServicios.map((servicio) =>
-                        servicio.id === editandoServicio.id ? { ...servicio, ...formData } : servicio
-                    )
-                );
+            await axios.put(`https://backendcentro.onrender.com/api/servicios/${editandoServicio.id}`, {
+                nombre,
+                descripcion,
+                precio,
+                id_categoria,
+            });
 
-                setEditandoServicio(null);
-                setFormData({ nombre: '', descripcion: '', precio: '', id_categoria: '' });
-                Swal.fire('Actualizado', 'El servicio ha sido actualizado correctamente', 'success');
-            } catch (error) {
-                console.error('Error al editar el servicio:', error);
-                Swal.fire('Error', 'Hubo un problema al actualizar el servicio.', 'error');
-            }
+            // Actualizar el estado local sin recargar la página
+            setServicios((prevServicios) =>
+                prevServicios.map((servicio) =>
+                    servicio.id === editandoServicio.id ? { ...servicio, ...formData } : servicio
+                )
+            );
+
+            setFormData({ nombre: '', descripcion: '', precio: '', id_categoria: '' });
+            Swal.fire('Actualizado', 'El servicio ha sido actualizado correctamente', 'success');
+        } catch (error) {
+            console.error('Error al editar el servicio:', error);
+            Swal.fire('Error', 'Hubo un problema al actualizar el servicio.', 'error');
         }
-    };
+    } else {
+        // Si el usuario cancela, volver a abrir el modal de edición
+        setEditandoServicio(editandoServicio);
+    }
+};
 
-    // Función para eliminar un servicio con confirmación
+    // Eliminar un servicio
     const eliminarServicio = (id) => {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -88,6 +101,7 @@ const InventarioServicios = () => {
             if (result.isConfirmed) {
                 try {
                     await axios.delete(`https://backendcentro.onrender.com/api/servicios/${id}`);
+                    // Actualizar el estado local sin recargar la página
                     setServicios((prevServicios) => prevServicios.filter((servicio) => servicio.id !== id));
                     Swal.fire('Eliminado', 'El servicio ha sido eliminado.', 'success');
                 } catch (error) {
@@ -98,227 +112,112 @@ const InventarioServicios = () => {
         });
     };
 
+    // Columnas del DataGrid
+    const columns = [
+        { field: 'nombre', headerName: 'Nombre', flex: 2, minWidth: 200, headerClassName: 'header-style' },
+        { field: 'precio', headerName: 'Precio', flex: 1, minWidth: 100, type: 'number', headerClassName: 'header-style' },
+        {
+            field: 'acciones',
+            headerName: 'Acciones',
+            flex: 1,
+            minWidth: 200,
+            headerClassName: 'header-style',
+            renderCell: (params) => (
+                <div>
+                    <Button
+                        variant="contained"
+                        color="warning"
+                        onClick={() => {
+                            setEditandoServicio(params.row);
+                            setFormData({
+                                nombre: params.row.nombre,
+                                descripcion: params.row.descripcion,
+                                precio: params.row.precio,
+                                id_categoria: params.row.id_categoria,
+                            });
+                        }}
+                        style={{ marginRight: 8 }}
+                    >
+                        Editar
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => eliminarServicio(params.row.id)}
+                    >
+                        Eliminar
+                    </Button>
+                </div>
+            ),
+        },
+    ];
+
     return (
-        <div className="inventario-container">
+        <div style={{ height: 'calc(100vh - 64px)', width: '92%', padding: '16px', overflow: 'hidden' }}>
             <h1>Inventario de Servicios</h1>
 
+            {/* Modal para editar servicio */}
             {editandoServicio && (
-                <div className="edit-form-container">
-                    <h2>Editar Servicio</h2>
-                    <form onSubmit={handleSubmitEdit}>
-                        <label>
-                            Nombre:
-                            <input
-                                type="text"
+                <Modal open={Boolean(editandoServicio)} onClose={() => setEditandoServicio(null)}>
+                    <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: isMobile ? '90%' : 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                        <Typography variant="h6" component="h2">
+                            Editar Servicio
+                        </Typography>
+                        <form onSubmit={handleSubmitEdit}>
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Nombre"
                                 name="nombre"
                                 value={formData.nombre}
                                 onChange={handleInputChange}
-                                className="input-edit"
                             />
-                        </label>
-                        <label>
-                            Descripción:
-                            <input
-                                type="text"
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Descripción"
                                 name="descripcion"
                                 value={formData.descripcion}
                                 onChange={handleInputChange}
-                                className="input-edit"
                             />
-                        </label>
-                        <label>
-                            Precio:
-                            <input
-                                type="number"
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Precio"
                                 name="precio"
+                                type="number"
                                 value={formData.precio}
                                 onChange={handleInputChange}
-                                className="input-edit"
                             />
-                        </label>
-                        <div className="form-actions">
-                            <button type="submit" className="btn-submit">Actualizar Servicio</button>
-                            <button type="button" onClick={() => setEditandoServicio(null)} className="btn-cancel">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                                <Button type="submit" variant="contained" color="primary">Actualizar Servicio</Button>
+                                <Button variant="contained" color="secondary" onClick={() => setEditandoServicio(null)}>Cancelar</Button>
+                            </Box>
+                        </form>
+                    </Box>
+                </Modal>
             )}
 
-            <table className="inventario-table">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {servicios.map((servicio) => (
-                        <tr key={servicio.id}>
-                            <td>{servicio.nombre}</td>
-                            <td>${servicio.precio}</td>
-                            <td className="acciones">
-                                <button
-                                    className="btn-editar"
-                                    onClick={() => {
-                                        setEditandoServicio(servicio);
-                                        setFormData({
-                                            nombre: servicio.nombre,
-                                            descripcion: servicio.descripcion,
-                                            precio: servicio.precio,
-                                            id_categoria: servicio.id_categoria,
-                                        });
-                                    }}
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    className="btn-eliminar-producto"
-                                    onClick={() => eliminarServicio(servicio.id)}
-                                >
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <style jsx>{`
-                .inventario-container {
-                    padding: 20px;
-                    font-family: Arial, sans-serif;
-                }
-
-                h1 {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-
-                .edit-form-container,
-                .modal-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.5);
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    z-index: 1000;
-                }
-
-                .edit-form-container form {
-                    background: white;
-                    padding: 30px;
-                    border-radius: 8px;
-                    width: 300px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                }
-
-                input {
-                    width: 100%;
-                    padding: 10px;
-                    margin: 10px 0;
-                    border-radius: 5px;
-                    border: 1px solid #ccc;
-                }
-
-                .form-actions {
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 10px;
-                }
-
-                .btn-submit,
-                .btn-cancel {
-                    padding: 10px;
-                    margin: 5px;
-                    border-radius: 5px;
-                    border: none;
-                    cursor: pointer;
-                }
-
-                .btn-submit {
-                    background-color: #28a745;
-                    color: white;
-                }
-
-                .btn-cancel {
-                    background-color: #dc3545;
-                    color: white;
-                }
-
-                .acciones {
-                    display: flex;
-                    gap: 10px;
-                    text-align: right;
-                }
-
-                .acciones button {
-                    padding: 8px 16px;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    color: white;
-                    border: none;
-                }
-
-                .btn-editar {
-                    background-color: #ffc107;
-                }
-
-                .btn-eliminar-producto {
-                    background-color: #dc3545;
-                }
-
-                .inventario-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-
-                .inventario-table th,
-                .inventario-table td {
-                     padding: 10px;
-                     text-align: left;
-                     border-bottom: 1px solid #ddd;
-                }
-
-                .inventario-table tr {
-                    border-bottom: 2px solid #ddd;
-                }
-
-                .inventario-table th {
-                    background-color: #f2f2f2;
-                }
-
-                .inventario-table tr:nth-child(even) {
-                    background-color: #f9f9f9;
-                }
-
-                .inventario-table tr:hover {
-                    background-color: #f1f1f1;
-                }
-                    .inventario-table th:nth-child(1),
-                    .inventario-table td:nth-child(1) {
-                     width: 80%; 
-                }
-
-                .inventario-table th:nth-child(2),
-                .inventario-table td:nth-child(2) 
-                {
-                  width: 20%; 
-                }
-
-                .inventario-table th:nth-child(3),
-                .inventario-table td:nth-child(3) 
-                {
-                   width: 10%;
-                }
-
-             
-                }
-            `}</style>
+            {/* DataGrid para mostrar los servicios */}
+            <div style={{ height: 'calc(100% - 64px)', width: '100%', overflow: 'auto' }}>
+                <DataGrid
+                    rows={servicios}
+                    columns={columns}
+                    pageSize={10}
+                    rowsPerPageOptions={[10, 20, 50]}
+                    components={{ Toolbar: GridToolbar }}
+                    disableSelectionOnClick
+                    sx={{
+                        '& .header-style': {
+                            backgroundColor: '#1976d2',
+                            color: 'white',
+                        },
+                        '& .MuiDataGrid-row:hover': {
+                            backgroundColor: '#e3f2fd',
+                        },
+                    }}
+                />
+            </div>
         </div>
     );
 };

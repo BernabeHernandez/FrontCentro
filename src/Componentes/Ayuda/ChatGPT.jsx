@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Send } from "lucide-react";
+import { Box, Card, CardContent, TextField, IconButton, Typography } from "@mui/material";
 
 const ChatGPT = () => {
   const [messages, setMessages] = useState([
@@ -30,142 +31,92 @@ const ChatGPT = () => {
     }
   };
 
-  const formatMessage = (text) => {
-    // Se usa dangerouslySetInnerHTML para renderizar HTML directamente en los mensajes
-    return { __html: text };
-  };
-
   return (
-    <div className="chat-container">
-      <div className="chat-header">Estoy aquí para ayudarte. Si tienes alguna pregunta, no dudes en preguntar.</div>
-      <div className="chat-messages" ref={chatMessagesRef}>
+    <Card
+      sx={{
+        maxWidth: 420,
+        width: "100%",
+        mx: "auto",
+        mt: 4,
+        p: 2,
+        borderRadius: 3,
+        boxShadow: 3,
+        backgroundColor: "#ffffff",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          textAlign: "center",
+          background: "linear-gradient(135deg, #00796b, #009688)",
+          color: "white",
+          p: 2,
+          borderRadius: 2,
+        }}
+      >
+        Estoy aquí para ayudarte. Pregunta lo que necesites.
+      </Typography>
+
+      <CardContent
+        ref={chatMessagesRef}
+        sx={{
+          maxHeight: 400,
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          mt: 2,
+          p: 1,
+          borderRadius: 2,
+          backgroundColor: "#f9fafb",
+        }}
+      >
         {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender}`}>
-            {/* Utilizamos dangerouslySetInnerHTML para los mensajes de tipo "bot" */}
-            <p dangerouslySetInnerHTML={formatMessage(msg.text)} />
-          </div>
+          <Box
+            key={index}
+            sx={{
+              maxWidth: "80%",
+              alignSelf: msg.sender === "user" ? "flex-end" : "flex-start",
+              backgroundColor: msg.sender === "user" ? "#00796b" : "#e5e7eb",
+              color: msg.sender === "user" ? "white" : "#333",
+              p: 1.5,
+              borderRadius: 2,
+              boxShadow: 1,
+              fontSize: "1rem",
+              wordBreak: "break-word",
+            }}
+          >
+            {msg.text}
+          </Box>
         ))}
-      </div>
-      <div className="chat-input-container">
-        <input
-          type="text"
+      </CardContent>
+
+      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Escribe tu mensaje..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="chat-input"
-          placeholder="Escribe tu mensaje..."
           onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+          sx={{
+            borderRadius: 5,
+            backgroundColor: "white",
+          }}
         />
-        <button onClick={sendMessage} className="send-button">
-          <Send size={20} />
-        </button>
-      </div>
-      <style>{`
-        .chat-container {
-          display: flex;
-          flex-direction: column;
-          height: 550px;
-          width: 100%;
-          max-width: 420px;
-          margin: 20px auto;
-          background: white;
-          box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-          border-radius: 15px;
-          overflow: hidden;
-          border: 1px solid #ddd;
-          padding: 15px;
-        }
-
-        .chat-header {
-          background: linear-gradient(135deg, #00796b, #00796b);
-          color: white;
-          text-align: center;
-          padding: 16px;
-          font-size: 1.3rem;
-          font-weight: bold;
-          letter-spacing: 0.5px;
-          border-radius: 10px;
-          margin-bottom: 12px;
-        }
-
-        .chat-messages {
-          flex: 1;
-          overflow-y: auto;
-          padding: 15px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          background: #f9fafb;
-          border-radius: 10px;
-          max-height: 400px;
-        }
-
-        .message {
-          max-width: 80%;
-          padding: 12px 16px;
-          border-radius: 18px;
-          font-size: 1rem;
-          line-height: 1.5;
-          word-wrap: break-word;
-          margin-bottom: 5px;
-        }
-
-        .message.user {
-          background: #00796b;
-          color: white;
-          align-self: flex-end;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .message.bot {
-          background: #e5e7eb;
-          color: #333;
-          align-self: flex-start;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-        }
-
-        .chat-input-container {
-          display: flex;
-          align-items: center;
-          padding: 14px;
-          border-top: 1px solid #ddd;
-          background: white;
-          border-radius: 10px;
-          margin-top: 10px;
-        }
-
-        .chat-input {
-          flex: 1;
-          padding: 12px;
-          border: 1px solid #ccc;
-          border-radius: 25px;
-          outline: none;
-          font-size: 1rem;
-          transition: border-color 0.3s ease;
-        }
-
-        .chat-input:focus {
-          border-color: #00796b;
-        }
-
-        .send-button {
-          background: #00796b;
-          color: white;
-          border: none;
-          padding: 12px;
-          margin-left: 10px;
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.3s ease;
-        }
-
-        .send-button:hover {
-          background: #005a4f;
-        }
-      `}</style>
-    </div>
+        <IconButton
+          onClick={sendMessage}
+          sx={{
+            ml: 1,
+            backgroundColor: "#00796b",
+            color: "white",
+            "&:hover": { backgroundColor: "#005a4f" },
+          }}
+        >
+          <Send size={24} />
+        </IconButton>
+      </Box>
+    </Card>
   );
 };
 

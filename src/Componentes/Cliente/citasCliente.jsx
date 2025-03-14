@@ -310,7 +310,7 @@ const CitasCliente = () => {
 
     // Verificar si el usuario existe en la base de datos
     try {
-      const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -346,7 +346,7 @@ const CitasCliente = () => {
         const fechaCita = format(diaSeleccionado.fecha, 'yyyy-MM-dd'); // Formato YYYY-MM-DD
   
         // Enviar la solicitud de reserva al backend
-        const reservaResponse = await axios.put('http://localhost:3302/api/citasC/sacar-cita', {
+        const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
           dia: selectedDay,
           horaInicio: selectedTime,
           horaFin: horaFin,

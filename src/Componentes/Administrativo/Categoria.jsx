@@ -1,6 +1,25 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import {
+  Box,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  IconButton,
+  Tooltip,
+  Modal,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon, Close as CloseIcon } from "@mui/icons-material";
 
 const Categoria = () => {
   const [categorias, setCategorias] = useState([]);
@@ -10,6 +29,10 @@ const Categoria = () => {
   const [productos, setProductos] = useState([]);
   const [servicios, setServicios] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
+  const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     obtenerCategorias();
@@ -39,12 +62,12 @@ const Categoria = () => {
     e.preventDefault();
 
     Swal.fire({
-      title: `¿Estás seguro de que deseas ${editando ? 'actualizar' : 'agregar'} esta categoría?`,
-      text: `Esta acción ${editando ? 'no se puede deshacer' : ''}.`,
-      icon: 'warning',
+      title: `¿Estás seguro de que deseas ${editando ? "actualizar" : "agregar"} esta categoría?`,
+      text: `Esta acción ${editando ? "no se puede deshacer" : ""}.`,
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: `Sí, ${editando ? 'actualizar' : 'agregar'}`,
-      cancelButtonText: 'No, cancelar',
+      confirmButtonText: `Sí, ${editando ? "actualizar" : "agregar"}`,
+      cancelButtonText: "No, cancelar",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -60,7 +83,7 @@ const Categoria = () => {
           obtenerCategorias();
           Swal.fire(
             editando ? "Actualizada" : "Agregada",
-            `La categoría ha sido ${editando ? 'actualizada' : 'agregada'} correctamente.`,
+            `La categoría ha sido ${editando ? "actualizada" : "agregada"} correctamente.`,
             "success"
           );
         } catch (error) {
@@ -71,15 +94,15 @@ const Categoria = () => {
     });
   };
 
-  const manejarEdicion = (categoria, e) => {
-    e.stopPropagation(); // Evitar que el clic se propague y active la selección de categoría
+  const manejarEdicion = (categoria) => {
     setNombre(categoria.nombre);
     setDescripcion(categoria.descripcion);
     setEditando(categoria.id);
+    setModalEditarAbierto(true);
   };
 
   const manejarEliminacion = async (id, e) => {
-    e.stopPropagation(); // Evitar que el clic se propague y active la selección de categoría
+    e.stopPropagation();
     Swal.fire({
       title: "¿Estás seguro?",
       text: "Esta acción no se puede deshacer.",
@@ -90,7 +113,7 @@ const Categoria = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3302/api/categoria/${id}`);
+          await axios.delete(`https://backendcentro.onrender.com/api/categoria/${id}`);
           obtenerCategorias();
           Swal.fire("Eliminada", "La categoría ha sido eliminada.", "success");
         } catch (error) {
@@ -107,240 +130,208 @@ const Categoria = () => {
   };
 
   return (
-    <div className="inventario-container">
-      <h1>Gestión de Categorías</h1>
+    <Box sx={{ padding: 3 }}>
+      <Typography variant="h4" component="h1" align="center" gutterBottom>
+        Gestión de Categorías
+      </Typography>
 
       {/* Formulario para agregar o editar categoría */}
-      <div className="edit-form-container">
-        <form onSubmit={manejarEnvio} className="edit-form">
-          <input
-            className="input"
-            placeholder="Nombre de la categoría"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
-          <input
-            className="input"
-            placeholder="Descripción"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            required
-          />
-          <div className="form-actions">
-            <button type="submit" className="btn-submit">
-              {editando ? "Actualizar" : "Agregar"}
-            </button>
-            {editando && (
-              <button
-                type="button"
-                className="btn-cancel"
-                onClick={() => {
-                  setNombre("");
-                  setDescripcion("");
-                  setEditando(null);
-                }}
-              >
-                Cancelar
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
+      <Box
+        component="form"
+        onSubmit={manejarEnvio}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          maxWidth: 500,
+          margin: "0 auto",
+          marginBottom: 4,
+        }}
+      >
+        <TextField
+          label="Nombre de la categoría"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          required
+          fullWidth
+        />
+        <TextField
+          label="Descripción"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          required
+          fullWidth
+        />
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button type="submit" variant="contained" color="primary">
+            {editando ? "Actualizar" : "Agregar"}
+          </Button>
+          {editando && (
+            <Button
+              type="button"
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                setNombre("");
+                setDescripcion("");
+                setEditando(null);
+              }}
+            >
+              Cancelar
+            </Button>
+          )}
+        </Box>
+      </Box>
 
       {/* Mostrar productos y servicios de la categoría seleccionada */}
       {categoriaSeleccionada && (
-        <div className="tabla-relacionada">
-          <h2>Elementos Relacionados a la Categoría: {categoriaSeleccionada.nombre}</h2>
-          <div className="tabla-scrollable">
-            <table className="inventario-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nombre</th>
-                </tr>
-              </thead>
-              <tbody>
+        <Box sx={{ marginTop: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Elementos Relacionados a la Categoría: {categoriaSeleccionada.nombre}
+          </Typography>
+          <TableContainer component={Paper} sx={{ maxHeight: 400, overflowY: "auto" }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>Nombre</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {[...productos, ...servicios].map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{index + 1}</td>
-                    <td>{item.nombre}</td>
-                  </tr>
+                  <TableRow key={item.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{item.nombre}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          <button className="btn-cerrar" onClick={() => setCategoriaSeleccionada(null)}>
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setCategoriaSeleccionada(null)}
+            sx={{ marginTop: 2 }}
+            startIcon={<CloseIcon />}
+          >
             Cerrar
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
 
       {/* Tabla de categorías */}
       {!categoriaSeleccionada && (
-        <table className="inventario-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nombre</th>
-              <th>Descripción</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categorias.map((categoria, index) => (
-              <tr key={categoria.id} onClick={() => manejarSeleccionCategoria(categoria)} style={{ cursor: 'pointer' }}>
-                <td>{index + 1}</td>
-                <td>{categoria.nombre}</td>
-                <td>{categoria.descripcion}</td>
-                <td className="acciones">
-                  <button onClick={(e) => manejarEdicion(categoria, e)} className="btn-editar">
-                    Editar
-                  </button>
-                  <button onClick={(e) => manejarEliminacion(categoria.id, e)} className="btn-eliminar">
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>#</TableCell>
+                <TableCell>Nombre</TableCell>
+                <TableCell>Descripción</TableCell>
+                <TableCell>Acciones</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {categorias.map((categoria, index) => (
+                <TableRow
+                  key={categoria.id}
+                  onClick={() => manejarSeleccionCategoria(categoria)}
+                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#f5f5f5" } }}
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{categoria.nombre}</TableCell>
+                  <TableCell>{categoria.descripcion}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Tooltip title="Editar">
+                        <IconButton
+                          color="warning"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            manejarEdicion(categoria);
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar">
+                        <IconButton
+                          color="error"
+                          onClick={(e) => manejarEliminacion(categoria.id, e)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
-      <style jsx>{`
-        .inventario-container {
-          padding: 20px;
-          font-family: Arial, sans-serif;
-        }
-
-        h1 {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-
-        .edit-form-container {
-          margin-bottom: 20px;
-        }
-
-        .edit-form {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .input {
-          width: 30%;
-          padding: 10px;
-          margin: 10px 0;
-          border-radius: 5px;
-          border: 1px solid #ccc;
-        }
-
-        .form-actions {
-          display: flex;
-          justify-content: space-between;
-          gap: 10px;
-        }
-
-        .btn-submit,
-        .btn-cancel,
-        .btn-confirm {
-          padding: 10px;
-          margin: 5px;
-          border-radius: 5px;
-          border: none;
-          cursor: pointer;
-        }
-
-        .btn-submit {
-          background-color: #28a745;
-          color: white;
-        }
-
-        .btn-confirm {
-          background-color: #28a745;
-          color: white;
-        }
-
-        .btn-cancel {
-          background-color: #dc3545;
-          color: white;
-        }
-
-        .acciones {
-          display: flex;
-          gap: 10px;
-        }
-
-        .acciones button {
-          padding: 8px 16px;
-          border-radius: 5px;
-          cursor: pointer;
-          color: white;
-          border: none;
-        }
-
-        .btn-agregar {
-          background-color: #28a745;
-        }
-
-        .btn-eliminar {
-          background-color: #dc3545;
-        }
-
-        .btn-editar {
-          background-color: #ffc107;
-        }
-
-        .inventario-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-
-        .inventario-table th,
-        .inventario-table td {
-          padding: 10px;
-          text-align: left;
-          border-bottom: 1px solid #ddd;
-        }
-
-        .inventario-table tr {
-          border-bottom: 2px solid #ddd;
-        }
-
-        .inventario-table th {
-          background-color: #f2f2f2;
-        }
-
-        .tabla-relacionada {
-          margin-top: 20px;
-          background-color: white;
-          padding: 20px;
-          border-radius: 10px;
-          box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .tabla-scrollable {
-          max-height: 400px;
-          overflow-y: auto;
-        }
-
-        .btn-cerrar {
-          background-color: #dc3545;
-          color: white;
-          padding: 10px 20px;
-          margin-top: 10px;
-          border-radius: 5px;
-          border: none;
-          cursor: pointer;
-        }
-
-        .btn-cerrar:hover {
-          background-color: #c82333;
-        }
-      `}</style>
-    </div>
+      {/* Modal para editar categoría */}
+      <Modal
+        open={modalEditarAbierto}
+        onClose={() => setModalEditarAbierto(false)}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: isMobile ? "90%" : 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            Editar Categoría
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              manejarEnvio(e);
+              setModalEditarAbierto(false);
+            }}
+            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          >
+            <TextField
+              label="Nombre de la categoría"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              required
+              fullWidth
+            />
+            <TextField
+              label="Descripción"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              required
+              fullWidth
+            />
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button type="submit" variant="contained" color="primary">
+                Actualizar
+              </Button>
+              <Button
+                type="button"
+                variant="contained"
+                color="secondary"
+                onClick={() => setModalEditarAbierto(false)}
+              >
+                Cancelar
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
+    </Box>
   );
 };
 
