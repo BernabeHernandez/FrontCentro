@@ -9,7 +9,6 @@ import imageForBlackBackground3 from "../Componentes/Imagenes/SL_0210121_40570_7
 
 const sections = [
   { id: 1, title: 'Centro de Rehabilitación Integral San Juan', description: 'Nos dedicamos a mejorar tu bienestar físico y mental...', backgroundImage: product1 },
-  { id: 4, title: 'Productos de Limpieza Facial', description: 'Contamos con productos de alta calidad...', backgroundImage: imageForBlackBackground2 },
 ];
 
 const Home = () => {

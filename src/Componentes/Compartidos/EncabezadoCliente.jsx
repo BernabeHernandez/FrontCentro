@@ -172,7 +172,7 @@ const EncabezadoCliente = () => {
         }
 
         .menu ul li.active {
-          background-color: var(--color-highlight);
+          background-color: #A9DFBF;
           border-radius: 5px;
         }
 
@@ -227,7 +227,7 @@ const EncabezadoCliente = () => {
             left: -100%;
             width: 70%;
             height: 100%;
-            background-color: var(--color-mobile-bg); 
+            background-color: var( --color-primary); 
             padding: 20px;
             transition: left 0.3s ease-in-out;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);

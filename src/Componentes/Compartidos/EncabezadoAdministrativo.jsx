@@ -37,6 +37,7 @@ const EncabezadoAdministrativo = () => {
     setIsMobileMenuOpen(false);
     setOpenDropdown(null);
   };
+  
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -47,6 +48,9 @@ const EncabezadoAdministrativo = () => {
   };
 
   const handleMenuClick = (key) => {
+    setIsMobileMenuOpen(false); // Cierra el menú móvil
+    setOpenDropdown(null); // Cierra cualquier menú desplegable abierto
+  
     switch (key) {
       case "politicas":
         navigate('/admin/politicas');
@@ -96,9 +100,9 @@ const EncabezadoAdministrativo = () => {
       case "horariosDis":
         navigate('/admin/horariosD');
         break;
-        case "promociones":
-          navigate('/admin/promociones');
-          break;
+      case "promociones":
+        navigate('/admin/promociones');
+        break;
       case "cerrarSesion":
         handleLogout();
         break;
@@ -265,6 +269,18 @@ const EncabezadoAdministrativo = () => {
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
               z-index: 1000;
           }
+               .menu ul .dropdown-menu {
+    position: static; /* Cambia la posición a estática para que no se superponga */
+    width: 100%; /* Asegura que el menú desplegable ocupe todo el ancho disponible */
+    margin-top: 0; /* Elimina el margen superior para que no se vea separado */
+    background-color: var(--color-mobile-bg); /* Fondo del menú desplegable */
+    border-radius: 0; /* Elimina el borde redondeado */
+  }
+
+   .menu ul .dropdown-menu li {
+    padding: 10px 20px; /* Ajusta el padding para que sea consistente */
+    border-bottom: 1px solid var(--color-hover); /* Añade un borde inferior para separar los elementos */
+  }
 
           .menu.menu-open ul {
             display: flex;
@@ -272,11 +288,7 @@ const EncabezadoAdministrativo = () => {
           }
 
           .menu ul li {
-            padding: 20px;
-            border-bottom: 1px solid var(--color-hover);
-            text-align: right; 
-            color: var(--color-mobile-text);
-              z-index: 1000;
+            padding: 15px 20px; 
           }
         .logo h1 { 
         }
@@ -284,6 +296,7 @@ const EncabezadoAdministrativo = () => {
             display: flex; 
           }
         }
+          
       `}</style>
 
       <header className="header">
@@ -315,7 +328,7 @@ const EncabezadoAdministrativo = () => {
                   <li onClick={() => { handleClick('servicios'); handleMenuClick('servicios'); }}>Servicios</li>
                   <li onClick={() => { handleClick('inventarioservicios'); handleMenuClick('inventarioservicios'); }}>Inventario de Servicios</li>
                   <li onClick={() => { handleClick('categoria'); handleMenuClick('categoria'); }}>Categorias</li>
-                  <li onClick={() => { handleClick('registroHo'); handleMenuClick('registroHo'); }}>Regsitro Horario</li>
+                  <li onClick={() => { handleClick('registroHo'); handleMenuClick('registroHo'); }}>Registro Horario</li>
                   <li onClick={() => { handleClick('horariosDis'); handleMenuClick('horariosDis'); }}>Disponibilidad</li>
                   <li onClick={() => { handleClick('promociones'); handleMenuClick('promociones'); }}>Promociones</li>
                 </ul>

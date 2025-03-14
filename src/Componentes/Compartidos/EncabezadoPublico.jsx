@@ -161,7 +161,7 @@ const EncabezadoPublico = () => {
         }
 
         .menu ul li.active {
-          background-color: var(--color-highlight);
+          background-color: #A9DFBF;
           border-radius: 5px;
         }
 
@@ -216,7 +216,7 @@ const EncabezadoPublico = () => {
             left: -100%;
             width: 70%;
             height: 100%;
-            background-color: var(--color-mobile-bg); 
+            background-color: var(--color-primary); 
             padding: 20px;
             transition: left 0.3s ease-in-out;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
@@ -259,7 +259,7 @@ const EncabezadoPublico = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button className="search-button" onClick={handleSearch}>
-            <SearchOutlined style={{ color: '#FFFFFF', fontSize: '18px' }} />
+            <SearchOutlined style={{ color: '#00B300', fontSize: '18px' }} />
           </button>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
