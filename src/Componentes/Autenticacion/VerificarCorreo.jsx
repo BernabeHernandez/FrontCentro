@@ -3,8 +3,37 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
 
 const MySwal = withReactContent(Swal);
+
+// Tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#00796b", // Verde principal
+    },
+    secondary: {
+      main: "#757575", // Gris oscuro
+    },
+    background: {
+      default: "#ffffff", // Fondo blanco
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
 
 function VerificarCorreo() {
   const [verificationCode, setVerificationCode] = useState("");
@@ -42,87 +71,71 @@ function VerificarCorreo() {
         text: error.response?.data?.error || "Ocurrió un error al verificar el código.",
       });
     }
-
-
-  };
-
-
-  const estilos = {
-    contenedor: {
-      textAlign: "left",
-      backgroundColor: "#e0f7fa",
-      padding: "15px",
-      borderRadius: "15px",
-      maxWidth: "400px",
-      width: "90%",
-      margin: "auto",
-      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-      marginTop: '30px',
-    },
-    titulo: {
-      fontSize: "28px",
-      marginBottom: "20px",
-      color: "#004d40",
-      textAlign: "center",
-    },
-    campo: {
-      marginBottom: "15px",
-      textAlign: "left",
-    },
-    etiqueta: {
-      display: "block",
-      marginBottom: "5px",
-      fontWeight: "bold",
-      color: "#00695c",
-    },
-    input: {
-      width: "100%",
-      padding: "10px",
-      borderRadius: "8px",
-      border: "1px solid #b2dfdb",
-      fontSize: "16px",
-      boxSizing: "border-box",
-    },
-    boton: {
-      backgroundColor: "#00796b",
-      color: "white",
-      padding: "10px 15px",
-      borderRadius: "8px",
-      cursor: "pointer",
-      fontSize: "16px",
-      marginTop: "20px",
-      display: "block",
-      width: "100%",
-    },
   };
 
   return (
-    <div style={estilos.contenedor}>
-      <h1 style={estilos.titulo}>Verificar Código</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={estilos.campo}>
-          <label style={estilos.etiqueta}></label>
-          <input
-            type="text"
-            placeholder="Introduce tu código"
-            name="verificationCode"
-            style={estilos.input}
-            value={verificationCode}
-            onChange={handleChange}
-            required
-            maxLength="6" 
-            onKeyPress={(e) => {
-            
-              if (!/[0-9]/.test(e.key)) {
-                e.preventDefault();
-              }
-            }}
-          />
-
-        </div>
-        <button type="submit" style={estilos.boton}>Verificar</button>
-      </form>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container
+        component="main"
+        maxWidth="sm"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "calc(70vh - 64px)", // Ajusta el espacio para el encabezado y pie de página
+          backgroundColor: theme.palette.background.default,
+        }}
+      >
+        <Card
+          elevation={6}
+          sx={{
+            width: "100%",
+            padding: 4,
+            borderRadius: 2,
+            textAlign: "center",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <CardContent>
+            <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: "bold", color: theme.palette.primary.main }}>
+              Verificar Código
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+              <TextField
+                fullWidth
+                label="Código de Verificación"
+                name="verificationCode"
+                value={verificationCode}
+                onChange={handleChange}
+                margin="normal"
+                required
+                inputProps={{ maxLength: 6 }}
+                InputProps={{
+                  inputProps: {
+                    pattern: "[0-9]*", // Solo permite números
+                  },
+                }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  backgroundColor: theme.palette.primary.main,
+                  "&:hover": { backgroundColor: "#004d40" },
+                  padding: "10px",
+                  fontWeight: "bold",
+                }}
+              >
+                Verificar
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </ThemeProvider>
   );
 }
 

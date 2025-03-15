@@ -1,107 +1,134 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+import React, { useState } from "react";
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
 
 const MySwal = withReactContent(Swal);
 
+// Tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#00796b", // Verde principal
+    },
+    secondary: {
+      main: "#757575", // Gris oscuro
+    },
+    background: {
+      default: "#ffffff", // Fondo blanco
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
+
 function ValidarCodigo() {
-  const [codigo, setCodigo] = useState('');
+  const [codigo, setCodigo] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const { email } = location.state; 
+  const { email } = location.state;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('https://backendcentro.onrender.com/api/codigo/validar_codigo', { email, codigo });
+      const response = await axios.post("https://backendcentro.onrender.com/api/codigo/validar_codigo", { email, codigo });
 
       if (response.data.success) {
         MySwal.fire({
-          icon: 'success',
-          title: 'Código verificado',
-          text: 'El código es correcto. Puedes cambiar tu contraseña.',
+          icon: "success",
+          title: "Código verificado",
+          text: "El código es correcto. Puedes cambiar tu contraseña.",
         });
 
-        navigate('/cambiar_password', { state: { email } });
+        navigate("/cambiar_password", { state: { email } });
       }
     } catch (error) {
       MySwal.fire({
-        icon: 'error',
-        title: 'Código incorrecto',
-        text: 'El código ingresado es incorrecto. Intenta nuevamente.',
+        icon: "error",
+        title: "Código incorrecto",
+        text: "El código ingresado es incorrecto. Intenta nuevamente.",
       });
     }
   };
 
-  const estilos = {
-    contenedor: {
-      textAlign: 'center',
-      backgroundColor: '#e0f7fa',
-      padding: '20px',
-      borderRadius: '15px',
-      maxWidth: '400px',
-      margin: '40px auto',
-      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-    },
-    titulo: {
-      fontSize: '28px',
-      marginBottom: '20px',
-      color: '#004d40',
-    },
-    campo: {
-      marginBottom: '15px',
-      textAlign: 'center',
-    },
-    input: {
-      width: '100%',
-      padding: '12px',
-      borderRadius: '8px',
-      border: '1px solid #b2dfdb',
-      fontSize: '16px',
-      boxSizing: 'border-box',
-    },
-    boton: {
-      backgroundColor: '#00796b',
-      color: 'white',
-      border: 'none',
-      padding: '12px 20px',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontSize: '16px',
-      fontWeight: 'bold',
-      transition: 'background-color 0.3s ease',
-      display: 'block',
-      margin: '20px auto 0',
-      width: '100%',
-    },
-  };
-
   return (
-    <div style={estilos.contenedor}>
-      <h1 style={estilos.titulo}>Verificar Código</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={estilos.campo}>
-        <input
-        type="text"
-        placeholder="Código de 6 dígitos"
-        value={codigo}
-        onChange={(e) => setCodigo(e.target.value)}
-        required
-        style={estilos.input}
-        maxLength="6" 
-        onKeyPress={(e) => {
-            if (!/[0-9]/.test(e.key)) {
-                e.preventDefault();
-            }
+    <ThemeProvider theme={theme}>
+      <Container
+        component="main"
+        maxWidth="sm"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "calc(70vh - 64px)", // Ajusta el espacio para el encabezado y pie de página
+          backgroundColor: theme.palette.background.default,
         }}
-    />
-        </div>
-        <button type="submit" style={estilos.boton}>Validar Código</button>
-      </form>
-    </div>
+      >
+        <Card
+          elevation={6}
+          sx={{
+            width: "100%",
+            padding: 4,
+            borderRadius: 2,
+            textAlign: "center",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <CardContent>
+            <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: "bold", color: theme.palette.primary.main }}>
+              Verificar Código
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+              <TextField
+                fullWidth
+                label="Código de 6 dígitos"
+                type="text"
+                placeholder="Introduce el código de 6 dígitos"
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                margin="normal"
+                required
+                inputProps={{ maxLength: 6 }}
+                InputProps={{
+                  inputProps: {
+                    pattern: "[0-9]*", // Solo permite números
+                  },
+                }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  backgroundColor: theme.palette.primary.main,
+                  "&:hover": { backgroundColor: "#004d40" },
+                  padding: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                Validar Código
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </ThemeProvider>
   );
 }
 

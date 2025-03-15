@@ -1,33 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
-import zxcvbn from 'zxcvbn';
-import sha1 from 'js-sha1';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import zxcvbn from "zxcvbn";
+import sha1 from "js-sha1";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
 
 const MySwal = withReactContent(Swal);
 
+// Tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#00796b", // Verde principal
+    },
+    secondary: {
+      main: "#757575", // Gris oscuro
+    },
+    background: {
+      default: "#ffffff", // Fondo blanco
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
+
 function CambiarPassword() {
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordHistoryError, setPasswordHistoryError] = useState('');
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordHistoryError, setPasswordHistoryError] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const { email } = location.state;
 
   useEffect(() => {
     MySwal.fire({
-      icon: 'info',
-      title: 'Aviso importante',
-      text: 'Las contraseñas anteriormente utilizadas no se pueden volver a utilizar, ni la actual. Se requiere un cambio de contraseña.',
+      icon: "info",
+      title: "Aviso importante",
+      text: "Las contraseñas anteriormente utilizadas no se pueden volver a utilizar, ni la actual. Se requiere un cambio de contraseña.",
     });
   }, []);
 
@@ -58,27 +90,27 @@ function CambiarPassword() {
 
   const checkPasswordHistory = async (password) => {
     try {
-      const response = await axios.post('https://backendcentro.onrender.com/api/cambio/check-password-history', {
+      const response = await axios.post("https://backendcentro.onrender.com/api/cambio/check-password-history", {
         email,
-        password
+        password,
       });
 
       if (response.data.success === false) {
         console.log("Contraseña ya utilizada. Mostrando alerta.");
         MySwal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'La contraseña ya se utilizó anteriormente. Prueba con otra.',
+          icon: "error",
+          title: "Error",
+          text: "La contraseña ya se utilizó anteriormente. Prueba con otra.",
         });
-        return false;  
+        return false;
       }
-      return true;  
+      return true;
     } catch (error) {
       console.error("Error al verificar el historial de contraseñas:", error);
       MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'La contraseña ya se utilizó anteriormente. Prueba con otra.',
+        icon: "error",
+        title: "Error",
+        text: "La contraseña ya se utilizó anteriormente. Prueba con otra.",
       });
       return false;
     }
@@ -103,26 +135,26 @@ function CambiarPassword() {
 
     if (newPassword !== confirmPassword) {
       MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Las contraseñas no coinciden. Por favor, verifica e intenta nuevamente.',
+        icon: "error",
+        title: "Error",
+        text: "Las contraseñas no coinciden. Por favor, verifica e intenta nuevamente.",
       });
       return;
     }
 
     if (newPassword.length < 6 || newPassword.length > 15) {
       MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'La contraseña debe tener entre 6 y 15 caracteres.',
+        icon: "error",
+        title: "Error",
+        text: "La contraseña debe tener entre 6 y 15 caracteres.",
       });
       return;
     }
 
     if (passwordError) {
       MySwal.fire({
-        icon: 'error',
-        title: 'Error',
+        icon: "error",
+        title: "Error",
         text: passwordError,
       });
       return;
@@ -131,44 +163,44 @@ function CambiarPassword() {
     const isCompromised = await checkPasswordCompromised(newPassword);
     if (isCompromised) {
       MySwal.fire({
-        icon: 'error',
-        title: 'Contraseña comprometida',
-        text: 'Esta contraseña ha sido filtrada en brechas de datos. Por favor, elige otra.',
+        icon: "error",
+        title: "Contraseña comprometida",
+        text: "Esta contraseña ha sido filtrada en brechas de datos. Por favor, elige otra.",
       });
       return;
     }
 
     const isPasswordValid = await checkPasswordHistory(newPassword);
     if (!isPasswordValid) {
-      return;  
+      return;
     }
 
     try {
-      const response = await axios.post('https://backendcentro.onrender.com/api/cambio/reset-password', {
+      const response = await axios.post("https://backendcentro.onrender.com/api/cambio/reset-password", {
         email,
         newPassword,
       });
 
       if (response.data.success) {
         MySwal.fire({
-          icon: 'success',
-          title: 'Contraseña cambiada',
-          text: 'Tu contraseña ha sido actualizada correctamente.',
+          icon: "success",
+          title: "Contraseña cambiada",
+          text: "Tu contraseña ha sido actualizada correctamente.",
         });
-        navigate('/login');
+        navigate("/login");
       } else {
         MySwal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'La contraseña ya se está utilizando actualmente. Prueba con otra.',
+          icon: "error",
+          title: "Error",
+          text: "La contraseña ya se está utilizando actualmente. Prueba con otra.",
         });
       }
     } catch (error) {
-      console.error('Error al cambiar la contraseña:', error);
+      console.error("Error al cambiar la contraseña:", error);
       MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'La contraseña ya se está utilizando actualmente. Prueba con otra.',
+        icon: "error",
+        title: "Error",
+        text: "La contraseña ya se está utilizando actualmente. Prueba con otra.",
       });
     }
   };
@@ -197,118 +229,122 @@ function CambiarPassword() {
     }
   };
 
-  const estilos = {
-    contenedor: {
-      textAlign: 'center',
-      backgroundColor: '#e0f7fa',
-      padding: '20px',
-      borderRadius: '15px',
-      maxWidth: '400px',
-      margin: '40px auto',
-      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-    },
-    titulo: {
-      fontSize: '28px',
-      marginBottom: '20px',
-      color: '#004d40',
-    },
-    campo: {
-      marginBottom: '15px',
-      textAlign: 'center',
-      position: 'relative',
-    },
-    input: {
-      width: '100%',
-      padding: '12px 40px 12px 12px', 
-      borderRadius: '8px',
-      border: '1px solid #b2dfdb',
-      fontSize: '16px',
-      boxSizing: 'border-box',
-      height: '50px', 
-    },
-    boton: {
-      backgroundColor: '#00796b',
-      color: 'white',
-      border: 'none',
-      padding: '12px 20px',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontSize: '16px',
-      fontWeight: 'bold',
-      transition: 'background-color 0.3s ease',
-      display: 'block',
-      margin: '20px auto 0',
-      width: '100%',
-    },
-    medidor: {
-      marginTop: '10px',
-      fontWeight: 'bold',
-      color: passwordStrength < 2 ? "red" : passwordStrength < 3 ? "orange" : "green",
-    },
-    errorMensaje: {
-      color: 'red',
-      fontSize: '14px',
-      marginTop: '5px',
-    },
-    icono: {
-      position: 'absolute',
-      right: '10px',
-      top: '40%',
-      transform: 'translateY(-50%)',
-      cursor: 'pointer',
-      color: '#00796b',
-    },
-  };
-
   return (
-    <div style={estilos.contenedor}>
-      <h1 style={estilos.titulo}>Cambiar Contraseña</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={estilos.campo}>
-          <input
-            type={showNewPassword ? "text" : "password"}
-            placeholder="Nueva contraseña"
-            value={newPassword}
-            onChange={(e) => {
-              setNewPassword(e.target.value);
-              validatePasswordStrength(e.target.value);
-            }}
-            required
-            style={estilos.input}
-          />
-          <FontAwesomeIcon
-            icon={showNewPassword ? faEyeSlash : faEye}
-            style={estilos.icono}
-            onClick={() => togglePasswordVisibility('new')}
-          />
-          {passwordStrength > 0 && (
-            <p style={estilos.medidor}>
-              Fuerza de la contraseña: {getPasswordStrengthText(passwordStrength)}
-            </p>
-          )}
-        </div>
-        <div style={estilos.campo}>
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirmar nueva contraseña"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            style={estilos.input}
-          />
-          <FontAwesomeIcon
-            icon={showConfirmPassword ? faEyeSlash : faEye}
-            style={estilos.icono}
-            onClick={() => togglePasswordVisibility('confirm')}
-          />
-        </div>
-        {passwordHistoryError && (
-          <p style={estilos.errorMensaje}>{passwordHistoryError}</p>
-        )}
-
-        <button type="submit" style={estilos.boton}>Cambiar Contraseña</button>
-      </form>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container
+        component="main"
+        maxWidth="sm"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "calc(70vh - 64px)", // Ajusta el espacio para el encabezado y pie de página
+          backgroundColor: theme.palette.background.default,
+        }}
+      >
+        <Card
+          elevation={6}
+          sx={{
+            width: "100%",
+            padding: 4,
+            borderRadius: 2,
+            textAlign: "center",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <CardContent>
+            <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: "bold", color: theme.palette.primary.main }}>
+              Cambiar Contraseña
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+              <TextField
+                fullWidth
+                label="Nueva Contraseña"
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  validatePasswordStrength(e.target.value);
+                }}
+                margin="normal"
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => togglePasswordVisibility("new")} edge="end">
+                        <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              {passwordStrength > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <LinearProgress
+                    variant="determinate"
+                    value={(passwordStrength / 4) * 100}
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: "#e0f2f1",
+                      "& .MuiLinearProgress-bar": {
+                        backgroundColor:
+                          passwordStrength < 2
+                            ? "#f44336" // Rojo para contraseña débil
+                            : passwordStrength < 3
+                            ? "#ff9800" // Naranja para contraseña media
+                            : "#4caf50", // Verde para contraseña fuerte
+                      },
+                    }}
+                  />
+                  <Typography variant="body2" sx={{ mt: 1, color: theme.palette.secondary.main }}>
+                    Fuerza de la contraseña: {getPasswordStrengthText(passwordStrength)}
+                  </Typography>
+                </Box>
+              )}
+              <TextField
+                fullWidth
+                label="Confirmar Nueva Contraseña"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                margin="normal"
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => togglePasswordVisibility("confirm")} edge="end">
+                        <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              {passwordHistoryError && (
+                <Typography variant="body2" sx={{ color: "red", mt: 2 }}>
+                  {passwordHistoryError}
+                </Typography>
+              )}
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  backgroundColor: theme.palette.primary.main,
+                  "&:hover": { backgroundColor: "#004d40" },
+                  padding: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                Cambiar Contraseña
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </ThemeProvider>
   );
 }
 

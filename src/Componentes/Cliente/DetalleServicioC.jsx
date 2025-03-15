@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BreadcrumbsServicios from '../Navegacion/BreadcrumbsServicios';
+import { Container, Grid, Typography, Button, Box, Paper, Avatar } from '@mui/material';
 
 const DetallesServicioC = () => {
   const [servicio, setServicio] = useState(null);
@@ -32,7 +33,7 @@ const DetallesServicioC = () => {
   }, [id]);
 
   if (!servicio) {
-    return <p>Cargando servicio...</p>;
+    return <Typography>Cargando servicio...</Typography>;
   }
 
   const handlePagoClick = () => {
@@ -42,103 +43,7 @@ const DetallesServicioC = () => {
   const manejarProductoRelacionadoClick = (idProducto) => {
     const productosRestantes = productosRelacionados.filter(prod => prod.id !== idProducto);
     setProductosRelacionados(productosRestantes);
-    navigate(`/detalle/${idProducto}`);
-  };
-
-  const styles = {
-    container: {
-      padding: '1rem',
-      maxWidth: '1100px',
-      margin: '0 auto',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#fff',
-      borderRadius: '8px',
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '20px',
-    },
-    leftColumn: {
-      flex: 2,
-      minWidth: '300px',
-    },
-    rightColumn: {
-      flex: 1,
-      minWidth: '250px',
-      borderLeft: '1px solid #ddd',
-      paddingLeft: '20px',
-    },
-    imagen: {
-      width: '100%',
-      height: '300px',
-      objectFit: 'cover',
-      borderRadius: '8px',
-    },
-    titulo: {
-      fontSize: '22px',
-      fontWeight: 'bold',
-      margin: '16px 0',
-      color: '#333',
-      textAlign: 'start',
-    },
-    descripcion: {
-      fontSize: '16px',
-      color: '#555',
-      marginBottom: '16px',
-      lineHeight: '1.6',
-    },
-    precio: {
-      fontSize: '20px',
-      color: '#d32f2f',
-      fontWeight: 'bold',
-      marginBottom: '16px',
-    },
-    detalles: {
-      fontSize: '16px',
-      color: '#333',
-      marginBottom: '16px',
-    },
-    boton: {
-      width: '100%',
-      padding: '12px',
-      backgroundColor: '#007bff',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      fontSize: '18px',
-      transition: 'background-color 0.3s',
-      textAlign: 'center',
-      maxWidth: '150px',
-    },
-    botonHover: {
-      backgroundColor: '#0056b3',
-    },
-    productosRelacionadosContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    productoRelacionado: {
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '12px',
-      cursor: 'pointer',
-      borderBottom: '1px solid #ddd',
-      paddingBottom: '8px',
-    },
-    productoImagen: {
-      width: '60px',
-      height: '60px',
-      marginRight: '10px',
-      borderRadius: '8px',
-      objectFit: 'contain',
-    },
-    flecha: {
-      cursor: 'pointer',
-      fontSize: '16px',
-      color: '#007bff',
-      marginTop: '10px',
-      textAlign: 'center',
-    },
+    navigate(`/cliente/detalle/${idProducto}`);
   };
 
   const mostrarMasProductos = () => {
@@ -152,44 +57,87 @@ const DetallesServicioC = () => {
   return (
     <div>
       <BreadcrumbsServicios />
-      <div style={styles.container}>
-        <div style={styles.leftColumn}>
-          <img src={servicio.imagen} alt={servicio.nombre} style={styles.imagen} />
-          <h1 style={styles.titulo}>{servicio.nombre}</h1>
-          <p><strong>Descripción:</strong></p>
-          <p style={styles.descripcion}>{servicio.descripcion}</p>
-          <p style={styles.precio}>Precio: ${servicio.precio}</p>
-          <div style={styles.detalles}>
-            <p>Categoría: {servicio.categoria_nombre}</p>
-          </div>
-          <button
-            style={styles.boton}
-            onMouseOver={(e) => e.target.style.backgroundColor = styles.botonHover.backgroundColor}
-            onMouseOut={(e) => e.target.style.backgroundColor = styles.boton.backgroundColor}
-            onClick={handlePagoClick}
-          >
-            Sacar cita
-          </button>
-        </div>
+      <Container maxWidth="lg" sx={{ paddingY: 4 }}>
+        <Grid container spacing={4}>
+          {/* Columna izquierda */}
+          <Grid item xs={12} md={8}>
+            <Paper elevation={3} sx={{ padding: 2 }}>
+              <Box sx={{ mb: 2 }}>
+                <img src={servicio.imagen} alt={servicio.nombre} style={{ width: '100%', height: 'auto', borderRadius: '8px' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#333', mb: 2 }}>
+                {servicio.nombre}
+              </Typography>
+              <Typography variant="body1" sx={{ color: '#555', mb: 2 }}>
+                <strong>Descripción:</strong> {servicio.descripcion}
+              </Typography>
+              <Typography variant="h6" sx={{ color: '#d32f2f', fontWeight: 'bold', mb: 2 }}>
+                Precio: ${servicio.precio}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                <strong>Categoría:</strong> {servicio.categoria_nombre}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handlePagoClick}
+                sx={{ padding: '12px', fontSize: '18px', mt: 2 }}
+              >
+                Sacar cita
+              </Button>
+            </Paper>
+          </Grid>
 
-        <div style={styles.rightColumn}>
-          <h2>Servicios Relacionados</h2>
-          <div style={styles.productosRelacionadosContainer}>
-            {productosRelacionados.slice(0, mostrarProductos).map((prod) => (
-              <div key={prod.id} style={styles.productoRelacionado} onClick={() => manejarProductoRelacionadoClick(prod.id)}>
-                <img src={prod.imagen} alt={prod.nombre} style={styles.productoImagen} />
-                <p>{prod.nombre}</p>
-              </div>
-            ))}
-          </div>
-          {mostrarProductos < productosRelacionados.length && (
-            <span style={styles.flecha} onClick={mostrarMasProductos}>➡️ Mostrar más</span>
-          )}
-          {mostrarProductos > 3 && (
-            <span style={styles.flecha} onClick={mostrarMenosProductos}>⬅️ Mostrar menos</span>
-          )}
-        </div>
-      </div>
+          {/* Columna derecha */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} sx={{ padding: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+                Servicios Relacionados
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                {productosRelacionados.slice(0, mostrarProductos).map((prod) => (
+                  <Box
+                    key={prod.id}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: 2,
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #ddd',
+                      paddingBottom: 1
+                    }}
+                    onClick={() => manejarProductoRelacionadoClick(prod.id)}
+                  >
+                    <Avatar alt={prod.nombre} src={prod.imagen} sx={{ width: 60, height: 60, marginRight: 2 }} />
+                    <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                      {prod.nombre}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+              {mostrarProductos < productosRelacionados.length && (
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#007bff', cursor: 'pointer', textAlign: 'center' }}
+                  onClick={mostrarMasProductos}
+                >
+                  ➡️ Mostrar más
+                </Typography>
+              )}
+              {mostrarProductos > 3 && (
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#007bff', cursor: 'pointer', textAlign: 'center' }}
+                  onClick={mostrarMenosProductos}
+                >
+                  ⬅️ Mostrar menos
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
     </div>
   );
 };
