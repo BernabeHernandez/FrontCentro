@@ -1,6 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircleOutlined, CloseCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { message } from 'antd';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  Typography,
+  Container,
+  Grid,
+  Pagination,
+  Box,
+  CircularProgress,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  '&:hover': {
+    backgroundColor: theme.palette.action.selected,
+  },
+}));
 
 const RegistroCambioPassw = () => {
   const [changeLogs, setChangeLogs] = useState([]);
@@ -8,6 +34,8 @@ const RegistroCambioPassw = () => {
   const [error, setError] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [page, setPage] = useState(1);
+  const [rowsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchChangeLogs = async () => {
@@ -28,199 +56,134 @@ const RegistroCambioPassw = () => {
         setLoading(false);
       }
     };
+
     fetchChangeLogs();
   }, [startDate, endDate]);
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleDateChange = (setter, value, validationMessage) => {
+    if (validationMessage) {
+      message.warning(validationMessage);
+    } else {
+      setter(value);
+    }
+  };
+
+  const paginatedLogs = changeLogs.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   if (error) {
     return <div>Error: {error}</div>;
   }
 
   return (
-    <div className="change-log">
-      <style>{`
-        .change-log {
-          padding: 20px;
-          max-width: 800px;
-          background-color: #f9f9f9;
-          border-radius: 8px;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          display: flex;
-          flex-direction: column;
-          gap: 20px; /* Espacio entre el contenido */
-          margin: auto auto 40px;
-        }
+    <Container maxWidth="md">
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" component="h2" gutterBottom align="center">
+          Registro de Cambio de Contraseña
+        </Typography>
 
-        h2 {
-          text-align: center;
-          color: #333;
-          margin-bottom: 20px;
-        }
-
-        .filter-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center; 
-          margin-bottom: 20px;
-          padding: 10px;
-          border: 1px solid #ddd; 
-          border-radius: 8px; 
-          background-color: #fff; 
-        }
-
-        .filter-container label {
-          margin-right: 10px; 
-          font-weight: bold;
-          color: #333; 
-        }
-
-        .filter-container input {
-          padding: 8px;
-          border: 1px solid #ccc; 
-          border-radius: 4px; 
-          width: 150px; 
-        }
-
-    
-        body.dark-mode .filter-container label {
-          color: #f9f9f9; 
-        }
-
-        .table-container {
-          max-height: 400px; 
-          overflow-y: auto; 
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          background-color: #fff; 
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 20px;
-        }
-
-        th, td {
-          padding: 12px;
-          text-align: left;
-          border-bottom: 1px solid #ddd;
-        }
-
-        th {
-          background-color: #007bff; 
-          color: white;
-          font-weight: bold;
-        }
-
-        tr:hover {
-          background-color: #f1f1f1; 
-        }
-
-        .status-success {
-          background-color: #d4edda; 
-          color: #155724; 
-        }
-
-        .status-failed {
-          background-color: #f8d7da; 
-          color: #721c24; 
-        }
-
-        .status-icon {
-          margin-right: 8px; 
-        }
-
-        .no-data {
-          text-align: center;
-          color: #888;
-          margin-top: 20px;
-        }
-
-        .no-data-icon {
-          font-size: 50px;
-          color: #007bff;
-        }
-
-        @media (max-width: 600px) {
-          table {
-            font-size: 14px; 
-          }
-        }
-      `}</style>
-      
-      <h2>Registro de Cambio de Contraseña</h2>
-      <div className="filter-container">
-        <div>
-          <label htmlFor="start-date">Inicio:</label>
-          <input 
-            type="date" 
-            id="start-date"
-            value={startDate} 
-            onChange={(e) => {
-              const selectedDate = e.target.value;
-              setStartDate(selectedDate);
-              if (endDate && new Date(selectedDate) > new Date(endDate)) {
-                setEndDate('');
-                message.warning('La fecha de inicio debe ser anterior a la fecha de fin.');
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Fecha de Inicio"
+              type="date"
+              value={startDate}
+              onChange={(e) =>
+                handleDateChange(
+                  setStartDate,
+                  e.target.value,
+                  endDate && new Date(e.target.value) > new Date(endDate)
+                    ? 'La fecha de inicio debe ser anterior a la fecha de fin.'
+                    : null
+                )
               }
-            }} 
-          />
-        </div>
-        <div>
-          <label htmlFor="end-date">Fin:</label>
-          <input 
-            type="date" 
-            id="end-date"
-            value={endDate} 
-            onChange={(e) => {
-              const selectedDate = e.target.value;
-              if (startDate && new Date(selectedDate) < new Date(startDate)) {
-                message.warning('La fecha de fin debe ser posterior a la fecha de inicio.');
-              } else {
-                setEndDate(selectedDate);
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Fecha de Fin"
+              type="date"
+              value={endDate}
+              onChange={(e) =>
+                handleDateChange(
+                  setEndDate,
+                  e.target.value,
+                  startDate && new Date(e.target.value) < new Date(startDate)
+                    ? 'La fecha de fin debe ser posterior a la fecha de inicio.'
+                    : null
+                )
               }
-            }} 
-          />
-        </div>
-      </div>
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+        </Grid>
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Estado</th>
-              <th>Acción</th>
-              <th>Fecha y Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-            {changeLogs.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="no-data">
-                  <InfoCircleOutlined className="no-data-icon" />
-                  No hay datos disponibles.
-                </td>
-              </tr>
-            ) : (
-              changeLogs.map((log) => (
-                <tr key={log._id} className={log.estado === 'Exitoso' ? 'status-success' : 'status-failed'}>
-                  <td>{log.usuario}</td>
-                  <td>
-                    <span className="status-icon">
-                      {log.estado === 'Exitoso' ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-                      {log.estado}
-                    </span>
-                  </td>
-                  <td>{log.razon}</td>
-                  <td>{new Date(log.fechaHora).toLocaleString()}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+            <CircularProgress />
+          </Box>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Usuario</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Razón</TableCell>
+                  <TableCell>Fecha y Hora</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedLogs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      <InfoCircleOutlined style={{ fontSize: '50px', color: '#007bff' }} />
+                      <Typography variant="body1">No hay datos disponibles.</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedLogs.map((log) => (
+                    <StyledTableRow key={log._id}>
+                      <TableCell>{log.usuario}</TableCell>
+                      <TableCell>
+                        {log.estado === 'Exitoso' ? (
+                          <Box display="flex" alignItems="center">
+                            <CheckCircleOutlined style={{ color: '#28a745', marginRight: '8px' }} />
+                            {log.estado}
+                          </Box>
+                        ) : (
+                          <Box display="flex" alignItems="center">
+                            <CloseCircleOutlined style={{ color: '#dc3545', marginRight: '8px' }} />
+                            {log.estado}
+                          </Box>
+                        )}
+                      </TableCell>
+                      <TableCell>{log.razon}</TableCell>
+                      <TableCell>{new Date(log.fechaHora).toLocaleString()}</TableCell>
+                    </StyledTableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={Math.ceil(changeLogs.length / rowsPerPage)}
+            page={page}
+            onChange={handleChangePage}
+            color="primary"
+          />
+        </Box>
+      </Box>
+    </Container>
   );
 };
 

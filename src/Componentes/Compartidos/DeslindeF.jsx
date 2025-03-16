@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { message } from 'antd'; 
+import { message } from 'antd';
+import {
+  Typography,
+  Container,
+  Box,
+  CircularProgress,
+  Paper,
+} from '@mui/material';
 
 const DeslindeF = () => {
   const [deslinde, setDeslinde] = useState(null);
@@ -9,7 +16,7 @@ const DeslindeF = () => {
   useEffect(() => {
     const fetchDeslinde = async () => {
       try {
-        const response = await fetch('https://backendcentro.onrender.com/api/deslindes/ultimo'); 
+        const response = await fetch('https://backendcentro.onrender.com/api/deslindes/ultimo');
         if (!response.ok) {
           throw new Error('Error al cargar el deslinde');
         }
@@ -17,7 +24,7 @@ const DeslindeF = () => {
         setDeslinde(data);
       } catch (err) {
         setError(err.message);
-        message.error('Error al cargar el deslinde'); 
+        message.error('Error al cargar el deslinde');
       } finally {
         setLoading(false);
       }
@@ -27,87 +34,54 @@ const DeslindeF = () => {
   }, []);
 
   if (loading) {
-    return <div style={styles.loadingMessage}>Cargando deslinde...</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <div style={styles.errorMessage}>Error: {error}</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <Typography variant="h6" color="error">
+          Error: {error}
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div style={styles.deslindeContainer}>
-      <h2 style={styles.deslindeTitle}>{deslinde.titulo || "Deslinde"}</h2>
-      <p style={styles.deslindeContent}>{deslinde.contenido}</p>
-      
-      {/* Cambiamos de 'secciones' a 'subtitulos' */}
-      {deslinde.subtitulos && deslinde.subtitulos.length > 0 ? (
-        deslinde.subtitulos.map((section, index) => (
-          <div key={index} style={styles.section}>
-            <h3 style={styles.sectionTitle}>{section.titulo}</h3>
-            <p style={styles.sectionContent}>{section.contenido}</p>
-          </div>
-        ))
-      ) : (
-        <p style={styles.noDataMessage}>No hay secciones disponibles.</p>
-      )}
-    </div>
-  );
-};
+    <Container maxWidth="md">
+      <Box sx={{ my: 4 }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: '10px', backgroundColor: '#f9f9f9' }}>
+          <Typography variant="h4" component="h2" align="center" gutterBottom sx={{ color: '#333', borderBottom: '2px solid #007bff', pb: 2 }}>
+            {deslinde.titulo || "Deslinde"}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#555', my: 2 }}>
+            {deslinde.contenido}
+          </Typography>
 
-const styles = {
-  deslindeContainer: {
-    maxWidth: '800px',
-    margin: '20px auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden', 
-  },
-  deslindeTitle: {
-    fontSize: '2rem',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: '20px',
-    borderBottom: '2px solid #007bff',
-    paddingBottom: '10px',
-  },
-  deslindeContent: {
-    fontSize: '1.1rem',
-    lineHeight: '1.6',
-    color: '#555',
-    margin: '15px 0',
-    wordWrap: 'break-word', 
-  },
-  section: {
-    marginTop: '20px',
-  },
-  sectionTitle: {
-    fontSize: '1.5rem',
-    color: '#007bff',
-    margin: '10px 0',
-  },
-  sectionContent: {
-    fontSize: '1.1rem',
-    lineHeight: '1.4',
-    color: '#555',
-    wordWrap: 'break-word', 
-  },
-  loadingMessage: {
-    textAlign: 'center',
-    fontSize: '1.2rem',
-    color: '#007bff',
-  },
-  errorMessage: {
-    textAlign: 'center',
-    fontSize: '1.2rem',
-    color: '#ff4d4f',
-  },
-  noDataMessage: {
-    textAlign: 'center',
-    fontSize: '1.2rem',
-    color: '#007bff',
-  },
+          {deslinde.subtitulos && deslinde.subtitulos.length > 0 ? (
+            deslinde.subtitulos.map((section, index) => (
+              <Box key={index} sx={{ mt: 4 }}>
+                <Typography variant="h5" component="h3" sx={{ color: '#007bff', mb: 2 }}>
+                  {section.titulo}
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: '1.4', color: '#555' }}>
+                  {section.contenido}
+                </Typography>
+              </Box>
+            ))
+          ) : (
+            <Typography variant="body1" align="center" sx={{ fontSize: '1.2rem', color: '#007bff', mt: 4 }}>
+              No hay secciones disponibles.
+            </Typography>
+          )}
+        </Paper>
+      </Box>
+    </Container>
+  );
 };
 
 export default DeslindeF;

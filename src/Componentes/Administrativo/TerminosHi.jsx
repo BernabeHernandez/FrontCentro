@@ -1,8 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Container,
+  Box,
+  Button,
+  Pagination,
+  CircularProgress,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  '&:hover': {
+    backgroundColor: theme.palette.action.selected,
+  },
+}));
 
 const TerminosHi = () => {
   const [historial, setHistorial] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage] = useState(10);
 
   useEffect(() => {
     const obtenerHistorial = async () => {
@@ -11,13 +44,13 @@ const TerminosHi = () => {
         const datos = respuesta.data;
 
         const datosOrdenados = datos.sort((a, b) => {
-          return parseFloat(b.version) - parseFloat(a.version); 
+          return parseFloat(b.version) - parseFloat(a.version);
         });
 
         const datosActualizados = datosOrdenados.map((termino, indice) => {
-          let estado = "No Vigente"; 
+          let estado = "No Vigente";
           if (termino.estado === "eliminado") {
-            estado = "Eliminado";  
+            estado = "Eliminado";
           } else if (indice === 0) {
             estado = "Vigente";
           }
@@ -29,7 +62,10 @@ const TerminosHi = () => {
 
         setHistorial(datosActualizados);
       } catch (error) {
+        setError('Error al obtener el historial de términos');
         console.error('Error al obtener el historial de términos:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -39,8 +75,8 @@ const TerminosHi = () => {
   const manejarMostrar = async (id) => {
     try {
       await axios.patch(`https://backendcentro.onrender.com/api/historialterminos/${id}`, { Estado: "activo" });
-      setHistorial((prevHistorial) => 
-        prevHistorial.map((termino) => 
+      setHistorial((prevHistorial) =>
+        prevHistorial.map((termino) =>
           termino.id === id ? { ...termino, estado: "No vigente" } : termino
         )
       );
@@ -49,198 +85,123 @@ const TerminosHi = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const paginatedHistorial = historial.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <Typography variant="h6" color="error">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <div style={estilos.contenedor}>
-      <h1 style={estilos.titulo}>Historial de Términos</h1>
+    <Container maxWidth="lg">
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom align="center">
+          Historial de Términos y Condiciones
+        </Typography>
 
-      {historial.length > 0 ? (
-        <div style={estilos.contenedorTabla}>
-          <table style={estilos.tabla}>
-            <thead>
-              <tr style={estilos.filaEncabezado}>
-                <th style={estilos.celdaEncabezado}>Título</th>
-                <th style={estilos.celdaEncabezado}>Fecha de Vigencia</th>
-                <th style={estilos.celdaEncabezado}>Fecha de Creación</th>
-                <th style={estilos.celdaEncabezado}>Versión</th>
-                <th style={estilos.celdaEncabezado}>Estado</th>
-                <th style={estilos.celdaEncabezado}>Contenido</th>
-                <th style={estilos.celdaEncabezado}>Secciones</th>
-                <th style={estilos.celdaEncabezado}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historial.map((termino, indice) => (
-                <tr
-                  key={termino.id}
-                  style={{
-                    ...estilos.filaTabla,
-                    backgroundColor: indice % 2 === 0 ? '#f9fafb' : '#ffffff',
-                  }}
-                >
-                  <td style={estilos.celdaTabla}>{termino.titulo}</td>
-                  <td style={estilos.celdaTabla}>{termino.fechaVigencia}</td>
-                  <td style={estilos.celdaTabla}>{new Date(termino.fechaCreacion).toISOString().split('T')[0]}</td>
-                  <td style={estilos.celdaTabla}>{termino.version}</td>
-                  <td style={estilos.celdaTabla}>
-                    <span style={termino.estado === 'Vigente' ? estilos.vigente : termino.estado === 'No Vigente' ? estilos.noVigente : estilos.eliminado}>
-                      {termino.estado}
-                    </span>
-                  </td>
-                  <td style={estilos.celdaTabla}>{termino.contenido}</td>
-                  <td style={estilos.celdaTabla}>
-                    {termino.secciones && termino.secciones.length > 0 ? (
-                      <ul style={estilos.listaSecciones}>
-                        {termino.secciones.map((seccion, index) => (
-                          <li key={index}>
-                            <strong>{seccion.titulo}:</strong> {seccion.contenido}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span>No hay secciones</span>
-                    )}
-                  </td>
-                  <td style={estilos.celdaTabla}>
-                    {termino.estado === 'Eliminado' && (
-                      <button 
-                        style={estilos.botonMostrar} 
-                        onClick={() => manejarMostrar(termino.id)}
-                      >
-                        Mostrar
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p>No hay términos en el historial</p>
-      )}
-    </div>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Título</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Vigencia</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Creación</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Versión</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Estado</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Contenido</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Secciones</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedHistorial.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    <Typography variant="body1">No hay términos en el historial</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedHistorial.map((termino, indice) => (
+                  <StyledTableRow key={termino.id}>
+                    <TableCell>{termino.titulo}</TableCell>
+                    <TableCell>{termino.fechaVigencia}</TableCell>
+                    <TableCell>{new Date(termino.fechaCreacion).toISOString().split('T')[0]}</TableCell>
+                    <TableCell>{termino.version}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={termino.estado}
+                        color={
+                          termino.estado === 'Vigente'
+                            ? 'success'
+                            : termino.estado === 'No Vigente'
+                            ? 'error'
+                            : 'default'
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>{termino.contenido}</TableCell>
+                    <TableCell>
+                      {termino.secciones && termino.secciones.length > 0 ? (
+                        <List dense>
+                          {termino.secciones.map((seccion, index) => (
+                            <ListItem key={index}>
+                              <ListItemText
+                                primary={seccion.titulo}
+                                secondary={seccion.contenido}
+                              />
+                            </ListItem>
+                          ))}
+                        </List>
+                      ) : (
+                        <Typography variant="body2">No hay secciones</Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {termino.estado === 'Eliminado' && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => manejarMostrar(termino.id)}
+                        >
+                          Mostrar
+                        </Button>
+                      )}
+                    </TableCell>
+                  </StyledTableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={Math.ceil(historial.length / rowsPerPage)}
+            page={page}
+            onChange={handleChangePage}
+            color="primary"
+          />
+        </Box>
+      </Box>
+    </Container>
   );
-};
-
-const estilos = {
-  contenedor: {
-    padding: '20px',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    backgroundColor: '#f4f7fa',
-    borderRadius: '8px',
-  },
-  titulo: {
-    fontSize: '28px',
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: '20px',
-    textAlign: 'center',
-  },
-  contenedorTabla: {
-    overflowX: 'auto',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  },
-  tabla: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    marginTop: '10px',
-  },
-  filaEncabezado: {
-    backgroundColor: '#34495e',
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'left',
-  },
-  celdaEncabezado: {
-    padding: '12px',
-    textAlign: 'left',
-    fontSize: '16px',
-  },
-  filaTabla: {
-    transition: 'background-color 0.3s ease',
-  },
-  celdaTabla: {
-    padding: '12px',
-    fontSize: '15px',
-    color: '#2c3e50',
-    borderBottom: '1px solid #ecf0f1',
-  },
-  listaSecciones: {
-    margin: 0,
-    paddingLeft: '20px',
-  },
-  vigente: {
-    color: 'green',
-    fontWeight: 'bold',
-  },
-  noVigente: {
-    color: 'red',
-    fontWeight: 'bold',
-  },
-  eliminado: {
-    color: 'gray',
-    fontWeight: 'bold',
-  },
-  botonMostrar: {
-    backgroundColor: '#27ae60',
-    color: 'white',
-    padding: '5px 10px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  '@media (max-width: 1200px)': { 
-    contenedor: {
-      padding: '15px',
-    },
-    titulo: {
-      fontSize: '24px',
-    },
-    tabla: {
-      marginTop: '15px',
-    },
-  },
-  '@media (max-width: 768px)': { 
-    contenedor: {
-      padding: '15px',
-    },
-    titulo: {
-      fontSize: '22px',
-    },
-    tabla: {
-      marginTop: '10px',
-    },
-    celdaEncabezado: {
-      fontSize: '14px',
-    },
-    celdaTabla: {
-      fontSize: '14px',
-    },
-  },
-  '@media (max-width: 480px)': { 
-    contenedor: {
-      padding: '10px',
-    },
-    titulo: {
-      fontSize: '20px',
-    },
-    tabla: {
-      fontSize: '14px',
-      marginTop: '5px',
-    },
-    celdaEncabezado: {
-      fontSize: '12px',
-    },
-    celdaTabla: {
-      fontSize: '13px',
-    },
-    listaSecciones: {
-      paddingLeft: '10px',
-    },
-  },
 };
 
 export default TerminosHi;

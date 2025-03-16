@@ -2,7 +2,29 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
+  Box,
+  Tooltip, // Importar Tooltip aquí
+} from '@mui/material';
+import { Add, Edit, Delete, Remove, History } from '@mui/icons-material';
 
 const MySwal = withReactContent(Swal);
 
@@ -16,6 +38,9 @@ const Terminos = () => {
   const [currentId, setCurrentId] = useState('');
   const [fechaCreacion, setFechaCreacion] = useState('');
   const [version, setVersion] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const apiUrl = 'https://backendcentro.onrender.com/api/terminos';
 
@@ -37,22 +62,17 @@ const Terminos = () => {
         return currentTerm.version > maxTerm.version ? currentTerm : maxTerm;
       });
 
-      const updatedTerminos = terminosData.map(termino => {
-        return {
-          ...termino,
-          estado: termino.version === maxVersionTermino.version ? 'Vigente' : 'No Vigente',
-        };
-      });
+      const updatedTerminos = terminosData.map(termino => ({
+        ...termino,
+        estado: termino.version === maxVersionTermino.version ? 'Vigente' : 'No Vigente',
+      }));
 
       setTerminos(updatedTerminos);
     } catch (error) {
       console.error('Error al obtener términos:', error);
-      if (error.response) {
-        MySwal.fire('Error', 'No se pudo obtener la lista de términos', 'error');
-      }
+      MySwal.fire('Error', 'No se pudo obtener la lista de términos', 'error');
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,7 +88,8 @@ const Terminos = () => {
   const createTermino = async () => {
     try {
       await axios.post(apiUrl, { titulo, contenido, fechaVigencia, secciones });
-      MySwal.fire('Éxito', 'Se insertó correctamente', 'success');
+      setSnackbarMessage('Término creado correctamente');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error al crear término:', error);
       MySwal.fire('Error', 'No se pudo crear el término', 'error');
@@ -78,7 +99,8 @@ const Terminos = () => {
   const updateTermino = async (id) => {
     try {
       await axios.put(`${apiUrl}/${id}`, { titulo, contenido, fechaVigencia, secciones });
-      MySwal.fire('Éxito', 'Actualizado correctamente', 'success');
+      setSnackbarMessage('Término actualizado correctamente');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error al actualizar término:', error);
       MySwal.fire('Error', 'No se pudo actualizar el término', 'error');
@@ -100,7 +122,8 @@ const Terminos = () => {
     if (confirm.isConfirmed) {
       try {
         await axios.delete(`${apiUrl}/${id}`);
-        MySwal.fire('Eliminado', 'Eliminado correctamente', 'success');
+        setSnackbarMessage('Término eliminado correctamente');
+        setSnackbarOpen(true);
         fetchTerminos();
       } catch (error) {
         console.error('Error al eliminar término:', error);
@@ -112,7 +135,8 @@ const Terminos = () => {
   const deleteTerminoTabla = async (id) => {
     try {
       await axios.put(`${apiUrl}/eliminar-tabla/${id}`);
-      MySwal.fire('Éxito', 'Término marcado como eliminado en la tabla', 'success');
+      setSnackbarMessage('Término marcado como eliminado en la tabla');
+      setSnackbarOpen(true);
       fetchTerminos();
     } catch (error) {
       console.error('Error al eliminar término de la tabla:', error);
@@ -129,6 +153,7 @@ const Terminos = () => {
     setFechaCreacion(termino.fechaCreacion);
     setVersion(termino.version);
     setEditMode(true);
+    setOpenDialog(true);
   };
 
   const resetForm = () => {
@@ -140,6 +165,7 @@ const Terminos = () => {
     setCurrentId('');
     setFechaCreacion('');
     setVersion('');
+    setOpenDialog(false);
   };
 
   const handleAddSection = () => {
@@ -158,331 +184,174 @@ const Terminos = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Gestión de Términos</h1>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          placeholder="Ingrese título"
-          required
-          style={styles.input}
-        />
-        <textarea
-          value={contenido}
-          onChange={(e) => setContenido(e.target.value)}
-          placeholder="Ingrese contenido"
-          required
-          style={styles.textarea}
-        />
-        <input
-          type="date"
-          value={fechaVigencia}
-          onChange={(e) => setFechaVigencia(e.target.value)}
-          required
-          style={styles.input}
-        />
+    <Container maxWidth="lg">
+      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mt: 4 }}>
+        Gestión de Términos
+      </Typography>
 
-        {secciones.map((section, index) => (
-          <div key={index} style={styles.section}>
-            <div style={styles.sectionInputContainer}>
-              <input
-                type="text"
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Add />}
+        onClick={() => setOpenDialog(true)}
+        sx={{ mb: 4 }}
+      >
+        Agregar Término
+      </Button>
+
+      <Dialog open={openDialog} onClose={resetForm} maxWidth="md" fullWidth>
+        <DialogTitle>{editMode ? 'Editar Término' : 'Agregar Término'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Título"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            required
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Contenido"
+            value={contenido}
+            onChange={(e) => setContenido(e.target.value)}
+            required
+            multiline
+            rows={4}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Fecha de Vigencia"
+            type="date"
+            value={fechaVigencia}
+            onChange={(e) => setFechaVigencia(e.target.value)}
+            required
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+          />
+
+          {secciones.map((section, index) => (
+            <Box key={index} sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="Subtítulo"
                 value={section.titulo}
                 onChange={(e) => handleSectionChange(index, 'titulo', e.target.value)}
-                placeholder="Ingrese subtítulo"
                 required
-                style={styles.input}
+                sx={{ mb: 2 }}
               />
-              <textarea
+              <TextField
+                fullWidth
+                label="Contenido del Subtítulo"
                 value={section.contenido}
                 onChange={(e) => handleSectionChange(index, 'contenido', e.target.value)}
-                placeholder="Ingrese contenido del subtítulo"
                 required
-                style={styles.textarea}
+                multiline
+                rows={2}
+                sx={{ mb: 2 }}
               />
-            </div>
-            <div style={styles.removeButtonContainer}>
-              <button
-                type="button"
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<Remove />}
                 onClick={() => handleRemoveSection(index)}
-                style={styles.removeButton}>
+              >
                 Eliminar Sección
-              </button>
-            </div>
-          </div>
-        ))}
+              </Button>
+            </Box>
+          ))}
 
-        <button type="button" onClick={handleAddSection} style={styles.addButton}>
-          Agregar Sección
-        </button>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<Add />}
+            onClick={handleAddSection}
+            sx={{ mt: 2 }}
+          >
+            Agregar Sección
+          </Button>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={resetForm} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            {editMode ? 'Actualizar' : 'Agregar'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <div style={styles.buttonContainer}>
-          <button type="submit" style={styles.submitButton}>
-            {editMode ? 'Actualizar Término' : 'Agregar Término'}
-          </button>
-          {editMode && (
-            <button type="button" onClick={resetForm} style={styles.cancelButton}>
-              Cancelar
-            </button>
-          )}
-        </div>
-      </form>
-
-      <h2 style={styles.subTitle}>Lista de Términos</h2>
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.tableHeader}>
-              <th style={styles.tableHeaderCell}>Título</th>
-              <th style={styles.tableHeaderCell}>Contenido</th>
-              <th style={styles.tableHeaderCell}>Fecha de Vigencia</th>
-              <th style={styles.tableHeaderCell}>Fecha de Creación</th>
-              <th style={styles.tableHeaderCell}>Versión</th>
-              <th style={styles.tableHeaderCell}>Estado</th>
-              <th style={styles.tableHeaderCell}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
+      <TableContainer component={Paper} sx={{ mb: 4 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Título</TableCell>
+              <TableCell>Contenido</TableCell>
+              <TableCell>Fecha de Vigencia</TableCell>
+              <TableCell>Fecha de Creación</TableCell>
+              <TableCell>Versión</TableCell>
+              <TableCell>Estado</TableCell>
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {terminos.map((termino) => (
-              <tr key={termino.id} style={styles.tableRow}>
-                <td style={styles.tableCell}>{termino.titulo}</td>
-                <td style={styles.tableCell}>{termino.contenido}</td>
-                <td style={styles.tableCell}>{new Date (termino.fechaVigencia).toISOString().split('T')[0]}</td>
-                <td style={styles.tableCell}>{new Date(termino.fechaCreacion).toISOString().split('T')[0]}</td>
-                <td style={styles.tableCell}>{termino.version}</td>
-                <td style={styles.tableCell}>{termino.estado}</td>
-                <td style={styles.tableCell}>
-                  <button
-                    onClick={() => editTermino(termino.id, termino)}
-                    style={styles.editButton}>
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => deleteTermino(termino.id)}
-                    style={styles.deleteButton}>
-                    Eliminar
-                  </button>
-                  <button
-                    onClick={() => deleteTerminoTabla(termino.id)}
-                    style={termino.estado === 'Vigente' ? styles.disabledButton : styles.softDeleteButton}
-                    disabled={termino.estado === 'Vigente'} 
-                  >
-                    Quitar
-                  </button>
-                </td>
-              </tr>
+              <TableRow key={termino.id}>
+                <TableCell>{termino.titulo}</TableCell>
+                <TableCell>{termino.contenido}</TableCell>
+                <TableCell>{new Date(termino.fechaVigencia).toISOString().split('T')[0]}</TableCell>
+                <TableCell>{new Date(termino.fechaCreacion).toISOString().split('T')[0]}</TableCell>
+                <TableCell>{termino.version}</TableCell>
+                <TableCell>{termino.estado}</TableCell>
+                <TableCell>
+                  <Tooltip title="Editar">
+                    <IconButton color="primary" onClick={() => editTermino(termino.id, termino)}>
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Eliminar">
+                    <IconButton color="error" onClick={() => deleteTermino(termino.id)}>
+                      <Delete />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={termino.estado === 'Vigente' ? 'No se puede quitar' : 'Quitar de la tabla'}>
+                    <span>
+                      <IconButton
+                        color="warning"
+                        onClick={() => deleteTerminoTabla(termino.id)}
+                        disabled={termino.estado === 'Vigente'}
+                      >
+                        <Remove />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
-      <Link to="/admin/historial-terminos" style={styles.linkButton}>
-        <button style={styles.historialButton}>
-          Ir al Historial
-        </button>
-      </Link>
-    </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Button
+        component={Link}
+        to="/admin/historial-terminos"
+        variant="contained"
+        color="primary"
+        startIcon={<History />}
+        sx={{ mb: 4 }}
+      >
+        Ir al Historial
+      </Button>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
+    </Container>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: '800px',
-    margin: 'auto',
-    padding: '20px',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    backgroundColor: '#f9f9f9',
-  },
-  actionCell: {
-    display: 'flex',
-    justifyContent: 'flex-start', 
-    alignItems: 'center', 
-    padding: '10px',
-  },
-  buttonActionContainer: {
-    display: 'flex',
-    flexDirection: 'row', 
-    gap: '5px', 
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: '20px',
-    fontSize: '24px',
-    color: '#333',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: '20px',
-  },
-  input: {
-    padding: '10px',
-    marginBottom: '10px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-  },
-  textarea: {
-    padding: '10px',
-    marginBottom: '10px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-  },
-  section: {
-    marginBottom: '15px',
-  },
-  sectionInputContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  addButton: {
-    padding: '10px 15px',
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    marginBottom: '10px',
-    alignSelf: 'flex-start',
-  },
-  removeButton: {
-    padding: '5px 10px',
-    backgroundColor: '#f44336',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-  },
-  removeButtonContainer: {
-    textAlign: 'center',
-    marginTop: '5px',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap', 
-  },
-  submitButton: {
-    padding: '10px 15px',
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    flex: 1,
-    marginRight: '10px',
-  },
-  cancelButton: {
-    padding: '10px 15px',
-    backgroundColor: '#f44336',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    flex: 1,
-  },
-  tableContainer: {
-    overflowX: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    marginTop: '20px',
-  },
-  tableHeader: {
-    backgroundColor: '#2196F3',
-    color: 'white',
-  },
-  tableHeaderCell: {
-    padding: '10px',
-    textAlign: 'left',
-    width: '20%',
-  },
-  tableRow: {
-    borderBottom: '1px solid #ccc',
-  },
-  tableCell: {
-    padding: '10px',
-    verticalAlign: 'top',
-    color: '#333',
-    maxWidth: '200px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  editButton: {
-    padding: '5px 10px',
-    backgroundColor: '#FFA500',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
-  deleteButton: {
-    padding: '5px 10px',
-    backgroundColor: '#f44336',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginLeft: '10px',
-  },
-  linkButton: {
-    textDecoration: 'none',
-  },
-  historialButton: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '10px 10px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '14px',
-    marginTop: '20px',
-  },
-  softDeleteButton: {
-    padding: '5px 10px',
-    backgroundColor: '#FFC107',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginLeft: '10px',
-  },
-  disabledButton: {
-    padding: '5px 10px',
-    backgroundColor: '#B0B0B0',  
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'not-allowed',  
-    marginLeft: '10px',
-  },
-
-  
-  '@media (max-width: 768px)': {
-    tableCell: {
-      fontSize: '12px',
-      display: 'block',
-    },
-    input: {
-      padding: '8px',
-    },
-    textarea: {
-      padding: '8px',
-    },
-    buttonContainer: {
-      flexDirection: 'column', 
-      alignItems: 'stretch', 
-    },
-    submitButton: {
-      marginRight: '0',
-      marginBottom: '10px',
-    },
-    cancelButton: {
-      marginBottom: '10px',
-    },
-  },
 };
 
 export default Terminos;
