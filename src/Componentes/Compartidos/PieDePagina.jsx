@@ -9,7 +9,7 @@ import {
   EnvironmentOutlined,
   FileProtectOutlined,
   LockOutlined,
-  FileDoneOutlined,
+  FileDoneOutlined,BulbOutlined, EyeOutlined, MessageOutlined 
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
@@ -91,15 +91,15 @@ const PieDePagina = () => {
             <p style={textStyle}><PhoneOutlined style={iconStyle} /> Teléfono: {datosEmpresa.telefono || 'No disponible'}</p>
             <p style={textStyle}><MailOutlined style={iconStyle} /> Correo electrónico: {datosEmpresa.correo || 'No disponible'}</p>
             <p style={textStyle}><EnvironmentOutlined style={iconStyle} /> Ubicación: {datosEmpresa.direccion || 'No disponible'}</p>
-            <Link to="/chats" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Chats</Link>
+            <Link to="/chats" style={linkStyle}><MessageOutlined style={iconStyle} /> Chats</Link>
           </div>
           <div>
             <h2 style={headerStyle}>Datos de la empresa</h2>
             <Link to="/deslindes" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Deslinde legal</Link>
             <Link to="/politicass" style={linkStyle}><LockOutlined style={iconStyle} /> Política de Privacidad</Link>
             <Link to="/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Términos y condiciones</Link>
-            <Link to="/terminos-condiciones" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Misión</Link>
-            <Link to="/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Visión</Link>
+            <Link to="/misionview" style={linkStyle}><BulbOutlined style={iconStyle} /> Misión</Link>
+            <Link to="/visionview" style={linkStyle}><EyeOutlined style={iconStyle} /> Visión</Link>
             
           </div>
         </div>

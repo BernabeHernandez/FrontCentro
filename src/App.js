@@ -59,6 +59,10 @@ import DetalleProductoC from './Componentes/Cliente/DetalleProductoC';
 import Carrito from './Componentes/Cliente/Carrito';
 import Promociones from './Componentes/Administrativo/Promociones';
 import PerfilCliente from './Componentes/Cliente/PerfilCliente';
+import Mision from './Componentes/Administrativo/Mision';
+import Vision from './Componentes/Administrativo/Vision';
+import MisionView from './Componentes/Compartidos/MisionView';
+import VisionView from './Componentes/Compartidos/VisionView';
 
 const App = () => {
   return (
@@ -93,6 +97,10 @@ const App = () => {
             <Route path="/admin/registroH" element={<ProtectedRoute allowedRoles={['Administrador']}><RegistroHorario/></ProtectedRoute>} />
             <Route path="/admin/horariosD" element={<ProtectedRoute allowedRoles={['Administrador']}><HorariosDis /></ProtectedRoute>} />
             <Route path="/admin/promociones" element={<ProtectedRoute allowedRoles={['Administrador']}><Promociones /></ProtectedRoute>} />
+            <Route path="/admin/mision" element={<ProtectedRoute allowedRoles={['Administrador']}><Mision /></ProtectedRoute>} />
+            <Route path="/admin/vision" element={<ProtectedRoute allowedRoles={['Administrador']}><Vision /></ProtectedRoute>} />
+            <Route path="/admin/misionview" element={<ProtectedRoute allowedRoles={['Administrador']}><MisionView /></ProtectedRoute>} />
+            <Route path="/admin/visionview" element={<ProtectedRoute allowedRoles={['Administrador']}><VisionView /></ProtectedRoute>} />
             
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
@@ -112,7 +120,9 @@ const App = () => {
             <Route path="/cliente/chats" element={<ProtectedRoute allowedRoles={['Cliente']}><ChatGPT /></ProtectedRoute>} />
             <Route path="/cliente/citasCliente" element={<ProtectedRoute allowedRoles={['Cliente']}><CitasCliente /></ProtectedRoute>} />
             <Route path="/cliente/carrito" element={<ProtectedRoute allowedRoles={['Cliente']}><Carrito /></ProtectedRoute>} />
-            <Route path="/cliente/perfilUsuario" element={<ProtectedRoute allowedRoles={['Cliente']}><PerfilCliente /></ProtectedRoute>} />            
+            <Route path="/cliente/perfilUsuario" element={<ProtectedRoute allowedRoles={['Cliente']}><PerfilCliente /></ProtectedRoute>} /> 
+            <Route path="/cliente/misionview" element={<ProtectedRoute allowedRoles={['Cliente']}><MisionView /></ProtectedRoute>} /> 
+            <Route path="/cliente/visionview" element={<ProtectedRoute allowedRoles={['Cliente']}><VisionView /></ProtectedRoute>} />             
 
             {/* Rutas públicas */}
             <Route path="/verificar_correo" element={<SolicitarCodigo />} />
@@ -140,8 +150,8 @@ const App = () => {
             <Route path="/chats" element={<ChatGPT/>} />
             <Route path="/citasCliente" element={<CitasCliente/>} />
             <Route path="/carrito" element={<Carrito/>} />
-            
-
+            <Route path="/misionview" element={<MisionView/>} />
+            <Route path="/visionview" element={<VisionView/>} />
             <Route path="*" element={<PaginaError404 />} />  
          
           </Routes>

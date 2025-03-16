@@ -37,7 +37,7 @@ const EncabezadoAdministrativo = () => {
     setIsMobileMenuOpen(false);
     setOpenDropdown(null);
   };
-  
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -50,7 +50,7 @@ const EncabezadoAdministrativo = () => {
   const handleMenuClick = (key) => {
     setIsMobileMenuOpen(false); // Cierra el menú móvil
     setOpenDropdown(null); // Cierra cualquier menú desplegable abierto
-  
+
     switch (key) {
       case "politicas":
         navigate('/admin/politicas');
@@ -60,6 +60,12 @@ const EncabezadoAdministrativo = () => {
         break;
       case "terminos":
         navigate('/admin/terminos');
+        break;
+      case "mision":
+        navigate('/admin/mision');
+        break;
+      case "vision":
+        navigate('/admin/vision');
         break;
       case "perfil":
         navigate('/admin/perfil');
@@ -150,7 +156,7 @@ const EncabezadoAdministrativo = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px 15px; 
+          padding: 5px 7px; 
           background-color: var(--color-primary);
           color: var(--color-secondary);
           position: relative;
@@ -165,10 +171,9 @@ const EncabezadoAdministrativo = () => {
 
 
         .logo img {
-          width: 60px; 
+         width: 61%; 
           height: 10px; 
           border-radius: 50%; 
-          margin-right: 10px; 
         }
           
 
@@ -192,7 +197,7 @@ const EncabezadoAdministrativo = () => {
 
         .menu ul {
           display: flex;
-          gap: 15px; 
+          gap: 1px; 
           list-style-type: none;
           margin: 0;
           padding: 0;
@@ -302,7 +307,7 @@ const EncabezadoAdministrativo = () => {
       <header className="header">
         <div className="logo">
           {logoUrl && (
-            <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '60px', marginRight: '10px' }} />
+            <img src={logoUrl} alt="Logo de la Empresa" style={{ height: '75px', width: '75px', marginRight: '10px' }} />
           )}
         </div>
         <div>
@@ -347,6 +352,8 @@ const EncabezadoAdministrativo = () => {
                   <li onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}>Términos</li>
                   <li onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}>Políticas</li>
                   <li onClick={() => { handleClick('deslinde'); handleMenuClick('deslinde'); }}>Deslinde</li>
+                  <li onClick={() => { handleClick('mision'); handleMenuClick('mision'); }}>Mision</li>
+                  <li onClick={() => { handleClick('vision'); handleMenuClick('vision'); }}>Vision</li>
                 </ul>
               )}
             </li>

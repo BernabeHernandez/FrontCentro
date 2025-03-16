@@ -9,7 +9,7 @@ import {
   EnvironmentOutlined,
   FileProtectOutlined,
   LockOutlined,
-  FileDoneOutlined,
+  FileDoneOutlined,BulbOutlined, EyeOutlined, MessageOutlined
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
@@ -96,6 +96,8 @@ const PieDePaginaAdmin = () => {
             <Link to="/admin/deslindes" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Deslinde legal</Link>
             <Link to="/admin/politicass" style={linkStyle}><LockOutlined style={iconStyle} /> Política de Privacidad</Link>
             <Link to="/admin/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Términos y condiciones</Link>
+            <Link to="/admin/misionview" style={linkStyle}><BulbOutlined style={iconStyle} /> Mision</Link>
+            <Link to="/admin/visionview" style={linkStyle}><EyeOutlined style={iconStyle} /> Vision</Link>
           </div>
         </div>
       </Footer>
