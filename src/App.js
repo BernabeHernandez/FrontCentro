@@ -63,6 +63,12 @@ import Mision from './Componentes/Administrativo/Mision';
 import Vision from './Componentes/Administrativo/Vision';
 import MisionView from './Componentes/Compartidos/MisionView';
 import VisionView from './Componentes/Compartidos/VisionView';
+import OpcionesRestauracion from './Componentes/Autenticacion/OpcionesRestauracion';
+import CambioPasswordP from './Componentes/Autenticacion/RecuperacionPassword/PreguntaSecreta/CambioPasswordP';
+import RespuestaPregunta from './Componentes/Autenticacion/RecuperacionPassword/PreguntaSecreta/RespuestaPregunta';
+import VerificacionUsuario from './Componentes/Autenticacion/RecuperacionPassword/PreguntaSecreta/VerificacionUsuario';
+import VerificacionUsuarioSMS from './Componentes/Autenticacion/RecuperacionPassword/SMS/VerificacionUsuarioSMS';
+import ValidarCodigoSMS from './Componentes/Autenticacion/RecuperacionPassword/SMS/ValidarCodigoSMS';
 
 const App = () => {
   return (
@@ -152,8 +158,15 @@ const App = () => {
             <Route path="/carrito" element={<Carrito/>} />
             <Route path="/misionview" element={<MisionView/>} />
             <Route path="/visionview" element={<VisionView/>} />
+            <Route path="/opcionrestaurarpassw" element={<OpcionesRestauracion/>} />
+            <Route path="/verificacionUserp" element={<VerificacionUsuario/>} />
+            <Route path="/respuestaPregunta" element={<RespuestaPregunta/>} />
+            <Route path="/cambiopasswordP" element={<CambioPasswordP/>} />
+            <Route path="/verificarUserSMS" element={<VerificacionUsuarioSMS/>} />
+            <Route path="/validarcodigoSMS" element={<ValidarCodigoSMS/>} />
+
+
             <Route path="*" element={<PaginaError404 />} />  
-         
           </Routes>
           </ErrorBoundary>  
         </LayoutConEncabezado>

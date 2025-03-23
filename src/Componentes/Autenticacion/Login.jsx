@@ -252,7 +252,7 @@ function Login() {
               </Button>
               <Grid container justifyContent="space-between">
                 <Grid item>
-                  <MuiLink component={Link} to="/verificar_correo" variant="body2" sx={{ color: theme.palette.primary.main }}>
+                  <MuiLink component={Link} to="/opcionrestaurarpassw" variant="body2" sx={{ color: theme.palette.primary.main }}>
                     ¿Olvidaste la contraseña?
                   </MuiLink>
                 </Grid>
