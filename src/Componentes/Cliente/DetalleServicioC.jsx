@@ -6,7 +6,7 @@ import { Container, Grid, Typography, Button, Box, Paper, Avatar } from '@mui/ma
 const DetallesServicioC = () => {
   const [servicio, setServicio] = useState(null);
   const [productosRelacionados, setProductosRelacionados] = useState([]);
-  const [mostrarProductos, setMostrarProductos] = useState(3);  
+  const [mostrarProductos, setMostrarProductos] = useState(3);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -20,7 +20,7 @@ const DetallesServicioC = () => {
         const data = await response.json();
         setServicio(data);
 
-        const categoriaId = data.categoria_id; 
+        const categoriaId = data.categoria_id;
         const responseProductos = await fetch(`https://backendcentro.onrender.com/api/servicios?categoriaId=${categoriaId}`);
         const productosRelacionadosData = await responseProductos.json();
         setProductosRelacionados(productosRelacionadosData);
@@ -37,7 +37,7 @@ const DetallesServicioC = () => {
   }
 
   const handlePagoClick = () => {
-    navigate('/cliente/CitasCliente');
+    navigate('/cliente/CitasCliente', { state: { servicioId: id } });
   };
 
   const manejarProductoRelacionadoClick = (idProducto) => {

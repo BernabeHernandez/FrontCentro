@@ -3,7 +3,7 @@ import axios from 'axios';
 import { format, addDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import jsPDF from 'jspdf';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // Agregamos useLocation
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
@@ -64,7 +64,39 @@ const CitasCliente = () => {
   const [usuarioRegistrado, setUsuarioRegistrado] = useState(false);
   const [usuarioId, setUsuarioId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [nombreServicio, setNombreServicio] = useState(''); // Nuevo: para mostrar el nombre del servicio
   const navigate = useNavigate();
+  const location = useLocation(); // Nuevo: para obtener el estado de navegación
+
+  // Obtener el servicioId del estado de navegación
+  const servicioId = location.state?.servicioId;
+
+  // Verificar que el servicioId esté presente
+  useEffect(() => {
+    if (!servicioId) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Servicio no seleccionado',
+        text: 'Por favor selecciona un servicio antes de reservar una cita.',
+        confirmButtonText: 'Entendido',
+      }).then(() => navigate('/cliente/servicios'));
+    }
+  }, [servicioId, navigate]);
+
+  // Obtener el nombre del servicio
+  useEffect(() => {
+    const fetchNombreServicio = async () => {
+      if (servicioId) {
+        try {
+          const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
+          setNombreServicio(response.data.nombre);
+        } catch (error) {
+          console.error('Error al obtener el nombre del servicio:', error);
+        }
+      }
+    };
+    fetchNombreServicio();
+  }, [servicioId]);
 
   const haPasadoLaFranja = (horaInicioFranja, fechaSeleccionada) => {
     if (!isToday(fechaSeleccionada)) return false;
@@ -96,7 +128,7 @@ const CitasCliente = () => {
           localStorage.setItem('usuario_id', response.data.usuario.id);
         }
       } else {
-     setUsuarioRegistrado(false);
+        setUsuarioRegistrado(false);
         Swal.fire({
           icon: 'warning',
           title: 'Usuario no registrado',
@@ -233,42 +265,48 @@ const CitasCliente = () => {
     doc.addImage(iconoRelojImg, 'PNG', 10, 145, 10, 10);
     doc.text(`Hora: ${selectedTime}`, 25, 153);
 
+    // Nuevo: Agregar el nombre del servicio al PDF
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Servicio: ${nombreServicio}`, 25, 168);
+
     doc.setDrawColor(0, 128, 0);
     doc.setLineWidth(0.5);
-    doc.line(10, 160, 200, 160);
+    doc.line(10, 175, 200, 175); // Ajustar la línea para dar espacio al nuevo texto
 
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 0, 0);
-    doc.text("Importante", 10, 170);
+    doc.text("Importante", 10, 185); // Ajustar posición
 
     const iconoUbicacionImg = await convertirIconoAImagen(FaMapMarkerAlt, 'red');
-    doc.addImage(iconoUbicacionImg, 'PNG', 10, 180, 10, 10);
+    doc.addImage(iconoUbicacionImg, 'PNG', 10, 195, 10, 10); // Ajustar posición
     doc.setTextColor(0, 0, 0);
-    doc.text('Calle Clavel, Col. Valle del Encinal, Huejutla, Mexico', 25, 188);
+    doc.text('Calle Clavel, Col. Valle del Encinal, Huejutla, Mexico', 25, 203); // Ajustar posición
 
     const iconoTelefonoImg = await convertirIconoAImagen(FaPhone, 'teal');
-    doc.addImage(iconoTelefonoImg, 'PNG', 10, 195, 10, 10);
-    doc.text('Teléfono: (+51) 771 162 8377', 25, 203);
+    doc.addImage(iconoTelefonoImg, 'PNG', 10, 210, 10, 10); // Ajustar posición
+    doc.text('Teléfono: (+51) 771 162 8377', 25, 218); // Ajustar posición
 
     const iconoCorreoImg = await convertirIconoAImagen(FaEnvelope, 'blue');
-    doc.addImage(iconoCorreoImg, 'PNG', 10, 210, 10, 10);
-    doc.text('Correo: Ltfmariela@hotmail.com', 25, 218);
+    doc.addImage(iconoCorreoImg, 'PNG', 10, 225, 10, 10); // Ajustar posición
+    doc.text('Correo: Ltfmariela@hotmail.com', 25, 233); // Ajustar posición
 
     doc.setDrawColor(0, 128, 0);
     doc.setLineWidth(0.5);
-    doc.line(10, 225, 200, 225);
+    doc.line(10, 240, 200, 240); // Ajustar posición
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 0, 0);
-    doc.text("Aviso:", 10, 235);
+    doc.text("Aviso:", 10, 250); // Ajustar posición
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text('- Por favor, preséntese 15 minutos antes de su cita.', 15, 245);
-    doc.text('- En caso de cancelación, notificar con al menos 24 horas de anticipación.', 15, 255);
-    doc.text('- No presentarse a la cita puede generar cargos adicionales.', 15, 265);
+    doc.text('- Por favor, preséntese 15 minutos antes de su cita.', 15, 260); // Ajustar posición
+    doc.text('- En caso de cancelación, notificar con al menos 24 horas de anticipación.', 15, 270); // Ajustar posición
+    doc.text('- No presentarse a la cita puede generar cargos adicionales.', 15, 280); // Ajustar posición
 
     const qrImage = await generarQRComoImagen();
     doc.addImage(qrImage, 'PNG', 150, 100, 50, 50);
@@ -278,7 +316,7 @@ const CitasCliente = () => {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text('Términos y condiciones aplican. Consulta más detalles en nuestra página web.', 10, 280);
+    doc.text('Términos y condiciones aplican. Consulta más detalles en nuestra página web.', 10, 295); // Ajustar posición
 
     doc.save("comprobante_cita.pdf");
   };
@@ -341,7 +379,7 @@ const CitasCliente = () => {
         const confirmacion = await Swal.fire({
           icon: 'question',
           title: 'Confirmar cita',
-          text: `¿Deseas reservar la cita para el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}?`,
+          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}?`,
           showCancelButton: true,
           confirmButtonText: 'Sí, reservar',
           cancelButtonText: 'No, cancelar',
@@ -356,6 +394,8 @@ const CitasCliente = () => {
             horaFin: horaFin,
             usuario_id: usuarioId,
             fecha_cita: fechaCita,
+            servicio_id: servicioId, // Nuevo: enviar el servicio_id
+            estado: 'pendiente', // Nuevo: enviar el estado por defecto
           });
 
           actualizarHorariosLocalmente(selectedDay, selectedTime);
@@ -393,7 +433,7 @@ const CitasCliente = () => {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 3, background: 'linear-gradient(135deg, #f9f9f9, #e6f3ff)' }}>
           <Typography variant="h4" align="center" gutterBottom sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-            <FontAwesomeIcon icon={faCalendarAlt} /> Reserva tu cita
+            <FontAwesomeIcon icon={faCalendarAlt} /> Reserva tu cita {nombreServicio ? `para ${nombreServicio}` : ''}
           </Typography>
 
           <Box sx={{ mt: 4 }}>
@@ -471,10 +511,10 @@ const CitasCliente = () => {
                                 variant={selectedTime === franja.hora_inicio ? 'filled' : 'outlined'}
                                 disabled={!disponible}
                                 sx={{
-                                  height: 40, // Aumenta la altura
-                                  fontSize: '1.1rem', // Aumenta el tamaño de la fuente
-                                  padding: '8px 16px', // Aumenta el padding interno
-                                  borderRadius: '20px', // Bordes más redondeados
+                                  height: 40,
+                                  fontSize: '1.1rem',
+                                  padding: '8px 16px',
+                                  borderRadius: '20px',
                                   transition: 'all 0.3s ease',
                                   '&:hover': disponible ? { backgroundColor: '#28a745', color: '#fff' } : {},
                                 }}

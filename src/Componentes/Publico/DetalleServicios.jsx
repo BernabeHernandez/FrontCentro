@@ -37,7 +37,7 @@ const DetallesServicio = () => {
   }
 
   const handlePagoClick = () => {
-    navigate('/CitasCliente');
+    navigate('/CitasCliente', { state: { servicioId: id } });
   };
 
   const manejarProductoRelacionadoClick = (idProducto) => {

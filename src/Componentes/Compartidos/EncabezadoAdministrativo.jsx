@@ -109,6 +109,15 @@ const EncabezadoAdministrativo = () => {
       case "promociones":
         navigate('/admin/promociones');
         break;
+        case "ventas":
+          navigate('/admin/ventas');
+          break;
+          case "detalleventas":
+            navigate('/admin/detalleventas');
+            break;
+            case "detallecitas":
+              navigate('/admin/detallecitas');
+              break;
       case "cerrarSesion":
         handleLogout();
         break;
@@ -368,6 +377,20 @@ const EncabezadoAdministrativo = () => {
                   <li onClick={() => { handleClick('activity-log'); handleMenuClick('activity-log'); }}>Registro de logeos</li>
                   <li onClick={() => { handleClick('registro-password'); handleMenuClick('registro-password'); }}>Registro de Contraseña</li>
                   <li onClick={() => { handleClick('registro-sospechosos'); handleMenuClick('registro-sospechosos'); }}>Lista negra</li>
+                </ul>
+              )}
+            </li>
+
+            <li className="dropdown" onClick={() => toggleDropdown('ventasa')}>
+              <span>
+                <AppstoreOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+                Reporte de Ventas
+              </span>
+              {openDropdown === 'ventasa' && (
+                <ul className="dropdown-menu">
+                  <li onClick={() => { handleClick('ventas'); handleMenuClick('ventas'); }}>Ventas</li>
+                  <li onClick={() => { handleClick('detalleventas'); handleMenuClick('detalleventas'); }}>Detalle de las ventas</li>
+                  <li onClick={() => { handleClick('detallecitas'); handleMenuClick('detallecitas'); }}>Detalle citas</li>
                 </ul>
               )}
             </li>

@@ -69,7 +69,9 @@ import RespuestaPregunta from './Componentes/Autenticacion/RecuperacionPassword/
 import VerificacionUsuario from './Componentes/Autenticacion/RecuperacionPassword/PreguntaSecreta/VerificacionUsuario';
 import VerificacionUsuarioSMS from './Componentes/Autenticacion/RecuperacionPassword/SMS/VerificacionUsuarioSMS';
 import ValidarCodigoSMS from './Componentes/Autenticacion/RecuperacionPassword/SMS/ValidarCodigoSMS';
-
+import Ventas from './Componentes/Administrativo/Ventas/Ventas';
+import DetallesVentas from './Componentes/Administrativo/Ventas/DetallesVenta';
+import DetalleCitas from './Componentes/Administrativo/Ventas/DetalleCitas';
 const App = () => {
   return (
     <AuthProvider>
@@ -107,7 +109,9 @@ const App = () => {
             <Route path="/admin/vision" element={<ProtectedRoute allowedRoles={['Administrador']}><Vision /></ProtectedRoute>} />
             <Route path="/admin/misionview" element={<ProtectedRoute allowedRoles={['Administrador']}><MisionView /></ProtectedRoute>} />
             <Route path="/admin/visionview" element={<ProtectedRoute allowedRoles={['Administrador']}><VisionView /></ProtectedRoute>} />
-            
+           <Route path="/admin/ventas" element={<ProtectedRoute allowedRoles={['Administrador']}><Ventas /></ProtectedRoute>} />
+           <Route path="/admin/detalleventas" element={<ProtectedRoute allowedRoles={['Administrador']}><DetallesVentas /></ProtectedRoute>} />
+           <Route path="/admin/detallecitas" element={<ProtectedRoute allowedRoles={['Administrador']}><DetalleCitas /></ProtectedRoute>} />
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
             <Route path="/cliente/terminos-condiciones" element={<ProtectedRoute allowedRoles={['Cliente']}><TerminosF /></ProtectedRoute>} />
@@ -164,7 +168,7 @@ const App = () => {
             <Route path="/cambiopasswordP" element={<CambioPasswordP/>} />
             <Route path="/verificarUserSMS" element={<VerificacionUsuarioSMS/>} />
             <Route path="/validarcodigoSMS" element={<ValidarCodigoSMS/>} />
-
+            
 
             <Route path="*" element={<PaginaError404 />} />  
           </Routes>
