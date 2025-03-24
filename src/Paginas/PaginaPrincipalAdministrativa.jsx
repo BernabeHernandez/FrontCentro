@@ -1,943 +1,1314 @@
-import React, { useState } from 'react';
+"use client"
+
+import { useState } from "react"
+import { styled } from "@mui/material/styles"
 import {
-  Grid,
+  Avatar,
+  Badge as MuiBadge,
+  Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  Box,
-  Paper,
-  Avatar,
-  Divider,
-  LinearProgress,
-  Chip,
-  Stack,
+  CardHeader,
+  Grid,
   IconButton,
-  Tooltip,
-  CircularProgress,
-  Badge,
-  Fade,
-  Zoom,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Switch,
-  FormControlLabel,
-  Slider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
+  LinearProgress,
+  Menu,
+  MenuItem,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material"
 import {
-  Healing as HealingIcon,
-  People as PeopleIcon,
-  Event as EventIcon,
-  BarChart as BarChartIcon,
-  Notifications as NotificationsIcon,
-  TrendingUp as TrendingUpIcon,
-  LocalHospital as LocalHospitalIcon,
-  Psychology as PsychologyIcon,
-  FitnessCenter as FitnessCenterIcon,
-  CalendarToday as CalendarTodayIcon,
-  Assignment as AssignmentIcon,
-  Group as GroupIcon,
-  HealthAndSafety as HealthAndSafetyIcon,
-  SentimentSatisfied as SentimentSatisfiedIcon,
-  MonitorHeart as MonitorHeartIcon,
-  Spa as SpaIcon,
-  DirectionsRun as DirectionsRunIcon,
-  ExpandMore as ExpandMoreIcon,
-  Medication as MedicationIcon,
-  VolunteerActivism as VolunteerActivismIcon,
-  Assessment as AssessmentIcon,
-} from '@mui/icons-material';
-import { styled, keyframes } from '@mui/material/styles';
+  AccessTime as ClockIcon,
+  Add as PlusIcon,
+  ArrowDownward as ArrowDownIcon,
+  ArrowUpward as ArrowUpIcon,
+  Assessment as BarChartIcon,
+  Assignment as FileTextIcon,
+  CalendarToday as CalendarIcon,
+  CheckCircle as CheckCircleIcon,
+  ChevronRight as ChevronRightIcon,
+  Description as DocumentIcon,
+  EmojiEvents as AwardIcon,
+  Favorite as HeartIcon,
+  Group as UsersIcon,
+  InsertChart as PieChartIcon,
+  Message as MessageIcon,
+  Notifications as BellIcon,
+  Person as UserIcon,
+  ShowChart as TrendingUpIcon,
+  Timeline as ActivityIcon,
+  Whatshot as ZapIcon,
+} from "@mui/icons-material"
+import { createTheme, ThemeProvider } from "@mui/material/styles"
 
-const HomeAdministrativa = () => {
-  // Animaciones personalizadas
-  const pulse = keyframes`
-    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(76, 175, 80, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-  `;
-
-  const glow = keyframes`
-    0% { filter: brightness(100%); }
-    50% { filter: brightness(130%); }
-    100% { filter: brightness(100%); }
-  `;
-
-  const rotate = keyframes`
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  `;
-
-  // Componentes estilizados
-  const RehabCard = styled(Card)(({ theme }) => ({
-    background: 'linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%)',
-    borderRadius: 25,
-    border: '2px solid rgba(76, 175, 80, 0.3)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      transform: 'scale(1.03)',
-      boxShadow: '0 0 25px rgba(76, 175, 80, 0.4)',
-      animation: `${pulse} 1.5s infinite`,
+// Crear un tema personalizado para mantener los colores similares a la versión Tailwind
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#3f51b5",
+      light: "#757de8",
+      dark: "#002984",
+      contrastText: "#fff",
     },
-  }));
+    secondary: {
+      main: "#f50057",
+      light: "#ff4081",
+      dark: "#c51162",
+      contrastText: "#fff",
+    },
+    success: {
+      main: "#4caf50",
+      light: "#81c784",
+      dark: "#388e3c",
+    },
+    warning: {
+      main: "#ff9800",
+      light: "#ffb74d",
+      dark: "#f57c00",
+    },
+    error: {
+      main: "#f44336",
+      light: "#e57373",
+      dark: "#d32f2f",
+    },
+    info: {
+      main: "#2196f3",
+      light: "#64b5f6",
+      dark: "#1976d2",
+    },
+    background: {
+      default: "#f5f5f5",
+      paper: "#ffffff",
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontSize: "2.5rem",
+      fontWeight: 700,
+    },
+    h2: {
+      fontSize: "2rem",
+      fontWeight: 700,
+    },
+    h3: {
+      fontSize: "1.75rem",
+      fontWeight: 600,
+    },
+    h4: {
+      fontSize: "1.5rem",
+      fontWeight: 600,
+    },
+    h5: {
+      fontSize: "1.25rem",
+      fontWeight: 600,
+    },
+    h6: {
+      fontSize: "1rem",
+      fontWeight: 600,
+    },
+    subtitle1: {
+      fontSize: "1rem",
+      fontWeight: 500,
+    },
+    subtitle2: {
+      fontSize: "0.875rem",
+      fontWeight: 500,
+    },
+    body1: {
+      fontSize: "1rem",
+    },
+    body2: {
+      fontSize: "0.875rem",
+    },
+    caption: {
+      fontSize: "0.75rem",
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: "0 2px 12px 0 rgba(0,0,0,0.05)",
+        },
+      },
+    },
+  },
+})
 
-  const FancyPaper = styled(Paper)(({ theme }) => ({
-    background: 'linear-gradient(45deg, #f5f7fa 0%, #bbdefb 100%)',
-    borderRadius: 30,
-    padding: theme.spacing(3),
-    boxShadow: '0 0 20px rgba(76, 175, 80, 0.2)',
-    border: '1px solid rgba(76, 175, 80, 0.1)',
-  }));
+// Componentes estilizados personalizados
+const StyledBadge = styled(MuiBadge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 3,
+    padding: "0 4px",
+  },
+}))
 
-  const NeonChip = styled(Chip)(({ theme }) => ({
-    background: 'linear-gradient(45deg, #4caf50, #81c784)',
-    color: 'white',
-    fontWeight: 'bold',
-    boxShadow: '0 0 10px rgba(76, 175, 80, 0.5)',
-  }));
+const BorderCard = styled(Card)(({ theme, bordercolor }) => ({
+  position: "relative",
+  overflow: "visible",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: bordercolor || theme.palette.primary.main,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+}))
 
-  // Estado para interacciones
-  const [hoveredStat, setHoveredStat] = useState(null);
-  const [monitoringActive, setMonitoringActive] = useState(false);
+const GradientCard = styled(Card)(({ theme, colors }) => ({
+  background: `linear-gradient(135deg, ${colors.light} 0%, ${colors.main} 100%)`,
+  color: colors.text,
+  boxShadow: "0 4px 20px 0 rgba(0,0,0,0.05)",
+}))
 
-  // Paleta de colores
-  const colors = {
-    primary: '#4caf50', // Verde bienestar
-    secondary: '#0288d1', // Azul serenidad
-    accent: '#f06292', // Rosa empatía
-    background: '#f0f4f8', // Fondo suave
-    cardBg: '#ffffff',
-    textPrimary: '#212121',
-    textSecondary: '#757575',
-    highlight: '#ffca28', // Amarillo para detalles
-  };
+const IconBox = styled(Box)(({ theme, bgcolor }) => ({
+  backgroundColor: bgcolor || theme.palette.primary.light,
+  borderRadius: "50%",
+  padding: theme.spacing(1.5),
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}))
 
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  "& .MuiTab-root": {
+    textTransform: "none",
+    minWidth: 100,
+    fontWeight: 500,
+  },
+}))
+
+const CalendarDay = styled(Box)(({ theme, istoday, iscurrentmonth, hasappointments }) => ({
+  aspectRatio: "1/1",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 8,
+  cursor: iscurrentmonth === "true" ? "pointer" : "default",
+  backgroundColor: istoday === "true" ? theme.palette.primary.main : "transparent",
+  color:
+    istoday === "true"
+      ? theme.palette.primary.contrastText
+      : iscurrentmonth === "true"
+        ? theme.palette.text.primary
+        : theme.palette.text.disabled,
+  "&:hover": {
+    backgroundColor: iscurrentmonth === "true" && istoday !== "true" ? theme.palette.action.hover : undefined,
+  },
+}))
+
+const DonutChart = styled(Box)(({ theme, size, color, thickness }) => ({
+  width: size,
+  height: size,
+  borderRadius: "50%",
+  border: `${thickness}px solid ${color}`,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}))
+
+const BarChart = styled(Box)(({ theme, height, color }) => ({
+  width: "100%",
+  height: `${height}%`,
+  backgroundColor: color,
+  borderTopLeftRadius: 4,
+  borderTopRightRadius: 4,
+  transition: "all 0.3s ease",
+  "&:hover": {
+    filter: "brightness(0.9)",
+  },
+}))
+
+// Componente principal
+function HomeAdmin() {
+  // Estados
+  const [tabValue, setTabValue] = useState("dashboard")
+  const [periodMenuAnchor, setPeriodMenuAnchor] = useState(null)
+
+  // Obtener fecha actual en español
+  const currentDate = new Date().toLocaleDateString("es-ES", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+
+  // Capitalizar primera letra de la fecha
+  const formattedDate = currentDate.charAt(0).toUpperCase() + currentDate.slice(1)
+
+  // Manejadores de eventos
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue)
+  }
+
+  const handlePeriodMenuOpen = (event) => {
+    setPeriodMenuAnchor(event.currentTarget)
+  }
+
+  const handlePeriodMenuClose = () => {
+    setPeriodMenuAnchor(null)
+  }
+
+  // Renderizado
   return (
-    <Box sx={{ p: 5, backgroundColor: '#B0BEC5', minHeight: '100vh' }}>
-      <Grid container spacing={4}>
-        {/* Estadísticas clave con más detalles */}
-        <Grid item xs={12} md={3}>
-          <RehabCard
-            onMouseEnter={() => setHoveredStat('patients')}
-            onMouseLeave={() => setHoveredStat(null)}
-          >
-            <CardContent>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar
-                  sx={{
-                    bgcolor: colors.primary,
-                    width: 60,
-                    height: 60,
-                    animation: hoveredStat === 'patients' ? `${glow} 2s infinite` : 'none',
-                  }}
-                >
-                  <PeopleIcon sx={{ fontSize: 35 }} />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ color: colors.textSecondary }}>
-                    Pacientes Activos
-                  </Typography>
-                  <Fade in={true} timeout={1500}>
-                    <Typography
-                      variant="h3"
-                      fontWeight="bold"
-                      sx={{ color: colors.textPrimary }}
-                    >
-                      178
-                    </Typography>
-                  </Fade>
-                  <LinearProgress
-                    variant="determinate"
-                    value={82}
-                    sx={{
-                      mt: 2,
-                      height: 12,
-                      borderRadius: 5,
-                      bgcolor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': { bgcolor: colors.primary, boxShadow: '0 0 10px rgba(76, 175, 80, 0.5)' },
-                    }}
-                  />
-                  <NeonChip label="+5% esta semana" size="small" sx={{ mt: 1 }} />
-                </Box>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <RehabCard
-            onMouseEnter={() => setHoveredStat('sessions')}
-            onMouseLeave={() => setHoveredStat(null)}
-          >
-            <CardContent>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar
-                  sx={{
-                    bgcolor: colors.secondary,
-                    width: 60,
-                    height: 60,
-                    animation: hoveredStat === 'sessions' ? `${glow} 2s infinite` : 'none',
-                  }}
-                >
-                  <PsychologyIcon sx={{ fontSize: 35 }} />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ color: colors.textSecondary }}>
-                    Sesiones Diarias
-                  </Typography>
-                  <Fade in={true} timeout={1500}>
-                    <Typography
-                      variant="h3"
-                      fontWeight="bold"
-                      sx={{ color: colors.textPrimary }}
-                    >
-                      45
-                    </Typography>
-                  </Fade>
-                  <LinearProgress
-                    variant="determinate"
-                    value={70}
-                    sx={{
-                      mt: 2,
-                      height: 12,
-                      borderRadius: 5,
-                      bgcolor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': { bgcolor: colors.secondary, boxShadow: '0 0 10px rgba(2, 136, 209, 0.5)' },
-                    }}
-                  />
-                  <NeonChip label="Estable" size="small" sx={{ mt: 1, background: colors.secondary }} />
-                </Box>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <RehabCard
-            onMouseEnter={() => setHoveredStat('recovery')}
-            onMouseLeave={() => setHoveredStat(null)}
-          >
-            <CardContent>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar
-                  sx={{
-                    bgcolor: colors.accent,
-                    width: 60,
-                    height: 60,
-                    animation: hoveredStat === 'recovery' ? `${glow} 2s infinite` : 'none',
-                  }}
-                >
-                  <HealthAndSafetyIcon sx={{ fontSize: 35 }} />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ color: colors.textSecondary }}>
-                    Tasa de Recuperación
-                  </Typography>
-                  <Fade in={true} timeout={1500}>
-                    <Typography
-                      variant="h3"
-                      fontWeight="bold"
-                      sx={{ color: colors.textPrimary }}
-                    >
-                      89%
-                    </Typography>
-                  </Fade>
-                  <LinearProgress
-                    variant="determinate"
-                    value={89}
-                    sx={{
-                      mt: 2,
-                      height: 12,
-                      borderRadius: 5,
-                      bgcolor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': { bgcolor: colors.accent, boxShadow: '0 0 10px rgba(240, 98, 146, 0.5)' },
-                    }}
-                  />
-                  <NeonChip label="+3% mensual" size="small" sx={{ mt: 1, background: colors.accent }} />
-                </Box>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <RehabCard
-            onMouseEnter={() => setHoveredStat('staff')}
-            onMouseLeave={() => setHoveredStat(null)}
-          >
-            <CardContent>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar
-                  sx={{
-                    bgcolor: colors.highlight,
-                    width: 60,
-                    height: 60,
-                    animation: hoveredStat === 'staff' ? `${glow} 2s infinite` : 'none',
-                  }}
-                >
-                  <GroupIcon sx={{ fontSize: 35 }} />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ color: colors.textSecondary }}>
-                    Equipo Activo
-                  </Typography>
-                  <Fade in={true} timeout={1500}>
-                    <Typography
-                      variant="h3"
-                      fontWeight="bold"
-                      sx={{ color: colors.textPrimary }}
-                    >
-                      38
-                    </Typography>
-                  </Fade>
-                  <LinearProgress
-                    variant="determinate"
-                    value={95}
-                    sx={{
-                      mt: 2,
-                      height: 12,
-                      borderRadius: 5,
-                      bgcolor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': { bgcolor: colors.highlight, boxShadow: '0 0 10px rgba(255, 202, 40, 0.5)' },
-                    }}
-                  />
-                  <NeonChip label="Completo" size="small" sx={{ mt: 1, background: colors.highlight }} />
-                </Box>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
-
-        {/* Progreso detallado de programas */}
-        <Grid item xs={12} md={6}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Progreso de Programas de Rehabilitación
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Stack spacing={4}>
-              <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography sx={{ color: colors.textSecondary, fontWeight: 'bold' }}>
-                    Rehabilitación Física
-                  </Typography>
-                  <NeonChip label="82% Completado" size="small" />
-                </Stack>
-                <LinearProgress
-                  variant="determinate"
-                  value={82}
-                  sx={{
-                    mt: 1,
-                    height: 15,
-                    borderRadius: 5,
-                    bgcolor: '#e0e0e0',
-                    '& .MuiLinearProgress-bar': { bgcolor: colors.primary, boxShadow: '0 0 10px rgba(76, 175, 80, 0.5)' },
-                  }}
-                />
-                <Typography variant="caption" sx={{ color: colors.textSecondary, mt: 1 }}>
-                  45 pacientes en curso
-                </Typography>
-              </Box>
-              <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography sx={{ color: colors.textSecondary, fontWeight: 'bold' }}>
-                    Terapia Psicológica
-                  </Typography>
-                  <NeonChip label="68% Completado" size="small" sx={{ background: colors.secondary }} />
-                </Stack>
-                <LinearProgress
-                  variant="determinate"
-                  value={68}
-                  sx={{
-                    mt: 1,
-                    height: 15,
-                    borderRadius: 5,
-                    bgcolor: '#e0e0e0',
-                    '& .MuiLinearProgress-bar': { bgcolor: colors.secondary, boxShadow: '0 0 10px rgba(2, 136, 209, 0.5)' },
-                  }}
-                />
-                <Typography variant="caption" sx={{ color: colors.textSecondary, mt: 1 }}>
-                  32 sesiones activas
-                </Typography>
-              </Box>
-              <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography sx={{ color: colors.textSecondary, fontWeight: 'bold' }}>
-                    Reintegración Social
-                  </Typography>
-                  <NeonChip label="91% Completado" size="small" sx={{ background: colors.accent }} />
-                </Stack>
-                <LinearProgress
-                  variant="determinate"
-                  value={91}
-                  sx={{
-                    mt: 1,
-                    height: 15,
-                    borderRadius: 5,
-                    bgcolor: '#e0e0e0',
-                    '& .MuiLinearProgress-bar': { bgcolor: colors.accent, boxShadow: '0 0 10px rgba(240, 98, 146, 0.5)' },
-                  }}
-                />
-                <Typography variant="caption" sx={{ color: colors.textSecondary, mt: 1 }}>
-                  18 pacientes en transición
-                </Typography>
-              </Box>
-            </Stack>
-          </FancyPaper>
-        </Grid>
-
-        {/* Notificaciones con más detalles */}
-        <Grid item xs={12} md={6}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Notificaciones del Sistema
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Stack spacing={3}>
-              <Zoom in={true} timeout={1000}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <IconButton sx={{ bgcolor: colors.primary, color: 'white', '&:hover': { bgcolor: '#388e3c' } }}>
-                    <NotificationsIcon />
-                  </IconButton>
-                  <Box>
-                    <Typography sx={{ color: colors.textSecondary, fontWeight: 'medium' }}>
-                      Nueva cita confirmada - Paciente #245
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                      Hace 10 minutos | Sala 3
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Zoom>
-              <Zoom in={true} timeout={1200}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <IconButton sx={{ bgcolor: colors.secondary, color: 'white', '&:hover': { bgcolor: '#01579b' } }}>
-                    <LocalHospitalIcon />
-                  </IconButton>
-                  <Box>
-                    <Typography sx={{ color: colors.textSecondary, fontWeight: 'medium' }}>
-                      Paciente #198 dado de alta
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                      Hace 45 minutos | Dr. López
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Zoom>
-              <Zoom in={true} timeout={1400}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <IconButton sx={{ bgcolor: colors.accent, color: 'white', '&:hover': { bgcolor: '#d81b60' } }}>
-                    <EventIcon />
-                  </IconButton>
-                  <Box>
-                    <Typography sx={{ color: colors.textSecondary, fontWeight: 'medium' }}>
-                      Taller de yoga programado
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                      Hace 1 hora | 15:00 hoy
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Zoom>
-            </Stack>
-          </FancyPaper>
-        </Grid>
-
-        {/* Calendario de actividades expandido */}
-        <Grid item xs={12} md={6}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Calendario de Actividades
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Hora</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Actividad</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Responsable</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Sala</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>08:30</TableCell>
-                  <TableCell>Terapia Física Grupal</TableCell>
-                  <TableCell>Ft. Ana Morales</TableCell>
-                  <TableCell>Sala 1</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>10:00</TableCell>
-                  <TableCell>Sesión Psicológica Individual</TableCell>
-                  <TableCell>Psic. Laura Díaz</TableCell>
-                  <TableCell>Consultorio B</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>14:00</TableCell>
-                  <TableCell>Taller de Reintegración</TableCell>
-                  <TableCell>Lic. Juan Pérez</TableCell>
-                  <TableCell>Sala 3</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>16:00</TableCell>
-                  <TableCell>Clase de Meditación</TableCell>
-                  <TableCell>Instr. Carla Gómez</TableCell>
-                  <TableCell>Sala 2</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </FancyPaper>
-        </Grid>
-
-        {/* Indicadores de bienestar detallados */}
-        <Grid item xs={12} md={6}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Indicadores de Bienestar
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Stack spacing={4}>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.primary, width: 50, height: 50 }}>
-                  <SentimentSatisfiedIcon sx={{ fontSize: 30 }} />
-                </Avatar>
-                <Box flexGrow={1}>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Satisfacción de Pacientes
-                  </Typography>
-                  <Slider
-                    value={94}
-                    min={0}
-                    max={100}
-                    disabled
-                    sx={{ color: colors.primary }}
-                  />
-                  <Typography variant="caption" sx={{ color: colors.textPrimary }}>
-                    94% - Excelente
-                  </Typography>
-                </Box>
-              </Stack>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.secondary, width: 50, height: 50 }}>
-                  <FitnessCenterIcon sx={{ fontSize: 30 }} />
-                </Avatar>
-                <Box flexGrow={1}>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Progreso Físico Promedio
-                  </Typography>
-                  <Slider
-                    value={87}
-                    min={0}
-                    max={100}
-                    disabled
-                    sx={{ color: colors.secondary }}
-                  />
-                  <Typography variant="caption" sx={{ color: colors.textPrimary }}>
-                    87% - Muy Bueno
-                  </Typography>
-                </Box>
-              </Stack>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.accent, width: 50, height: 50 }}>
-                  <PsychologyIcon sx={{ fontSize: 30 }} />
-                </Avatar>
-                <Box flexGrow={1}>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Estabilidad Emocional
-                  </Typography>
-                  <Slider
-                    value={90}
-                    min={0}
-                    max={100}
-                    disabled
-                    sx={{ color: colors.accent }}
-                  />
-                  <Typography variant="caption" sx={{ color: colors.textPrimary }}>
-                    90% - Óptimo
-                  </Typography>
-                </Box>
-              </Stack>
-            </Stack>
-          </FancyPaper>
-        </Grid>
-
-        {/* Monitoreo en tiempo real */}
-        <Grid item xs={12} md={4}>
-          <RehabCard>
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6" fontWeight="bold" sx={{ color: colors.textPrimary }}>
-                  Monitoreo en Tiempo Real
-                </Typography>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={monitoringActive}
-                      onChange={(e) => setMonitoringActive(e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label={monitoringActive ? 'Activo' : 'Inactivo'}
-                />
-              </Stack>
-              <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-              <Stack spacing={3}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <MonitorHeartIcon sx={{ fontSize: 40, color: colors.primary }} />
-                  <Box>
-                    <Typography sx={{ color: colors.textSecondary }}>
-                      Ritmo Cardíaco Promedio
-                    </Typography>
-                    <Typography variant="h5" sx={{ color: colors.textPrimary }}>
-                      72 bpm
-                    </Typography>
-                  </Box>
-                </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <DirectionsRunIcon sx={{ fontSize: 40, color: colors.secondary }} />
-                  <Box>
-                    <Typography sx={{ color: colors.textSecondary }}>
-                      Actividad Física Diaria
-                    </Typography>
-                    <Typography variant="h5" sx={{ color: colors.textPrimary }}>
-                      45 min
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Stack>
-              {monitoringActive && (
-                <Box sx={{ mt: 3, textAlign: 'center' }}>
-                  <CircularProgress
-                    size={60}
-                    sx={{ color: colors.primary, animation: `${rotate} 2s linear infinite` }}
-                  />
-                  <Typography variant="caption" sx={{ color: colors.textSecondary, mt: 1 }}>
-                    Actualizando datos...
-                  </Typography>
-                </Box>
-              )}
-            </CardContent>
-          </RehabCard>
-        </Grid>
-
-        {/* Historial reciente extendido */}
-        <Grid item xs={12} md={8}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Historial Reciente
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Stack spacing={3}>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.primary, width: 50, height: 50 }}>
-                  <LocalHospitalIcon />
-                </Avatar>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Paciente #278 ingresado - Programa Físico
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    Hace 12 minutos | Sala 1
-                  </Typography>
-                </Box>
-              </Stack>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.secondary, width: 50, height: 50 }}>
-                  <PsychologyIcon />
-                </Avatar>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Sesión psicológica completada - Paciente #192
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    Hace 30 minutos | Consultorio A
-                  </Typography>
-                </Box>
-              </Stack>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.accent, width: 50, height: 50 }}>
-                  <HealthAndSafetyIcon />
-                </Avatar>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Alta médica procesada - Paciente #165
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    Hace 1 hora | Dr. Ramírez
-                  </Typography>
-                </Box>
-              </Stack>
-              <Stack direction="row" spacing={3} alignItems="center">
-                <Avatar sx={{ bgcolor: colors.highlight, width: 50, height: 50 }}>
-                  <MedicationIcon />
-                </Avatar>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    Medicación administrada - Paciente #234
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    Hace 2 horas | Enfermera Soto
-                  </Typography>
-                </Box>
-              </Stack>
-            </Stack>
-          </FancyPaper>
-        </Grid>
-
-        {/* Recursos y estadísticas adicionales */}
-        <Grid item xs={12} md={4}>
-          <RehabCard>
-            <CardContent>
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                sx={{ color: colors.textPrimary, mb: 2 }}
-              >
-                Recursos Disponibles
+    <ThemeProvider theme={theme}>
+      <Box sx={{ p: 3, bgcolor: 'background.default', minHeight: '100vh' }}>
+        {/* Sección de bienvenida con fecha y estadísticas rápidas */}
+        <Box sx={{ mb: 4 }}>
+          <Grid container spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h4" color="primary" gutterBottom>
+                Centro de Rehabilitación Integral San Juan
               </Typography>
-              <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-              <Stack spacing={3}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <FitnessCenterIcon sx={{ fontSize: 35, color: colors.primary }} />
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    6 Salas de Fisioterapia
-                  </Typography>
-                </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <PsychologyIcon sx={{ fontSize: 35, color: colors.secondary }} />
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    4 Consultorios Psicológicos
-                  </Typography>
-                </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <SpaIcon sx={{ fontSize: 35, color: colors.accent }} />
-                  <Typography sx={{ color: colors.textSecondary }}>
-                    2 Áreas de Relajación
-                  </Typography>
-                </Stack>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <RehabCard>
-            <CardContent>
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                sx={{ color: colors.textPrimary, mb: 2 }}
-              >
-                Próximos Eventos
+              <Typography variant="body2" color="text.secondary">
+                {formattedDate}
               </Typography>
-              <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-              <Stack spacing={3}>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary, fontWeight: 'medium' }}>
-                    Taller de Mindfulness
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    23 Mar 2025 - 09:00 AM | Sala 2
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary, fontWeight: 'medium' }}>
-                    Día de Integración Familiar
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    26 Mar 2025 - 14:00 PM | Área Externa
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography sx={{ color: colors.textSecondary, fontWeight: 'medium' }}>
-                    Sesión de Evaluación Grupal
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-                    28 Mar 2025 - 11:00 AM | Sala 3
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
+            </Grid>
 
-        <Grid item xs={12} md={4}>
-          <RehabCard>
-            <CardContent>
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                sx={{ color: colors.textPrimary, mb: 2 }}
+            <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, gap: 1.5 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<BellIcon />}
+                endIcon={<StyledBadge badgeContent={5} color="secondary" />}
               >
-                Contacto de Emergencia
-              </Typography>
-              <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-              <Stack spacing={2}>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  Teléfono: (123) 456-7890
-                </Typography>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  Email: emergencia@rehabintegral.com
-                </Typography>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  Línea 24/7: (987) 654-3210
-                </Typography>
-              </Stack>
-            </CardContent>
-          </RehabCard>
-        </Grid>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  Notificaciones
+                </Box>
+              </Button>
 
-        {/* Panel de métricas avanzadas */}
-        <Grid item xs={12} md={6}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Métricas Avanzadas
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <AssessmentIcon sx={{ fontSize: 40, color: colors.primary }} />
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<MessageIcon />}
+                endIcon={<StyledBadge badgeContent={3} color="secondary" />}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  Mensajes
+                </Box>
+              </Button>
+
+              <Avatar
+                sx={{
+                  width: 40,
+                  height: 40,
+                  border: 2,
+                  borderColor: 'primary.main'
+                }}
+                alt="Admin"
+                src="/placeholder.svg?height=40&width=40"
+              >
+                AD
+              </Avatar>
+            </Grid>
+          </Grid>
+
+          {/* Tarjetas de estadísticas rápidas */}
+          <Grid container spacing={2}>
+            <Grid item xs={6} md={3}>
+              <GradientCard colors={{ light: '#e3f2fd', main: '#bbdefb', text: '#1565c0' }}>
+                <CardContent sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
-                    <Typography sx={{ color: colors.textSecondary }}>
-                      Evaluaciones Completadas
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'inherit' }}>
+                      Pacientes Totales
                     </Typography>
-                    <Typography variant="h5" sx={{ color: colors.textPrimary }}>
-                      124
+                    <Typography variant="h5" sx={{ fontWeight: 700, my: 0.5 }}>
+                      1,248
                     </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', color: '#4caf50' }}>
+                      <ArrowUpIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                      <Typography variant="caption">12% este mes</Typography>
+                    </Box>
                   </Box>
-                </Stack>
-              </Grid>
-              <Grid item xs={6}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <VolunteerActivismIcon sx={{ fontSize: 40, color: colors.secondary }} />
+                  <IconBox bgcolor="#e3f2fd">
+                    <UsersIcon sx={{ color: '#1565c0' }} />
+                  </IconBox>
+                </CardContent>
+              </GradientCard>
+            </Grid>
+
+            <Grid item xs={6} md={3}>
+              <GradientCard colors={{ light: '#e8f5e9', main: '#c8e6c9', text: '#2e7d32' }}>
+                <CardContent sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
-                    <Typography sx={{ color: colors.textSecondary }}>
-                      Voluntarios Activos
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'inherit' }}>
+                      Citas Hoy
                     </Typography>
-                    <Typography variant="h5" sx={{ color: colors.textPrimary }}>
-                      15
+                    <Typography variant="h5" sx={{ fontWeight: 700, my: 0.5 }}>
+                      24
                     </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', color: '#4caf50' }}>
+                      <ArrowUpIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                      <Typography variant="caption">8% vs ayer</Typography>
+                    </Box>
                   </Box>
-                </Stack>
-              </Grid>
-              <Grid item xs={6}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <MedicationIcon sx={{ fontSize: 40, color: colors.accent }} />
+                  <IconBox bgcolor="#e8f5e9">
+                    <CalendarIcon sx={{ color: '#2e7d32' }} />
+                  </IconBox>
+                </CardContent>
+              </GradientCard>
+            </Grid>
+
+            <Grid item xs={6} md={3}>
+              <GradientCard colors={{ light: '#f3e5f5', main: '#e1bee7', text: '#6a1b9a' }}>
+                <CardContent sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
-                    <Typography sx={{ color: colors.textSecondary }}>
-                      Medicamentos Dispensados
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'inherit' }}>
+                      Tasa de Éxito
                     </Typography>
-                    <Typography variant="h5" sx={{ color: colors.textPrimary }}>
-                      89
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Grid>
-              <Grid item xs={6}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <TrendingUpIcon sx={{ fontSize: 40, color: colors.highlight }} />
-                  <Box>
-                    <Typography sx={{ color: colors.textSecondary }}>
-                      Mejora General
-                    </Typography>
-                    <Typography variant="h5" sx={{ color: colors.textPrimary }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, my: 0.5 }}>
                       92%
                     </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', color: '#4caf50' }}>
+                      <ArrowUpIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                      <Typography variant="caption">5% vs anterior</Typography>
+                    </Box>
                   </Box>
-                </Stack>
-              </Grid>
+                  <IconBox bgcolor="#f3e5f5">
+                    <TrendingUpIcon sx={{ color: '#6a1b9a' }} />
+                  </IconBox>
+                </CardContent>
+              </GradientCard>
             </Grid>
-          </FancyPaper>
-        </Grid>
 
-        {/* Acordeones con información adicional */}
-        <Grid item xs={12} md={6}>
-          <FancyPaper>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: colors.textPrimary, mb: 2 }}
-            >
-              Detalles del Centro
-            </Typography>
-            <Divider sx={{ mb: 3, bgcolor: colors.primary }} />
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  Protocolos de Seguridad
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  - Evacuación revisada el 15/03/2025<br />
-                  - Equipos de emergencia en todas las salas<br />
-                  - Personal capacitado en primeros auxilios
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  Inventario Médico
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  - 50 kits de fisioterapia<br />
-                  - 20 equipos de monitoreo<br />
-                  - Medicamentos básicos al 100%
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  Estadísticas Mensuales
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography sx={{ color: colors.textSecondary }}>
-                  - Altas: 25 pacientes<br />
-                  - Ingresos: 30 pacientes<br />
-                  - Sesiones: 450 horas
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          </FancyPaper>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
+            <Grid item xs={6} md={3}>
+              <GradientCard colors={{ light: '#fff8e1', main: '#ffecb3', text: '#ff8f00' }}>
+                <CardContent sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'inherit' }}>
+                      Ocupación
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 700, my: 0.5 }}>
+                      78%
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', color: '#f44336' }}>
+                      <ArrowDownIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                      <Typography variant="caption">3% disponible</Typography>
+                    </Box>
+                  </Box>
+                  <IconBox bgcolor="#fff8e1">
+                    <ActivityIcon sx={{ color: '#ff8f00' }} />
+                  </IconBox>
+                </CardContent>
+              </GradientCard>
+            </Grid>
+          </Grid>
+        </Box>
 
-export default HomeAdministrativa;
+        {/* Contenido principal con pestañas */}
+        <Box sx={{ mb: 4 }}>
+          <StyledTabs
+            value={tabValue}
+            onChange={handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            sx={{ maxWidth: { md: 400 }, mb: 2 }}
+          >
+            <Tab label="Dashboard" value="dashboard" />
+            <Tab label="Pacientes" value="pacientes" />
+            <Tab label="Citas" value="citas" />
+            <Tab label="Reportes" value="reportes" />
+          </StyledTabs>
+
+          {tabValue === 'dashboard' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Contenido principal del dashboard */}
+              <Grid container spacing={3}>
+                {/* Columna izquierda */}
+                <Grid item xs={12} lg={8} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {/* Próximas citas */}
+                  <BorderCard bordercolor={theme.palette.primary.main}>
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                          <Typography variant="h6">Próximas Citas</Typography>
+                        </Box>
+                      }
+                      subheader="Citas programadas para hoy"
+                      action={
+                        <Button
+                          variant="text"
+                          size="small"
+                          endIcon={<ChevronRightIcon />}
+                        >
+                          Ver todas
+                        </Button>
+                      }
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent sx={{ p: 0 }}>
+                      {[
+                        {
+                          name: 'María Rodríguez',
+                          therapy: 'Fisioterapia',
+                          time: '10:00',
+                          status: 'Confirmada',
+                          statusColor: 'primary',
+                          avatar: 'MR'
+                        },
+                        {
+                          name: 'Juan López',
+                          therapy: 'Terapia Ocupacional',
+                          time: '11:30',
+                          status: 'Pendiente',
+                          statusColor: 'default',
+                          avatar: 'JL'
+                        },
+                        {
+                          name: 'Ana Ramírez',
+                          therapy: 'Evaluación',
+                          time: '13:15',
+                          status: 'Nueva',
+                          statusColor: 'secondary',
+                          avatar: 'AR'
+                        },
+                        {
+                          name: 'Luis Sánchez',
+                          therapy: 'Fisioterapia',
+                          time: '15:45',
+                          status: 'Confirmada',
+                          statusColor: 'primary',
+                          avatar: 'LS'
+                        }
+                      ].map((appointment, i) => (
+                        <Box
+                          key={i}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            p: 2,
+                            '&:hover': { bgcolor: 'action.hover' },
+                            borderBottom: i < 3 ? 1 : 0,
+                            borderColor: 'divider'
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar alt={appointment.name} src={`/placeholder.svg?height=40&width=40&text=${i + 1}`}>
+                              {appointment.avatar}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="subtitle2">{appointment.name}</Typography>
+                              <Typography variant="body2" color="text.secondary">{appointment.therapy}</Typography>
+                            </Box>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <MuiBadge
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  position: 'static',
+                                  transform: 'none',
+                                  borderRadius: 1,
+                                  padding: '4px 8px',
+                                  height: 'auto',
+                                  bgcolor: appointment.statusColor === 'default' ? 'background.paper' : undefined,
+                                  border: appointment.statusColor === 'default' ? 1 : 0,
+                                  borderColor: 'divider'
+                                }
+                              }}
+                              badgeContent={appointment.status}
+                              color={appointment.statusColor === 'default' ? 'default' : appointment.statusColor}
+                            />
+                            <Box sx={{ textAlign: 'right' }}>
+                              <Typography variant="subtitle2">{appointment.time}</Typography>
+                              <Typography variant="body2" color="text.secondary">Hoy</Typography>
+                            </Box>
+                            <IconButton size="small" sx={{ ml: 1 }}>
+                              <ChevronRightIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      ))}
+                    </CardContent>
+                  </BorderCard>
+
+                  {/* Progreso de tratamientos */}
+                  <Card>
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <TrendingUpIcon sx={{ mr: 1, color: 'primary.main' }} />
+                          <Typography variant="h6">Progreso de Tratamientos</Typography>
+                        </Box>
+                      }
+                      subheader="Progreso de pacientes por tipo de terapia"
+                      action={
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={handlePeriodMenuOpen}
+                        >
+                          Este Mes
+                        </Button>
+                      }
+                    />
+                    <Menu
+                      anchorEl={periodMenuAnchor}
+                      open={Boolean(periodMenuAnchor)}
+                      onClose={handlePeriodMenuClose}
+                    >
+                      <MenuItem onClick={handlePeriodMenuClose}>Esta Semana</MenuItem>
+                      <MenuItem onClick={handlePeriodMenuClose}>Este Mes</MenuItem>
+                      <MenuItem onClick={handlePeriodMenuClose}>Este Año</MenuItem>
+                    </Menu>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {[
+                          { name: 'Fisioterapia', progress: 85, total: 48, completed: 41, color: '#2196f3' },
+                          { name: 'Terapia Ocupacional', progress: 72, total: 36, completed: 26, color: '#4caf50' },
+                          { name: 'Terapia del Habla', progress: 90, total: 20, completed: 18, color: '#ff9800' },
+                          { name: 'Psicología', progress: 65, total: 30, completed: 19, color: '#9c27b0' },
+                        ].map((item, i) => (
+                          <Box key={i} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                  <Box
+                                    sx={{
+                                      width: 12,
+                                      height: 12,
+                                      borderRadius: '50%',
+                                      bgcolor: item.color,
+                                      mr: 1
+                                    }}
+                                  />
+                                  <Typography variant="subtitle2">{item.name}</Typography>
+                                </Box>
+                                <Typography variant="body2" color="text.secondary">
+                                  {item.completed} de {item.total} completados
+                                </Typography>
+                              </Box>
+                              <Typography variant="h6" fontWeight="bold">{item.progress}%</Typography>
+                            </Box>
+                            <LinearProgress
+                              variant="determinate"
+                              value={item.progress}
+                              sx={{
+                                height: 8,
+                                borderRadius: 4,
+                                bgcolor: 'action.hover',
+                                '& .MuiLinearProgress-bar': {
+                                  bgcolor: item.color
+                                }
+                              }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </Card>
+
+                  {/* Vista de calendario */}
+                  <Card>
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                          <Typography variant="h6">Calendario de Citas</Typography>
+                        </Box>
+                      }
+                      subheader="Vista mensual de citas programadas"
+                      action={
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <Button variant="outlined" size="small">Hoy</Button>
+                          <IconButton size="small">
+                            <ChevronRightIcon sx={{ transform: 'rotate(180deg)' }} />
+                          </IconButton>
+                          <IconButton size="small">
+                            <ChevronRightIcon />
+                          </IconButton>
+                        </Box>
+                      }
+                    />
+                    <CardContent>
+                      <Grid container spacing={0.5} sx={{ mb: 1 }}>
+                        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, i) => (
+                          <Grid item xs={12 / 7} key={i}>
+                            <Typography
+                              variant="body2"
+                              align="center"
+                              color="text.secondary"
+                              fontWeight="medium"
+                              sx={{ py: 0.5 }}
+                            >
+                              {day}
+                            </Typography>
+                          </Grid>
+                        ))}
+                      </Grid>
+                      <Grid container spacing={0.5}>
+                        {Array.from({ length: 35 }, (_, i) => {
+                          const day = i - 2; // Offset para comenzar el mes en el día correcto
+                          const isCurrentMonth = day >= 1 && day <= 30;
+                          const isToday = day === 15;
+                          const hasAppointments = [3, 8, 12, 15, 19, 22, 27].includes(day);
+
+                          return (
+                            <Grid item xs={12 / 7} key={i}>
+                              <CalendarDay
+                                istoday={isToday ? 'true' : 'false'}
+                                iscurrentmonth={isCurrentMonth ? 'true' : 'false'}
+                                hasappointments={hasAppointments ? 'true' : 'false'}
+                              >
+                                {isCurrentMonth && (
+                                  <>
+                                    <Typography variant="body2">{day}</Typography>
+                                    {hasAppointments && (
+                                      <Box
+                                        sx={{
+                                          width: 6,
+                                          height: 6,
+                                          borderRadius: '50%',
+                                          mt: 0.5,
+                                          bgcolor: isToday ? 'primary.contrastText' : 'primary.main'
+                                        }}
+                                      />
+                                    )}
+                                  </>
+                                )}
+                              </CalendarDay>
+                            </Grid>
+                          );
+                        })}
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Columna derecha */}
+                <Grid item xs={12} lg={4} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {/* Distribución de pacientes */}
+                  <BorderCard bordercolor="#2196f3">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <PieChartIcon sx={{ mr: 1, color: '#2196f3' }} />
+                          <Typography variant="h6">Distribución de Pacientes</Typography>
+                        </Box>
+                      }
+                      subheader="Por tipo de terapia"
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent>
+                      <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {[
+                          { name: 'Fisioterapia', value: 45, color: '#2196f3' },
+                          { name: 'Terapia Ocupacional', value: 25, color: '#4caf50' },
+                          { name: 'Terapia del Habla', value: 15, color: '#ff9800' },
+                          { name: 'Psicología', value: 10, color: '#9c27b0' },
+                          { name: 'Otros', value: 5, color: '#9e9e9e' },
+                        ].map((item, i) => (
+                          <Box key={i} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    bgcolor: item.color,
+                                    mr: 1
+                                  }}
+                                />
+                                <Typography variant="body2">{item.name}</Typography>
+                              </Box>
+                              <Typography variant="subtitle2" fontWeight="medium">{item.value}%</Typography>
+                            </Box>
+                            <Box sx={{ width: '100%', height: 8, bgcolor: 'action.hover', borderRadius: 4, overflow: 'hidden' }}>
+                              <Box
+                                sx={{
+                                  height: '100%',
+                                  width: `${item.value}%`,
+                                  bgcolor: item.color
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+
+                      {/* Gráfico tipo donut */}
+                      <Box sx={{ position: 'relative', mt: 3, display: 'flex', justifyContent: 'center' }}>
+                        <DonutChart size={128} color="#2196f3" thickness={8}>
+                          <DonutChart size={96} color="#4caf50" thickness={8}>
+                            <DonutChart size={64} color="#ff9800" thickness={8}>
+                              <DonutChart size={32} color="#9c27b0" thickness={4}>
+                                <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#9e9e9e' }} />
+                              </DonutChart>
+                            </DonutChart>
+                          </DonutChart>
+                        </DonutChart>
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="h5" fontWeight="bold">1,248</Typography>
+                            <Typography variant="caption" color="text.secondary">Pacientes</Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </BorderCard>
+
+                  {/* Actividad reciente */}
+                  <BorderCard bordercolor="#4caf50">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ActivityIcon sx={{ mr: 1, color: '#4caf50' }} />
+                          <Typography variant="h6">Actividad Reciente</Typography>
+                        </Box>
+                      }
+                      subheader="Últimas actualizaciones"
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        {[
+                          { icon: UserIcon, text: 'Nuevo paciente registrado', time: 'Hace 10 minutos', color: '#2196f3' },
+                          { icon: CalendarIcon, text: 'Cita reprogramada', time: 'Hace 45 minutos', color: '#ff9800' },
+                          { icon: FileTextIcon, text: 'Informe actualizado', time: 'Hace 2 horas', color: '#4caf50' },
+                          { icon: MessageIcon, text: 'Nuevo mensaje recibido', time: 'Hace 3 horas', color: '#9c27b0' },
+                          { icon: CheckCircleIcon, text: 'Terapia completada', time: 'Hace 5 horas', color: '#00bcd4' },
+                        ].map((item, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: 2,
+                              p: 2,
+                              '&:hover': { bgcolor: 'action.hover' },
+                              borderBottom: i < 4 ? 1 : 0,
+                              borderColor: 'divider'
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                bgcolor: 'action.hover',
+                                p: 1,
+                                borderRadius: '50%',
+                                color: item.color
+                              }}
+                            >
+                              <item.icon fontSize="small" />
+                            </Box>
+                            <Box>
+                              <Typography variant="body2" fontWeight="medium">{item.text}</Typography>
+                              <Typography variant="caption" color="text.secondary">{item.time}</Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </BorderCard>
+
+                  {/* Personal disponible */}
+                  <BorderCard bordercolor="#9c27b0">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <UsersIcon sx={{ mr: 1, color: '#9c27b0' }} />
+                          <Typography variant="h6">Personal Disponible</Typography>
+                        </Box>
+                      }
+                      subheader="Terapeutas disponibles hoy"
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        {[
+                          { name: 'Dr. Carlos Méndez', role: 'Fisioterapeuta', status: 'Disponible', avatar: 'CM' },
+                          { name: 'Dra. Laura Vega', role: 'Terapeuta Ocupacional', status: 'En sesión', avatar: 'LV' },
+                          { name: 'Lic. Roberto Díaz', role: 'Psicólogo', status: 'Disponible', avatar: 'RD' },
+                          { name: 'Dra. Sofía Torres', role: 'Fonoaudióloga', status: 'Ausente', avatar: 'ST' },
+                        ].map((staff, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              p: 2,
+                              '&:hover': { bgcolor: 'action.hover' },
+                              borderBottom: i < 3 ? 1 : 0,
+                              borderColor: 'divider'
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Avatar alt={staff.name} src={`/placeholder.svg?height=40&width=40&text=${staff.avatar}`}>
+                                {staff.avatar}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="subtitle2">{staff.name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{staff.role}</Typography>
+                              </Box>
+                            </Box>
+                            <MuiBadge
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  position: 'static',
+                                  transform: 'none',
+                                  borderRadius: 1,
+                                  padding: '4px 8px',
+                                  height: 'auto',
+                                  bgcolor: staff.status === 'Disponible'
+                                    ? '#e8f5e9'
+                                    : staff.status === 'En sesión'
+                                      ? 'background.paper'
+                                      : '#f5f5f5',
+                                  color: staff.status === 'Disponible'
+                                    ? '#2e7d32'
+                                    : staff.status === 'En sesión'
+                                      ? 'text.primary'
+                                      : 'text.secondary',
+                                  border: staff.status === 'En sesión' ? 1 : 0,
+                                  borderColor: 'divider'
+                                }
+                              }}
+                              badgeContent={staff.status}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </BorderCard>
+                </Grid>
+              </Grid>
+
+              {/* Acciones rápidas */}
+              <Card>
+                <CardHeader
+                  title={
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ZapIcon sx={{ mr: 1, color: 'primary.main' }} />
+                      <Typography variant="h6">Acciones Rápidas</Typography>
+                    </Box>
+                  }
+                  subheader="Tareas comunes"
+                />
+                <CardContent>
+                  <Grid container spacing={2}>
+                    {[
+                      { icon: UserIcon, text: 'Nuevo Paciente', color: '#2196f3', bgColor: '#e3f2fd' },
+                      { icon: CalendarIcon, text: 'Agendar Cita', color: '#4caf50', bgColor: '#e8f5e9' },
+                      { icon: FileTextIcon, text: 'Crear Informe', color: '#ff9800', bgColor: '#fff3e0' },
+                      { icon: MessageIcon, text: 'Enviar Mensaje', color: '#9c27b0', bgColor: '#f3e5f5' },
+                      { icon: UsersIcon, text: 'Ver Terapeutas', color: '#3f51b5', bgColor: '#e8eaf6' },
+                      { icon: BarChartIcon, text: 'Estadísticas', color: '#e91e63', bgColor: '#fce4ec' },
+                      { icon: HeartIcon, text: 'Seguimiento', color: '#f44336', bgColor: '#ffebee' },
+                      { icon: ClockIcon, text: 'Horarios', color: '#00bcd4', bgColor: '#e0f7fa' },
+                      { icon: AwardIcon, text: 'Certificados', color: '#ffc107', bgColor: '#fff8e1' },
+                      { icon: ActivityIcon, text: 'Tratamientos', color: '#009688', bgColor: '#e0f2f1' },
+                      { icon: DocumentIcon, text: 'Documentos', color: '#607d8b', bgColor: '#eceff1' },
+                      { icon: CheckCircleIcon, text: 'Completados', color: '#009688', bgColor: '#e0f2f1' },
+                    ].map((item, i) => (
+                      <Grid item xs={6} sm={4} md={3} lg={2} key={i}>
+                        <Button
+                          variant="outlined"
+                          fullWidth
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1.5,
+                            py: 3,
+                            px: 1,
+                            height: 'auto',
+                            bgcolor: item.bgColor,
+                            color: item.color,
+                            borderColor: 'transparent',
+                            '&:hover': {
+                              bgcolor: item.bgColor,
+                              filter: 'brightness(0.95)',
+                              borderColor: 'transparent',
+                            }
+                          }}
+                        >
+                          <item.icon sx={{ fontSize: 32 }} />
+                          <Typography variant="caption" fontWeight="medium">{item.text}</Typography>
+                        </Button>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Tasas de éxito y evolución mensual */}
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <BorderCard bordercolor="#ff9800">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircleIcon sx={{ mr: 1, color: '#ff9800' }} />
+                          <Typography variant="h6">Tasa de Éxito por Tratamiento</Typography>
+                        </Box>
+                      }
+                      subheader="Porcentaje de tratamientos exitosos"
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent>
+                      <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {[
+                          { name: 'Rehabilitación Motora', rate: 94, patients: 156, color: '#2196f3' },
+                          { name: 'Terapia de Lenguaje', rate: 89, patients: 78, color: '#4caf50' },
+                          { name: 'Terapia Cognitiva', rate: 92, patients: 104, color: '#ff9800' },
+                          { name: 'Rehabilitación Post-Quirúrgica', rate: 96, patients: 132, color: '#9c27b0' },
+                        ].map((item, i) => (
+                          <Box key={i} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    bgcolor: item.color,
+                                    mr: 1
+                                  }}
+                                />
+                                <Typography variant="subtitle2">{item.name}</Typography>
+                              </Box>
+                              <Typography variant="h6" fontWeight="bold">{item.rate}%</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Typography variant="body2" color="text.secondary">
+                                Pacientes tratados: {item.patients}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Último mes
+                              </Typography>
+                            </Box>
+                            <LinearProgress
+                              variant="determinate"
+                              value={item.rate}
+                              sx={{
+                                height: 8,
+                                borderRadius: 4,
+                                bgcolor: 'action.hover',
+                                '& .MuiLinearProgress-bar': {
+                                  bgcolor: item.color
+                                }
+                              }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </BorderCard>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <BorderCard bordercolor="#009688">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <TrendingUpIcon sx={{ mr: 1, color: '#009688' }} />
+                          <Typography variant="h6">Evolución Mensual</Typography>
+                        </Box>
+                      }
+                      subheader="Pacientes atendidos en los últimos meses"
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent>
+                      <Box sx={{ height: 250, display: 'flex', alignItems: 'flex-end', gap: 1, pt: 3 }}>
+                        {['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'].map((month, i) => {
+                          const height = [60, 45, 70, 65, 75, 85, 80, 90, 95, 88, 92, 98][i];
+                          return (
+                            <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flex: 1 }}>
+                              <BarChart
+                                height={height}
+                                color="#009688"
+                                sx={{
+                                  backgroundImage: 'linear-gradient(to top, #009688, #4db6ac)',
+                                  '&:hover': {
+                                    backgroundImage: 'linear-gradient(to top, #00796b, #009688)',
+                                  }
+                                }}
+                              />
+                              <Typography variant="caption" fontWeight="medium">{month}</Typography>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </CardContent>
+                  </BorderCard>
+                </Grid>
+              </Grid>
+
+              {/* Sección inferior con widgets adicionales */}
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={8}>
+                  <BorderCard bordercolor="#3f51b5">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <AwardIcon sx={{ mr: 1, color: '#3f51b5' }} />
+                          <Typography variant="h6">Mejores Terapeutas</Typography>
+                        </Box>
+                      }
+                      subheader="Basado en evaluaciones de pacientes"
+                      action={
+                        <Button
+                          variant="text"
+                          size="small"
+                          endIcon={<ChevronRightIcon />}
+                        >
+                          Ver todos
+                        </Button>
+                      }
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        {[
+                          { name: 'Dra. Laura Vega', role: 'Terapeuta Ocupacional', rating: 4.9, patients: 128, avatar: 'LV' },
+                          { name: 'Dr. Carlos Méndez', role: 'Fisioterapeuta', rating: 4.8, patients: 156, avatar: 'CM' },
+                          { name: 'Lic. Roberto Díaz', role: 'Psicólogo', rating: 4.7, patients: 92, avatar: 'RD' },
+                        ].map((therapist, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              p: 2,
+                              '&:hover': { bgcolor: 'action.hover' },
+                              borderBottom: i < 2 ? 1 : 0,
+                              borderColor: 'divider'
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Box sx={{ position: 'relative' }}>
+                                <Avatar
+                                  alt={therapist.name}
+                                  src={`/placeholder.svg?height=48&width=48&text=${therapist.avatar}`}
+                                  sx={{ width: 48, height: 48 }}
+                                >
+                                  {therapist.avatar}
+                                </Avatar>
+                                <Box
+                                  sx={{
+                                    position: 'absolute',
+                                    bottom: -4,
+                                    right: -4,
+                                    bgcolor: '#3f51b5',
+                                    color: 'white',
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  {i + 1}
+                                </Box>
+                              </Box>
+                              <Box>
+                                <Typography variant="subtitle2">{therapist.name}</Typography>
+                                <Typography variant="body2" color="text.secondary">{therapist.role}</Typography>
+                              </Box>
+                            </Box>
+                            <Box sx={{ textAlign: 'right' }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Typography variant="h6" fontWeight="bold">{therapist.rating}</Typography>
+                                <Typography variant="h6" color="warning.main">★</Typography>
+                              </Box>
+                              <Typography variant="caption" color="text.secondary">
+                                {therapist.patients} pacientes
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </BorderCard>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <BorderCard bordercolor="#00bcd4">
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <BellIcon sx={{ mr: 1, color: '#00bcd4' }} />
+                          <Typography variant="h6">Recordatorios</Typography>
+                        </Box>
+                      }
+                      subheader="Tareas pendientes para hoy"
+                      sx={{
+                        pb: 1,
+                        bgcolor: 'action.hover',
+                        '& .MuiCardHeader-action': { m: 0 }
+                      }}
+                    />
+                    <CardContent sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        {[
+                          { text: 'Llamar a pacientes para confirmar citas', time: '10:30 AM', priority: 'Alta' },
+                          { text: 'Actualizar informes de progreso', time: '13:00 PM', priority: 'Media' },
+                          { text: 'Revisar inventario de suministros', time: '15:30 PM', priority: 'Baja' },
+                          { text: 'Reunión con el equipo médico', time: '17:00 PM', priority: 'Alta' },
+                        ].map((reminder, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              p: 2,
+                              '&:hover': { bgcolor: 'action.hover' },
+                              borderBottom: i < 3 ? 1 : 0,
+                              borderColor: 'divider'
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                              <Typography variant="subtitle2">{reminder.text}</Typography>
+                              <MuiBadge
+                                sx={{
+                                  ml: 1,
+                                  '& .MuiBadge-badge': {
+                                    position: 'static',
+                                    transform: 'none',
+                                    borderRadius: 1,
+                                    padding: '4px 8px',
+                                    height: 'auto',
+                                  }
+                                }}
+                                badgeContent={reminder.priority}
+                                color={
+                                  reminder.priority === 'Alta'
+                                    ? 'error'
+                                    : reminder.priority === 'Media'
+                                      ? 'primary'
+                                      : 'default'
+                                }
+                              />
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+                              <ClockIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                              <Typography variant="body2">{reminder.time}</Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    </CardContent>
+                    <Box
+                      sx={{
+                        p: 2,
+                        bgcolor: 'action.hover',
+                        borderTop: 1,
+                        borderColor: 'divider'
+                      }}
+                    >
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={<PlusIcon />}
+                      >
+                        Agregar Recordatorio
+                      </Button>
+                    </Box>
+                  </BorderCard>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          {tabValue === 'pacientes' && (
+            <Card>
+              <CardHeader
+                title="Gestión de Pacientes"
+                subheader="Administre la información de los pacientes"
+              />
+              <CardContent>
+                <Typography>Contenido de la pestaña de pacientes...</Typography>
+              </CardContent>
+            </Card>
+          )}
+
+          {tabValue === 'citas' && (
+            <Card>
+              <CardHeader
+                title="Gestión de Citas"
+                subheader="Administre las citas programadas"
+              />
+              <CardContent>
+                <Typography>Contenido de la pestaña de citas...</Typography>
+              </CardContent>
+            </Card>
+          )}
+
+          {tabValue === 'reportes' && (
+            <Card>
+              <CardHeader
+                title="Reportes y Estadísticas"
+                subheader="Visualice datos importantes del centro"
+              />
+              <CardContent>
+                <Typography>Contenido de la pestaña de reportes...</Typography>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      </Box>
+    </ThemeProvider>
+  )
+}
+
+export default HomeAdmin
+
