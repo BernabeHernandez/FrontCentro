@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, Typography } from 'antd';
 import {
-  FacebookOutlined,
-  TwitterOutlined,
-  InstagramOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  EnvironmentOutlined,
-  FileProtectOutlined,
-  LockOutlined,
-  FileDoneOutlined,BulbOutlined, EyeOutlined, MessageOutlined 
-} from '@ant-design/icons';
+  Facebook as FacebookIcon,
+  Twitter as TwitterIcon,
+  Instagram as InstagramIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationOnIcon,
+  Gavel as GavelIcon,
+  Lock as LockIcon,
+  Description as DescriptionIcon,
+  Lightbulb as LightbulbIcon,
+  Visibility as VisibilityIcon,
+} from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 
 const { Footer } = Layout;
 const { Text } = Typography;
 
-const PieDePagina = () => {
-  const contactoRef = useRef(null);
+const PieDePaginaAdmin = () => {
   const [datosEmpresa, setDatosEmpresa] = useState({
     redesSociales: {
       facebook: "",
@@ -57,8 +58,8 @@ const PieDePagina = () => {
 
   return (
     <Layout>
-      <Footer ref={contactoRef} style={{
-        backgroundColor: '#000000',
+      <Footer style={{
+        backgroundColor: '#1A2526', // Mismo color que el encabezado
         textAlign: 'center',
         padding: '40px 20px',
         width: '100%',
@@ -77,42 +78,60 @@ const PieDePagina = () => {
           <div>
             <h2 style={headerStyle}>Síguenos en nuestras redes sociales</h2>
             <a href={datosEmpresa.redesSociales.facebook || '#'} style={linkStyle} target="_blank" rel="noopener noreferrer">
-              <FacebookOutlined style={iconStyle} /> Facebook
+              <FacebookIcon style={{ ...iconStyle, color: '#3B5998' }} /> Facebook
             </a>
             <a href={datosEmpresa.redesSociales.twitter || '#'} style={linkStyle} target="_blank" rel="noopener noreferrer">
-              <TwitterOutlined style={iconStyle} /> Twitter
+              <TwitterIcon style={{ ...iconStyle, color: '#1DA1F2' }} /> Twitter
             </a>
             <a href={datosEmpresa.redesSociales.instagram || '#'} style={linkStyle} target="_blank" rel="noopener noreferrer">
-              <InstagramOutlined style={iconStyle} /> Instagram
+              <InstagramIcon style={{ ...iconStyle, color: '#E1306C' }} /> Instagram
             </a>
           </div>
           <div>
             <h2 style={headerStyle}>Atención al cliente</h2>
-            <p style={textStyle}><PhoneOutlined style={iconStyle} /> Teléfono: {datosEmpresa.telefono || 'No disponible'}</p>
-            <p style={textStyle}><MailOutlined style={iconStyle} /> Correo electrónico: {datosEmpresa.correo || 'No disponible'}</p>
-            <p style={textStyle}><EnvironmentOutlined style={iconStyle} /> Ubicación: {datosEmpresa.direccion || 'No disponible'}</p>
-            <Link to="/chats" style={linkStyle}><MessageOutlined style={iconStyle} /> Chats</Link>
+            <p style={textStyle}>
+              <PhoneIcon style={{ ...iconStyle, color: '#FF6F61' }} /> Teléfono: {datosEmpresa.telefono || 'No disponible'}
+            </p>
+            <p style={textStyle}>
+              <EmailIcon style={{ ...iconStyle, color: '#FFD700' }} /> Correo electrónico: {datosEmpresa.correo || 'No disponible'}
+            </p>
+            <p style={textStyle}>
+              <LocationOnIcon style={{ ...iconStyle, color: '#00CED1' }} /> Ubicación: {datosEmpresa.direccion || 'No disponible'}
+            </p>
+            <Link to="/chats" style={linkStyle}>
+              <VisibilityIcon style={{ ...iconStyle, color: '#00B300' }} /> Chat Box
+            </Link>
+            
           </div>
           <div>
             <h2 style={headerStyle}>Datos de la empresa</h2>
-            <Link to="/deslindes" style={linkStyle}><FileProtectOutlined style={iconStyle} /> Deslinde legal</Link>
-            <Link to="/politicass" style={linkStyle}><LockOutlined style={iconStyle} /> Política de Privacidad</Link>
-            <Link to="/terminos-condiciones" style={linkStyle}><FileDoneOutlined style={iconStyle} /> Términos y condiciones</Link>
-            <Link to="/misionview" style={linkStyle}><BulbOutlined style={iconStyle} /> Misión</Link>
-            <Link to="/visionview" style={linkStyle}><EyeOutlined style={iconStyle} /> Visión</Link>
-            
+            <Link to="/deslindes" style={linkStyle}>
+              <GavelIcon style={{ ...iconStyle, color: '#7B68EE' }} /> Deslinde legal
+            </Link>
+            <Link to="/politicass" style={linkStyle}>
+              <LockIcon style={{ ...iconStyle, color: '#FF4500' }} /> Política de Privacidad
+            </Link>
+            <Link to="/terminos-condiciones" style={linkStyle}>
+              <DescriptionIcon style={{ ...iconStyle, color: '#6B728E' }} /> Términos y condiciones
+            </Link>
+            <Link to="/misionview" style={linkStyle}>
+              <LightbulbIcon style={{ ...iconStyle, color: '#FF69B4' }} /> Misión
+            </Link>
+            <Link to="/visionview" style={linkStyle}>
+              <VisibilityIcon style={{ ...iconStyle, color: '#00B300' }} /> Visión
+            </Link>
           </div>
         </div>
       </Footer>
       <div style={{
-        backgroundColor: '#333333',
+        backgroundColor: '#1A2526', // Mismo color que el encabezado
         textAlign: 'center',
         padding: '20px',
         width: '100%',
         boxSizing: 'border-box'
       }}>
         <Text style={{ color: '#ffffff', fontSize: '16px' }}>
-          &copy; {new Date().getFullYear()} Centro de Rehabilitación Integral. Todos los derechos reservados.
+          © {new Date().getFullYear()} Centro de Rehabilitación Integral. Todos los derechos reservados.
         </Text>
       </div>
     </Layout>
@@ -130,7 +149,6 @@ const linkStyle = {
 const iconStyle = {
   fontSize: '18px',
   marginRight: '5px',
-  color: '#2E8B57',  
 };
 
 const textStyle = {
@@ -145,4 +163,4 @@ const headerStyle = {
   marginBottom: '10px',
 };
 
-export default PieDePagina;
+export default PieDePaginaAdmin;
