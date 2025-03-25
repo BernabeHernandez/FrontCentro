@@ -3,7 +3,7 @@ import axios from 'axios';
 import { format, addDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import jsPDF from 'jspdf';
-import { useNavigate, useLocation } from 'react-router-dom'; // Agregamos useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
@@ -30,16 +30,10 @@ import Icono from '../Icono';
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#28a745',
-    },
-    secondary: {
-      main: '#1976d2',
-    },
+    primary: { main: '#28a745' },
+    secondary: { main: '#1976d2' },
   },
-  typography: {
-    fontFamily: 'Poppins, sans-serif',
-  },
+  typography: { fontFamily: 'Poppins, sans-serif' },
 });
 
 const generarQRComoImagen = async () => {
@@ -47,12 +41,9 @@ const generarQRComoImagen = async () => {
   qrDiv.style.position = 'absolute';
   qrDiv.style.left = '-9999px';
   document.body.appendChild(qrDiv);
-
   ReactDOM.render(<QRCodeCanvas value="https://tu-aplicacion.com" size={128} />, qrDiv);
-
   const canvas = await html2canvas(qrDiv);
   document.body.removeChild(qrDiv);
-
   return canvas.toDataURL('image/png');
 };
 
@@ -64,14 +55,11 @@ const CitasCliente = () => {
   const [usuarioRegistrado, setUsuarioRegistrado] = useState(false);
   const [usuarioId, setUsuarioId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [nombreServicio, setNombreServicio] = useState(''); // Nuevo: para mostrar el nombre del servicio
+  const [nombreServicio, setNombreServicio] = useState('');
   const navigate = useNavigate();
-  const location = useLocation(); // Nuevo: para obtener el estado de navegación
-
-  // Obtener el servicioId del estado de navegación
+  const location = useLocation();
   const servicioId = location.state?.servicioId;
 
-  // Verificar que el servicioId esté presente
   useEffect(() => {
     if (!servicioId) {
       Swal.fire({
@@ -83,7 +71,6 @@ const CitasCliente = () => {
     }
   }, [servicioId, navigate]);
 
-  // Obtener el nombre del servicio
   useEffect(() => {
     const fetchNombreServicio = async () => {
       if (servicioId) {
@@ -162,8 +149,8 @@ const CitasCliente = () => {
       const horaActual = hoy.getHours();
 
       const horarioHoy = diasConHorario.find(dia => dia.dia.toLowerCase() === format(hoy, 'EEEE', { locale: es }).toLowerCase());
-      const horaInicioHoy = parseInt(horarioHoy.hora_inicio.split(':')[0], 10);
-      const horaFinHoy = parseInt(horarioHoy.hora_fin.split(':')[0], 10);
+      const horaInicioHoy = parseInt(horarioHoy?.hora_inicio.split(':')[0], 10);
+      const horaFinHoy = parseInt(horarioHoy?.hora_fin.split(':')[0], 10);
 
       const dentroDelHorario = horaActual >= horaInicioHoy && horaActual < horaFinHoy;
 
@@ -180,6 +167,7 @@ const CitasCliente = () => {
           fechaFormateada: format(fecha, "EEEE, d 'de' MMMM", { locale: es }),
           hora_inicio: dia.hora_inicio,
           hora_fin: dia.hora_fin,
+          disponible: dia.disponible // Agregar el campo disponible desde la API
         };
       });
 
@@ -195,7 +183,8 @@ const CitasCliente = () => {
     if (usuarioRegistrado) getDiasDisponibles();
   }, [usuarioRegistrado]);
 
-  const handleSelectDay = async (dia, fecha) => {
+  const handleSelectDay = async (dia, fecha, disponible) => {
+    if (disponible === 0) return; // No hacer nada si el día no está disponible
     setSelectedDay(dia);
     setLoading(true);
     try {
@@ -265,7 +254,6 @@ const CitasCliente = () => {
     doc.addImage(iconoRelojImg, 'PNG', 10, 145, 10, 10);
     doc.text(`Hora: ${selectedTime}`, 25, 153);
 
-    // Nuevo: Agregar el nombre del servicio al PDF
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
@@ -273,40 +261,40 @@ const CitasCliente = () => {
 
     doc.setDrawColor(0, 128, 0);
     doc.setLineWidth(0.5);
-    doc.line(10, 175, 200, 175); // Ajustar la línea para dar espacio al nuevo texto
+    doc.line(10, 175, 200, 175);
 
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 0, 0);
-    doc.text("Importante", 10, 185); // Ajustar posición
+    doc.text("Importante", 10, 185);
 
     const iconoUbicacionImg = await convertirIconoAImagen(FaMapMarkerAlt, 'red');
-    doc.addImage(iconoUbicacionImg, 'PNG', 10, 195, 10, 10); // Ajustar posición
+    doc.addImage(iconoUbicacionImg, 'PNG', 10, 195, 10, 10);
     doc.setTextColor(0, 0, 0);
-    doc.text('Calle Clavel, Col. Valle del Encinal, Huejutla, Mexico', 25, 203); // Ajustar posición
+    doc.text('Calle Clavel, Col. Valle del Encinal, Huejutla, Mexico', 25, 203);
 
     const iconoTelefonoImg = await convertirIconoAImagen(FaPhone, 'teal');
-    doc.addImage(iconoTelefonoImg, 'PNG', 10, 210, 10, 10); // Ajustar posición
-    doc.text('Teléfono: (+51) 771 162 8377', 25, 218); // Ajustar posición
+    doc.addImage(iconoTelefonoImg, 'PNG', 10, 210, 10, 10);
+    doc.text('Teléfono: (+51) 771 162 8377', 25, 218);
 
     const iconoCorreoImg = await convertirIconoAImagen(FaEnvelope, 'blue');
-    doc.addImage(iconoCorreoImg, 'PNG', 10, 225, 10, 10); // Ajustar posición
-    doc.text('Correo: Ltfmariela@hotmail.com', 25, 233); // Ajustar posición
+    doc.addImage(iconoCorreoImg, 'PNG', 10, 225, 10, 10);
+    doc.text('Correo: Ltfmariela@hotmail.com', 25, 233);
 
     doc.setDrawColor(0, 128, 0);
     doc.setLineWidth(0.5);
-    doc.line(10, 240, 200, 240); // Ajustar posición
+    doc.line(10, 240, 200, 240);
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 0, 0);
-    doc.text("Aviso:", 10, 250); // Ajustar posición
+    doc.text("Aviso:", 10, 250);
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text('- Por favor, preséntese 15 minutos antes de su cita.', 15, 260); // Ajustar posición
-    doc.text('- En caso de cancelación, notificar con al menos 24 horas de anticipación.', 15, 270); // Ajustar posición
-    doc.text('- No presentarse a la cita puede generar cargos adicionales.', 15, 280); // Ajustar posición
+    doc.text('- Por favor, preséntese 15 minutos antes de su cita.', 15, 260);
+    doc.text('- En caso de cancelación, notificar con al menos 24 horas de anticipación.', 15, 270);
+    doc.text('- No presentarse a la cita puede generar cargos adicionales.', 15, 280);
 
     const qrImage = await generarQRComoImagen();
     doc.addImage(qrImage, 'PNG', 150, 100, 50, 50);
@@ -316,7 +304,7 @@ const CitasCliente = () => {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text('Términos y condiciones aplican. Consulta más detalles en nuestra página web.', 10, 295); // Ajustar posición
+    doc.text('Términos y condiciones aplican. Consulta más detalles en nuestra página web.', 10, 295);
 
     doc.save("comprobante_cita.pdf");
   };
@@ -394,8 +382,8 @@ const CitasCliente = () => {
             horaFin: horaFin,
             usuario_id: usuarioId,
             fecha_cita: fechaCita,
-            servicio_id: servicioId, // Nuevo: enviar el servicio_id
-            estado: 'pendiente', // Nuevo: enviar el estado por defecto
+            servicio_id: servicioId,
+            estado: 'pendiente',
           });
 
           actualizarHorariosLocalmente(selectedDay, selectedTime);
@@ -449,17 +437,18 @@ const CitasCliente = () => {
                 {diasDisponibles.map((dia, index) => (
                   <Grid item xs={12} sm={6} md={2} key={index}>
                     <Card
-                      onClick={() => handleSelectDay(dia.nombre, dia.fecha)}
+                      onClick={dia.disponible === 1 ? () => handleSelectDay(dia.nombre, dia.fecha, dia.disponible) : undefined}
                       sx={{
-                        cursor: 'pointer',
+                        cursor: dia.disponible === 1 ? 'pointer' : 'not-allowed',
                         transition: 'all 0.3s ease',
                         border: selectedDay === dia.nombre ? '2px solid #28a745' : '2px solid #e0e0e0',
-                        '&:hover': {
+                        backgroundColor: dia.disponible === 0 ? '#f5f5f5' : selectedDay === dia.nombre ? '#e8f5e9' : '#fff',
+                        opacity: dia.disponible === 0 ? 0.6 : 1,
+                        '&:hover': dia.disponible === 1 && {
                           transform: 'translateY(-5px)',
                           boxShadow: '0 6px 18px rgba(0, 123, 255, 0.2)',
                           borderColor: '#28a745',
                         },
-                        backgroundColor: selectedDay === dia.nombre ? '#e8f5e9' : '#fff',
                       }}
                     >
                       <CardContent sx={{ textAlign: 'center' }}>
@@ -469,6 +458,11 @@ const CitasCliente = () => {
                         <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
                           {format(dia.fecha, 'EEEE', { locale: es })}
                         </Typography>
+                        {dia.disponible === 0 && (
+                          <Typography variant="body2" sx={{ color: '#d32f2f', mt: 1 }}>
+                            No disponible
+                          </Typography>
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>
