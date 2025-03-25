@@ -22,6 +22,8 @@ import {
   InputLabel,
   useMediaQuery,
   useTheme,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
@@ -31,6 +33,7 @@ const RegistroHorario = () => {
     hora_inicio: "",
     hora_fin: "",
     intervalo: 30,
+    disponible: true, // Valor por defecto al crear
   });
 
   const [horarios, setHorarios] = useState([]);
@@ -58,7 +61,7 @@ const RegistroHorario = () => {
     const { name, value } = e.target;
     setNewHorario((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "disponible" ? e.target.checked : value,
     }));
   };
 
@@ -66,7 +69,6 @@ const RegistroHorario = () => {
     e.preventDefault();
     setMensaje("");
 
-    // Validación de intervalo
     if (newHorario.intervalo % 30 !== 0) {
       Swal.fire({
         icon: "error",
@@ -77,15 +79,20 @@ const RegistroHorario = () => {
     }
 
     try {
+      const horarioData = {
+        ...newHorario,
+        disponible: newHorario.disponible ? 1 : 0, // Convertimos booleano a 0 o 1 para el backend
+      };
+
       if (editandoId) {
-        await axios.put(`https://backendcentro.onrender.com/api/citasAdmin/horarios/${editandoId}`, newHorario);
+        await axios.put(`https://backendcentro.onrender.com/api/citasAdmin/horarios/${editandoId}`, horarioData);
         Swal.fire({
           icon: "success",
           title: "Horario actualizado",
           text: "El horario se actualizó correctamente.",
         });
       } else {
-        await axios.post("https://backendcentro.onrender.com/api/citasAdmin/horarios", newHorario);
+        await axios.post("https://backendcentro.onrender.com/api/citasAdmin/horarios", horarioData);
         Swal.fire({
           icon: "success",
           title: "Horario registrado",
@@ -112,6 +119,7 @@ const RegistroHorario = () => {
       hora_inicio: horario.hora_inicio,
       hora_fin: horario.hora_fin,
       intervalo: horario.intervalo,
+      disponible: parseInt(horario.disponible) === 1, // Convertimos 0/1 a booleano
     });
     setEditandoId(horario.id_horario);
     setModalAbierto(true);
@@ -154,7 +162,7 @@ const RegistroHorario = () => {
   };
 
   const limpiarFormulario = () => {
-    setNewHorario({ dia: "", hora_inicio: "", hora_fin: "", intervalo: 30 });
+    setNewHorario({ dia: "", hora_inicio: "", hora_fin: "", intervalo: 30, disponible: true });
     setEditandoId(null);
     setModalAbierto(false);
   };
@@ -165,7 +173,6 @@ const RegistroHorario = () => {
         Registro de Horarios
       </Typography>
 
-      {/* Botón para abrir el modal de registro */}
       <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
         <Button
           variant="contained"
@@ -176,7 +183,6 @@ const RegistroHorario = () => {
         </Button>
       </Box>
 
-      {/* Modal para agregar o editar horario */}
       <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
         <Box
           sx={{
@@ -243,6 +249,16 @@ const RegistroHorario = () => {
               fullWidth
               inputProps={{ min: 10 }}
             />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={newHorario.disponible}
+                  onChange={handleChange}
+                  name="disponible"
+                />
+              }
+              label="Disponible"
+            />
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button type="submit" variant="contained" color="primary">
                 {editandoId ? "Actualizar" : "Registrar"}
@@ -260,7 +276,6 @@ const RegistroHorario = () => {
         </Box>
       </Modal>
 
-      {/* Tabla de Horarios */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
