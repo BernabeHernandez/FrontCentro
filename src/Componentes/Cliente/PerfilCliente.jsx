@@ -1,36 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { FaUser, FaEnvelope, FaPhone, FaAddressCard, FaUserAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  Fade,
+  CircularProgress,
+  Grid,
+  IconButton,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import {
+  Person,
+  Email,
+  Phone,
+  Badge,
+  Edit,
+  Save,
+  Cancel,
+} from "@mui/icons-material";
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  borderRadius: 16,
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
+  background: "linear-gradient(145deg, #ffffff 0%, #f5f7fa 100%)",
+  border: "1px solid #e0e4e8",
+}));
+
+const StyledField = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  padding: theme.spacing(1),
+  borderRadius: 8,
+  transition: "background-color 0.3s ease",
+  "&:hover": {
+    backgroundColor: theme.palette.grey[100],
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    "& fieldset": {
+      borderColor: theme.palette.grey[300],
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.grey[500],
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
 
 const PerfilCliente = () => {
-  const usuarioId = localStorage.getItem('usuario_id');
+  const usuarioId = localStorage.getItem("usuario_id");
   const [perfil, setPerfil] = useState({
-    nombre: '',
-    apellidopa: '',
-    apellidoma: '',
-    gmail: '',
-    user: '',
-    telefono: ''
+    nombre: "",
+    apellidopa: "",
+    apellidoma: "",
+    gmail: "",
+    user: "",
+    telefono: "",
   });
   const [editable, setEditable] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
     if (!usuarioId) {
-      console.error('No se encontró el ID del usuario en localStorage');
+      console.error("No se encontró el ID del usuario en localStorage");
       setLoading(false);
       return;
     }
 
-    axios.get(`https://backendcentro.onrender.com/api/perfilcliente/${usuarioId}`)
-      .then(response => {
+    axios
+      .get(`https://backendcentro.onrender.com/api/perfilcliente/${usuarioId}`)
+      .then((response) => {
         setPerfil(response.data);
         setLoading(false);
       })
-      .catch(error => {
-        console.error('Error al obtener el perfil:', error);
+      .catch((error) => {
+        console.error("Error al obtener el perfil:", error);
         setLoading(false);
       });
   }, [usuarioId]);
@@ -42,273 +100,231 @@ const PerfilCliente = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!usuarioId) {
-      setMensaje('No se encontró el ID del usuario');
+      Swal.fire("Error", "No se encontró el ID del usuario", "error");
       return;
     }
 
     Swal.fire({
-      title: '¿Estás seguro?',
+      title: "¿Estás seguro?",
       text: "¿Quieres guardar los cambios realizados?",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Sí, guardar',
-      cancelButtonText: 'No, cancelar'
+      confirmButtonText: "Sí, guardar",
+      cancelButtonText: "No, cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.put(`https://backendcentro.onrender.com/api/perfilcliente/${usuarioId}`, perfil)
-          .then(response => {
-            setEditable(false); // Deshabilitar la edición después de actualizar
+        axios
+          .put(`https://backendcentro.onrender.com/api/perfilcliente/${usuarioId}`, perfil)
+          .then((response) => {
+            setEditable(false);
             Swal.fire({
-              title: '¡Éxito!',
-              text: 'Los datos del perfil se actualizaron correctamente.',
-              icon: 'success',
-              confirmButtonText: 'Aceptar'
+              title: "¡Éxito!",
+              text: "Los datos del perfil se actualizaron correctamente.",
+              icon: "success",
+              confirmButtonText: "Aceptar",
             });
           })
-          .catch(error => {
-            console.error('Error al actualizar el perfil:', error);
+          .catch((error) => {
+            console.error("Error al actualizar el perfil:", error);
             Swal.fire({
-              title: 'Error',
-              text: 'Hubo un error al actualizar el perfil. Por favor, inténtalo de nuevo.',
-              icon: 'error',
-              confirmButtonText: 'Aceptar'
+              title: "Error",
+              text: "Hubo un error al actualizar el perfil. Por favor, inténtalo de nuevo.",
+              icon: "error",
+              confirmButtonText: "Aceptar",
             });
           });
       }
     });
   };
 
-  if (loading) return <p>Cargando perfil...</p>;
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.header}>{perfil.nombre}</h2>
-      {mensaje && <p style={styles.mensaje}>{mensaje}</p>}
-      <div style={styles.dataContainer}>
-        {!editable ? (
-          <div style={styles.info}>
-            <div style={styles.field}>
-              <FaUserAlt style={{ ...styles.icon, color: '#3498db' }} />
-              <strong>Nombre:</strong> {perfil.nombre} {perfil.apellidopa} {perfil.apellidoma}
-            </div>
-            <div style={styles.field}>
-              <FaEnvelope style={{ ...styles.icon, color: '#1abc9c' }} />
-              <strong>Correo Electrónico:</strong> {perfil.gmail}
-            </div>
-            <div style={styles.field}>
-              <FaAddressCard style={{ ...styles.icon, color: '#f39c12' }} />
-              <strong>Usuario:</strong> {perfil.user}
-            </div>
-            <div style={styles.field}>
-              <FaPhone style={{ ...styles.icon, color: '#e74c3c' }} />
-              <strong>Teléfono:</strong> {perfil.telefono}
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div style={styles.field}>
-              <FaUserAlt style={{ ...styles.icon, color: '#3498db' }} />
-              <label>Nombre:</label>
-              <input
-                type="text"
-                name="nombre"
-                value={perfil.nombre}
-                onChange={handleChange}
-                required
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.field}>
-              <FaUser style={{ ...styles.icon, color: '#e67e22' }} />
-              <label>Apellido Paterno:</label>
-              <input
-                type="text"
-                name="apellidopa"
-                value={perfil.apellidopa}
-                onChange={handleChange}
-                required
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.field}>
-              <FaUserAlt style={{ ...styles.icon, color: '#9b59b6' }} />
-              <label>Apellido Materno:</label>
-              <input
-                type="text"
-                name="apellidoma"
-                value={perfil.apellidoma}
-                onChange={handleChange}
-                required
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.field}>
-              <FaEnvelope style={{ ...styles.icon, color: '#1abc9c' }} />
-              <label>Correo Electrónico:</label>
-              <input
-                type="email"
-                name="gmail"
-                value={perfil.gmail}
-                onChange={handleChange}
-                required
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.field}>
-              <FaAddressCard style={{ ...styles.icon, color: '#f39c12' }} />
-              <label>Usuario:</label>
-              <input
-                type="text"
-                name="user"
-                value={perfil.user}
-                onChange={handleChange}
-                required
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.field}>
-              <FaPhone style={{ ...styles.icon, color: '#e74c3c' }} />
-              <label>Teléfono:</label>
-              <input
-                type="tel"
-                name="telefono"
-                value={perfil.telefono}
-                onChange={handleChange}
-                required
-                style={styles.input}
-              />
-            </div>
-            <button type="submit" style={styles.updateButton}>Actualizar Perfil</button>
-          </form>
-        )}
-      </div>
-      <div style={styles.buttonsContainer}>
-        {!editable ? (
-          <button onClick={() => setEditable(true)} style={styles.editButton}>Editar</button>
-        ) : (
-          <button onClick={() => setEditable(false)} style={styles.cancelButton}>Cancelar</button>
-        )}
-      </div>
-    </div>
-  );
-};
+    <Fade in={true} timeout={700}>
+      <Box sx={{ bgcolor: "#fafafa", minHeight: "100vh", py: 6 }}>
+        <Container maxWidth="md">
+          <StyledPaper elevation={0}>
+            <Typography
+              variant="h4"
+              fontWeight="bold"
+              color="primary.main"
+              textAlign="center"
+              gutterBottom
+            >
+              Mi Perfil
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              textAlign="center"
+              sx={{ mb: 4 }}
+            >
+              {perfil.nombre} {perfil.apellidopa} {perfil.apellidoma}
+            </Typography>
 
-const styles = {
-  container: {
-    width: '100%',
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    boxSizing: 'border-box',
-  },
-  header: {
-    textAlign: 'center',
-    fontSize: '2em',
-    marginBottom: '20px',
-    color: '#2c3e50',
-  },
-  dataContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  info: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  field: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '15px',
-    fontSize: '1.1em',
-    flexWrap: 'wrap',
-  },
-  icon: {
-    marginRight: '10px',
-    fontSize: '1.5em',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    marginTop: '5px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    boxSizing: 'border-box',
-    fontSize: '1em',
-  },
-  button: {
-    padding: '10px 20px',
-    backgroundColor: '#007BFF',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    width: '30%',
-    marginTop: '15px',
-    fontSize: '1em',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    display: 'block',
-  },
-  mensaje: {
-    textAlign: 'center',
-    color: 'green',
-    fontSize: '1.1em',
-    marginBottom: '15px',
-  },
-  editButton: {
-    padding: '10px 20px',
-    backgroundColor: '#2ecc71',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    width: '30%',
-    fontSize: '1.1em',
-    marginTop: '15px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    display: 'block',
-  },
-  cancelButton: {
-    padding: '10px 20px',
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    width: '30%',
-    fontSize: '1.1em',
-   
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    display: 'block',
-  },
-  updateButton: {
-    padding: '10px 20px',
-    backgroundColor: '#2ecc71',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-    width: '30%',
-    fontSize: '1.1em',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    display: 'block',
-  },
-  buttonsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '15px',
-    marginTop: '20px',
-  },
+            {!editable ? (
+              <Box>
+                <StyledField>
+                  <Person sx={{ color: "#3498db", fontSize: 28 }} />
+                  <Typography variant="body1" fontWeight="bold">
+                    Nombre completo:
+                  </Typography>
+                  <Typography variant="body1">
+                    {perfil.nombre} {perfil.apellidopa} {perfil.apellidoma}
+                  </Typography>
+                </StyledField>
+                <StyledField>
+                  <Email sx={{ color: "#1abc9c", fontSize: 28 }} />
+                  <Typography variant="body1" fontWeight="bold">
+                    Correo electrónico:
+                  </Typography>
+                  <Typography variant="body1">{perfil.gmail}</Typography>
+                </StyledField>
+                <StyledField>
+                  <Badge sx={{ color: "#f39c12", fontSize: 28 }} />
+                  <Typography variant="body1" fontWeight="bold">
+                    Usuario:
+                  </Typography>
+                  <Typography variant="body1">{perfil.user}</Typography>
+                </StyledField>
+                <StyledField>
+                  <Phone sx={{ color: "#e74c3c", fontSize: 28 }} />
+                  <Typography variant="body1" fontWeight="bold">
+                    Teléfono:
+                  </Typography>
+                  <Typography variant="body1">{perfil.telefono}</Typography>
+                </StyledField>
+              </Box>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <StyledField>
+                      <Person sx={{ color: "#3498db", fontSize: 28 }} />
+                      <StyledTextField
+                        fullWidth
+                        label="Nombre"
+                        name="nombre"
+                        value={perfil.nombre}
+                        onChange={handleChange}
+                        required
+                      />
+                    </StyledField>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <StyledField>
+                      <Person sx={{ color: "#e67e22", fontSize: 28 }} />
+                      <StyledTextField
+                        fullWidth
+                        label="Apellido Paterno"
+                        name="apellidopa"
+                        value={perfil.apellidopa}
+                        onChange={handleChange}
+                        required
+                      />
+                    </StyledField>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <StyledField>
+                      <Person sx={{ color: "#9b59b6", fontSize: 28 }} />
+                      <StyledTextField
+                        fullWidth
+                        label="Apellido Materno"
+                        name="apellidoma"
+                        value={perfil.apellidoma}
+                        onChange={handleChange}
+                        required
+                      />
+                    </StyledField>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <StyledField>
+                      <Email sx={{ color: "#1abc9c", fontSize: 28 }} />
+                      <StyledTextField
+                        fullWidth
+                        label="Correo Electrónico"
+                        name="gmail"
+                        type="email"
+                        value={perfil.gmail}
+                        onChange={handleChange}
+                        required
+                      />
+                    </StyledField>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <StyledField>
+                      <Badge sx={{ color: "#f39c12", fontSize: 28 }} />
+                      <StyledTextField
+                        fullWidth
+                        label="Usuario"
+                        name="user"
+                        value={perfil.user}
+                        onChange={handleChange}
+                        required
+                      />
+                    </StyledField>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <StyledField>
+                      <Phone sx={{ color: "#e74c3c", fontSize: 28 }} />
+                      <StyledTextField
+                        fullWidth
+                        label="Teléfono"
+                        name="telefono"
+                        type="tel"
+                        value={perfil.telefono}
+                        onChange={handleChange}
+                        required
+                      />
+                    </StyledField>
+                  </Grid>
+                </Grid>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="success"
+                  startIcon={<Save />}
+                  sx={{ mt: 3, borderRadius: 20, px: 4, textTransform: "none" }}
+                >
+                  Guardar Cambios
+                </Button>
+              </form>
+            )}
+
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 4 }}>
+              {!editable ? (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Edit />}
+                  onClick={() => setEditable(true)}
+                  sx={{ borderRadius: 20, px: 4, textTransform: "none" }}
+                >
+                  Editar Perfil
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Cancel />}
+                  onClick={() => setEditable(false)}
+                  sx={{ borderRadius: 20, px: 4, textTransform: "none" }}
+                >
+                  Cancelar
+                </Button>
+              )}
+            </Box>
+          </StyledPaper>
+        </Container>
+      </Box>
+    </Fade>
+  );
 };
 
 export default PerfilCliente;
