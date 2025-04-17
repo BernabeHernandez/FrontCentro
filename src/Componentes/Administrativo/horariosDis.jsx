@@ -10,9 +10,28 @@ import {
   Paper,
   CircularProgress,
   IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  InputAdornment,
+  TextField,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { CalendarToday, AccessTime, CheckCircle, Cancel } from "@mui/icons-material";
+import {
+  CalendarToday,
+  AccessTime,
+  CheckCircle,
+  Cancel,
+  Person,
+  Email,
+  Phone,
+  Event,
+  Search,
+  Build,
+} from "@mui/icons-material";
 
 const HorariosDis = () => {
   const [diasDisponibles, setDiasDisponibles] = useState([]);
@@ -20,6 +39,9 @@ const HorariosDis = () => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [citasDelDia, setCitasDelDia] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getDiasDisponibles = async () => {
     try {
@@ -86,35 +108,32 @@ const HorariosDis = () => {
     }
   };
 
-  // Columnas para la tabla de citas
-  const columns = [
-    { field: "nombre", headerName: "Nombre", flex: 1 },
-    { field: "apellidopa", headerName: "Apellido Paterno", flex: 1 },
-    { field: "apellidoma", headerName: "Apellido Materno", flex: 1 },
-    { field: "gmail", headerName: "Email", flex: 1 },
-    { field: "telefono", headerName: "Teléfono", flex: 1 },
-    {
-      field: "fecha_cita",
-      headerName: "Fecha de la Cita",
-      flex: 1,
-      valueFormatter: (params) =>
-        params.value ? format(parseISO(params.value), "dd/MM/yyyy") : "Fecha no disponible",
-    },
-    { field: "hora_inicio", headerName: "Hora Inicio", flex: 1 },
-    { field: "hora_fin", headerName: "Hora Fin", flex: 1 },
-  ];
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const filteredCitas = citasDelDia.filter((cita) =>
+    cita.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cita.apellidopa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cita.apellidoma.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Box sx={{ padding: 3, maxWidth: 1200, margin: "0 auto" }}>
-      <Typography variant="h4" component="h1" align="center" gutterBottom>
-        <CalendarToday sx={{ verticalAlign: "middle", marginRight: 1 }} />
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: "bold", color: "#424242", display: "flex", alignItems: "center" }}>
+        <CalendarToday sx={{ mr: 1 }} />
         Horarios Disponibles
       </Typography>
 
       {/* Días disponibles */}
-      <Paper sx={{ padding: 3, marginBottom: 3, borderRadius: 4, boxShadow: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", fontWeight: "bold", color: "success.main" }}>
-          <CalendarToday sx={{ verticalAlign: "middle", marginRight: 1, fontSize: "1.5rem" }} />
+      <Paper sx={{ padding: 3, marginBottom: 3, borderRadius: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", fontWeight: "bold", color: "#388e3c" }}>
+          <CalendarToday sx={{ mr: 1, fontSize: "1.5rem" }} />
           Días disponibles:
         </Typography>
         <Grid container spacing={2}>
@@ -125,31 +144,33 @@ const HorariosDis = () => {
                 variant={selectedDay === dia.nombre ? "contained" : "outlined"}
                 onClick={() => handleSelectDay(dia.nombre, dia.fecha)}
                 sx={{
-                  padding: 3,
-                  borderRadius: 3,
+                  padding: "16px",
+                  borderRadius: "12px",
                   textTransform: "capitalize",
-                  backgroundColor: selectedDay === dia.nombre ? "success.main" : "background.paper",
-                  color: selectedDay === dia.nombre ? "#fff" : "text.primary",
-                  border: selectedDay === dia.nombre ? "none" : "1px solid",
-                  borderColor: "success.main",
+                  background: selectedDay === dia.nombre
+                    ? "linear-gradient(45deg, #388e3c 30%, #66bb6a 90%)"
+                    : "linear-gradient(45deg, #ffffff 30%, #f5f5f5 90%)",
+                  color: selectedDay === dia.nombre ? "#fff" : "#424242",
+                  border: "2px solid #388e3c",
                   transition: "all 0.3s ease",
-                  boxShadow: selectedDay === dia.nombre ? 3 : 0,
+                  boxShadow: selectedDay === dia.nombre ? "0 6px 12px rgba(56, 142, 60, 0.3)" : "0 2px 4px rgba(0,0,0,0.1)",
                   "&:hover": {
-                    backgroundColor: selectedDay === dia.nombre ? "success.dark" : "success.light",
-                    color: selectedDay === dia.nombre ? "#fff" : "success.dark",
-                    transform: "translateY(-2px)",
-                    boxShadow: 4,
+                    background: selectedDay === dia.nombre
+                      ? "linear-gradient(45deg, #2e7d32 30%, #4caf50 90%)"
+                      : "linear-gradient(45deg, #e8f5e9 30%, #c8e6c9 90%)",
+                    transform: "translateY(-3px)",
+                    boxShadow: "0 8px 16px rgba(56, 142, 60, 0.2)",
                   },
                 }}
               >
                 <Box textAlign="center">
-                  <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
+                  <Typography variant="h5" component="div" sx={{ fontWeight: "bold", letterSpacing: "1px" }}>
                     {format(dia.fecha, "d")}
                   </Typography>
-                  <Typography variant="body1" component="div" sx={{ fontWeight: "medium" }}>
+                  <Typography variant="body1" component="div" sx={{ fontWeight: "medium", textTransform: "capitalize" }}>
                     {format(dia.fecha, "EEEE", { locale: es })}
                   </Typography>
-                  <Typography variant="caption" component="div" sx={{ color: selectedDay === dia.nombre ? "#fff" : "text.secondary" }}>
+                  <Typography variant="caption" component="div" sx={{ color: selectedDay === dia.nombre ? "#e8f5e9" : "#757575", fontStyle: "italic" }}>
                     {`${dia.hora_inicio} - ${dia.hora_fin}`}
                   </Typography>
                 </Box>
@@ -161,9 +182,9 @@ const HorariosDis = () => {
 
       {/* Horarios disponibles */}
       {selectedDay && (
-        <Paper sx={{ padding: 3, marginBottom: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            <AccessTime sx={{ verticalAlign: "middle", marginRight: 1 }} />
+        <Paper sx={{ padding: 3, marginBottom: 3, borderRadius: 4, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+          <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", fontWeight: "bold", color: "#424242" }}>
+            <AccessTime sx={{ mr: 1 }} />
             Horarios disponibles para {selectedDay}:
           </Typography>
           {loading ? (
@@ -174,7 +195,7 @@ const HorariosDis = () => {
             <Grid container spacing={2}>
               {horarios.map((horario) => (
                 <Grid item xs={12} key={horario.id_horario}>
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: "medium" }}>
                     {`${horario.hora_inicio} - ${horario.hora_fin}`}
                   </Typography>
                   <Grid container spacing={1}>
@@ -188,6 +209,7 @@ const HorariosDis = () => {
                           sx={{
                             textTransform: "none",
                             borderRadius: 2,
+                            padding: "6px 12px",
                           }}
                         >
                           {`${franja.hora_inicio} - ${franja.hora_fin}`}
@@ -204,21 +226,109 @@ const HorariosDis = () => {
 
       {/* Citas del día */}
       {citasDelDia.length > 0 && (
-        <Paper sx={{ padding: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            <CalendarToday sx={{ verticalAlign: "middle", marginRight: 1 }} />
+        <Paper sx={{ padding: 3, borderRadius: 4, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+          <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", fontWeight: "bold", color: "#424242" }}>
+            <CalendarToday sx={{ mr: 1 }} />
             Citas para {selectedDay}:
           </Typography>
-          <Box sx={{ height: 400, width: "100%" }}>
-            <DataGrid
-              rows={citasDelDia}
-              columns={columns}
-              pageSize={5}
-              rowsPerPageOptions={[5, 10, 20]}
-              disableSelectionOnClick
-              loading={loading}
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              variant="outlined"
+              placeholder="Buscar por nombre o apellido..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: "#757575" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ maxWidth: 400, borderRadius: 2 }}
             />
           </Box>
+          <TableContainer sx={{ borderRadius: "12px", overflow: "hidden" }}>
+            <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem" } }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "rgba(189, 189, 189, 0.2)" }}>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Person sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Nombre
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Person sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Apellido Paterno
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Person sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Apellido Materno
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Email sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Email
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Phone sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Teléfono
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Event sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Fecha
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <AccessTime sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Inicio
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <AccessTime sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Fin
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredCitas.length > 0 ? (
+                  filteredCitas.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((cita) => (
+                    <TableRow key={cita.id} sx={{ "&:hover": { backgroundColor: "#f5f5f5" }, height: "36px" }}>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre}</TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidopa}</TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidoma}</TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.gmail}</TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.telefono}</TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>
+                        {cita.fecha_cita ? format(parseISO(cita.fecha_cita), "dd/MM/yyyy") : "Fecha no disponible"}
+                      </TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
+                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_fin}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
+                      No hay citas para este día.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 20]}
+              component="div"
+              count={filteredCitas.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              sx={{ backgroundColor: "rgba(189, 189, 189, 0.1)", fontSize: "0.875rem", padding: "4px" }}
+            />
+          </TableContainer>
         </Paper>
       )}
     </Box>

@@ -18,8 +18,18 @@ import {
   Modal,
   useMediaQuery,
   useTheme,
+  InputAdornment,
+  TablePagination,
 } from "@mui/material";
-import { Edit as EditIcon, Delete as DeleteIcon, Close as CloseIcon } from "@mui/icons-material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Inventory,
+  Build,
+  Search,
+  Numbers,
+} from "@mui/icons-material";
 
 const Categoria = () => {
   const [categorias, setCategorias] = useState([]);
@@ -30,6 +40,9 @@ const Categoria = () => {
   const [servicios, setServicios] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -60,7 +73,6 @@ const Categoria = () => {
 
   const manejarEnvio = async (e) => {
     e.preventDefault();
-
     Swal.fire({
       title: `¿Estás seguro de que deseas ${editando ? "actualizar" : "agregar"} esta categoría?`,
       text: `Esta acción ${editando ? "no se puede deshacer" : ""}.`,
@@ -76,7 +88,6 @@ const Categoria = () => {
           } else {
             await axios.post("https://backendcentro.onrender.com/api/categoria", { nombre, descripcion });
           }
-
           setNombre("");
           setDescripcion("");
           setEditando(null);
@@ -129,9 +140,22 @@ const Categoria = () => {
     obtenerProductosYServicios(categoria.id);
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const filteredCategorias = categorias.filter((categoria) =>
+    categoria.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" component="h1" align="center" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: "bold", color: "#424242" }}>
         Gestión de Categorías
       </Typography>
 
@@ -154,6 +178,7 @@ const Categoria = () => {
           onChange={(e) => setNombre(e.target.value)}
           required
           fullWidth
+          variant="outlined"
         />
         <TextField
           label="Descripción"
@@ -161,6 +186,7 @@ const Categoria = () => {
           onChange={(e) => setDescripcion(e.target.value)}
           required
           fullWidth
+          variant="outlined"
         />
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button type="submit" variant="contained" color="primary">
@@ -169,7 +195,7 @@ const Categoria = () => {
           {editando && (
             <Button
               type="button"
-              variant="contained"
+              variant="outlined"
               color="secondary"
               onClick={() => {
                 setNombre("");
@@ -186,26 +212,44 @@ const Categoria = () => {
       {/* Mostrar productos y servicios de la categoría seleccionada */}
       {categoriaSeleccionada && (
         <Box sx={{ marginTop: 4 }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", color: "#424242" }}>
             Elementos Relacionados a la Categoría: {categoriaSeleccionada.nombre}
           </Typography>
-          <TableContainer component={Paper} sx={{ maxHeight: 400, overflowY: "auto" }}>
-            <Table>
+          <TableContainer component={Paper} sx={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "12px", overflow: "hidden" }}>
+            <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem" } }}>
               <TableHead>
-                <TableRow>
-                  <TableCell>#</TableCell>
-                  <TableCell>Nombre</TableCell>
+                <TableRow sx={{ backgroundColor: "rgba(189, 189, 189, 0.2)" }}>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Numbers sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> #
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Inventory sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Nombre
+                    </Box>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {[...productos, ...servicios].map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item.nombre}</TableCell>
+                {[...productos, ...servicios].slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
+                  <TableRow key={item.id} sx={{ "&:hover": { backgroundColor: "#f5f5f5" }, height: "36px" }}>
+                    <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{index + 1}</TableCell>
+                    <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{item.nombre}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={[...productos, ...servicios].length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              sx={{ backgroundColor: "rgba(189, 189, 189, 0.1)", fontSize: "0.875rem", padding: "4px" }}
+            />
           </TableContainer>
           <Button
             variant="contained"
@@ -221,61 +265,105 @@ const Categoria = () => {
 
       {/* Tabla de categorías */}
       {!categoriaSeleccionada && (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>#</TableCell>
-                <TableCell>Nombre</TableCell>
-                <TableCell>Descripción</TableCell>
-                <TableCell>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {categorias.map((categoria, index) => (
-                <TableRow
-                  key={categoria.id}
-                  onClick={() => manejarSeleccionCategoria(categoria)}
-                  sx={{ cursor: "pointer", "&:hover": { backgroundColor: "#f5f5f5" } }}
-                >
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{categoria.nombre}</TableCell>
-                  <TableCell>{categoria.descripcion}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      <Tooltip title="Editar">
-                        <IconButton
-                          color="warning"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            manejarEdicion(categoria);
-                          }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Eliminar">
-                        <IconButton
-                          color="error"
-                          onClick={(e) => manejarEliminacion(categoria.id, e)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
+        <>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth={isMobile}
+              variant="outlined"
+              placeholder="Buscar por nombre..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: "#757575" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ maxWidth: 400, borderRadius: 2 }}
+            />
+          </Box>
+          <TableContainer component={Paper} sx={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "12px", overflow: "hidden" }}>
+            <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem" } }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "rgba(189, 189, 189, 0.2)" }}>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Numbers sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> #
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Inventory sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Nombre
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Inventory sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Descripción
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Build sx={{ mr: 1, color: "#7b1fa2", fontSize: "1.2rem" }} /> Acciones
                     </Box>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {filteredCategorias.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((categoria, index) => (
+                  <TableRow
+                    key={categoria.id}
+                    onClick={() => manejarSeleccionCategoria(categoria)}
+                    sx={{ "&:hover": { backgroundColor: "#f5f5f5" }, height: "36px", cursor: "pointer" }}
+                  >
+                    <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{index + 1}</TableCell>
+                    <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{categoria.nombre}</TableCell>
+                    <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{categoria.descripcion}</TableCell>
+                    <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Tooltip title="Editar">
+                          <IconButton
+                            color="warning"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              manejarEdicion(categoria);
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Eliminar">
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={(e) => manejarEliminacion(categoria.id, e)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filteredCategorias.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              sx={{ backgroundColor: "rgba(189, 189, 189, 0.1)", fontSize: "0.875rem", padding: "4px" }}
+            />
+          </TableContainer>
+        </>
       )}
 
       {/* Modal para editar categoría */}
-      <Modal
-        open={modalEditarAbierto}
-        onClose={() => setModalEditarAbierto(false)}
-      >
+      <Modal open={modalEditarAbierto} onClose={() => setModalEditarAbierto(false)}>
         <Box
           sx={{
             position: "absolute",
@@ -289,7 +377,7 @@ const Categoria = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", color: "#424242" }}>
             Editar Categoría
           </Typography>
           <Box
@@ -307,6 +395,7 @@ const Categoria = () => {
               onChange={(e) => setNombre(e.target.value)}
               required
               fullWidth
+              variant="outlined"
             />
             <TextField
               label="Descripción"
@@ -314,6 +403,7 @@ const Categoria = () => {
               onChange={(e) => setDescripcion(e.target.value)}
               required
               fullWidth
+              variant="outlined"
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button type="submit" variant="contained" color="primary">
@@ -321,7 +411,7 @@ const Categoria = () => {
               </Button>
               <Button
                 type="button"
-                variant="contained"
+                variant="outlined"
                 color="secondary"
                 onClick={() => setModalEditarAbierto(false)}
               >

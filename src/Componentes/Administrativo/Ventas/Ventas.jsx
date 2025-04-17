@@ -3,10 +3,12 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, TablePagination, TextField, Box, Typography, CircularProgress,
   Modal, Button, Table as DetailTable, TableHead as DetailTableHead,
-  TableRow as DetailTableRow, TableCell as DetailTableCell, TableBody as DetailTableBody
+  TableRow as DetailTableRow, TableCell as DetailTableCell, TableBody as DetailTableBody,
+  InputAdornment,
 } from '@mui/material';
 import {
-  Receipt, Payment, CalendarToday, Person, Badge, Email, Visibility
+  Receipt, Payment, CalendarToday, Person, Badge, Email, Visibility,
+  Inventory, Numbers, MonetizationOn, Search,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +17,7 @@ const styleModal = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 600,
+  width: { xs: '90%', sm: 600 },
   bgcolor: 'background.paper',
   borderRadius: 2,
   boxShadow: 24,
@@ -80,7 +82,7 @@ const Ventas = () => {
     setPage(0);
   };
 
-  const filteredVentas = ventas.filter(venta => 
+  const filteredVentas = ventas.filter(venta =>
     venta.nombre.toLowerCase().includes(filter.toLowerCase()) ||
     venta.apellidopa.toLowerCase().includes(filter.toLowerCase()) ||
     venta.gmail.toLowerCase().includes(filter.toLowerCase())
@@ -95,39 +97,58 @@ const Ventas = () => {
   }
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, color: '#424242', fontWeight: 'bold' }}>
+    <Box sx={{ p: 3, maxWidth: '92%', margin: '0 auto' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#424242', mb: 3 }}>
         Gestión de Ventas
       </Typography>
       <TextField
-        label="Filtrar por Nombre, Apellido o Gmail"
-        variant="outlined"
         fullWidth
+        variant="outlined"
+        placeholder="Filtrar por Nombre, Apellido o Gmail..."
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        sx={{ mb: 3, backgroundColor: 'white' }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search sx={{ color: '#757575' }} />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ maxWidth: 400, borderRadius: 2, mb: 3 }}
       />
-      <TableContainer component={Paper} sx={{ boxShadow: 3, backgroundColor: '#e0e0e0' }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: '#616161' }}>
-            <TableRow>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <Receipt sx={{ verticalAlign: 'middle', mr: 1, color: '#ffca28' }} /> ID Venta
+      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)', borderRadius: '12px', overflow: 'hidden' }}>
+        <Table sx={{ '& .MuiTableCell-root': { padding: '6px 8px', fontSize: '0.875rem' } }}>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'rgba(189, 189, 189, 0.2)' }}>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Receipt sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> ID Venta
+                </Box>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <Payment sx={{ verticalAlign: 'middle', mr: 1, color: '#4caf50' }} /> ID Pago
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Payment sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> ID Pago
+                </Box>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <CalendarToday sx={{ verticalAlign: 'middle', mr: 1, color: '#42a5f5' }} /> Fecha Venta
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CalendarToday sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Fecha Venta
+                </Box>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <Person sx={{ verticalAlign: 'middle', mr: 1, color: '#ab47bc' }} /> Nombre
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Person sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Nombre
+                </Box>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <Badge sx={{ verticalAlign: 'middle', mr: 1, color: '#ef5350' }} /> Apellido Paterno
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Badge sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Apellido Paterno
+                </Box>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <Email sx={{ verticalAlign: 'middle', mr: 1, color: '#26a69a' }} /> Gmail
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Email sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Gmail
+                </Box>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -137,26 +158,25 @@ const Ventas = () => {
               .map((venta) => (
                 <TableRow
                   key={venta.id}
-                  hover
                   onClick={() => handleRowClick(venta)}
-                  sx={{ 
-                    cursor: 'pointer', 
-                    '&:hover': { backgroundColor: '#bdbdbd' },
-                    backgroundColor: '#eeeeee'
+                  sx={{
+                    '&:hover': { backgroundColor: '#f5f5f5' },
+                    height: '36px',
+                    cursor: 'pointer',
                   }}
                 >
-                  <TableCell>{venta.id}</TableCell>
-                  <TableCell>{venta.id_pago}</TableCell>
-                  <TableCell>{new Date(venta.fecha_venta).toLocaleDateString()}</TableCell>
-                  <TableCell>{venta.nombre}</TableCell>
-                  <TableCell>{venta.apellidopa}</TableCell>
-                  <TableCell>{venta.gmail}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.id}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.id_pago}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>
+                    {new Date(venta.fecha_venta).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.nombre}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.apellidopa}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.gmail}</TableCell>
                 </TableRow>
               ))}
           </TableBody>
         </Table>
-      </TableContainer>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -165,18 +185,19 @@ const Ventas = () => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Filas por página"
-          sx={{ color: '#424242' }}
+          sx={{ backgroundColor: 'rgba(189, 189, 189, 0.1)', fontSize: '0.875rem', padding: '4px' }}
         />
+      </TableContainer>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
         <Button
           variant="contained"
           startIcon={<Visibility />}
           onClick={() => navigate('/admin/detalleventas')}
-          sx={{ 
-            backgroundColor: '#424242', 
-            '&:hover': { backgroundColor: '#616161' },
+          sx={{
+            backgroundColor: '#0288d1',
+            '&:hover': { backgroundColor: '#0277bd' },
             textTransform: 'none',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
         >
           Ver Detalles de la Venta
@@ -190,21 +211,37 @@ const Ventas = () => {
             Detalle de la Venta #{selectedVenta?.id}
           </Typography>
           <DetailTable>
-            <DetailTableHead sx={{ backgroundColor: '#616161' }}>
-              <DetailTableRow>
-                <DetailTableCell sx={{ color: 'white' }}>Producto</DetailTableCell>
-                <DetailTableCell sx={{ color: 'white' }}>Cantidad</DetailTableCell>
-                <DetailTableCell sx={{ color: 'white' }}>Precio</DetailTableCell>
-                <DetailTableCell sx={{ color: 'white' }}>Subtotal</DetailTableCell>
+            <DetailTableHead>
+              <DetailTableRow sx={{ backgroundColor: 'rgba(189, 189, 189, 0.2)' }}>
+                <DetailTableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Inventory sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Producto
+                  </Box>
+                </DetailTableCell>
+                <DetailTableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Numbers sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Cantidad
+                  </Box>
+                </DetailTableCell>
+                <DetailTableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <MonetizationOn sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Precio
+                  </Box>
+                </DetailTableCell>
+                <DetailTableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <MonetizationOn sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Subtotal
+                  </Box>
+                </DetailTableCell>
               </DetailTableRow>
             </DetailTableHead>
             <DetailTableBody>
               {detalleVentas.map((detalle) => (
-                <DetailTableRow key={detalle.id}>
-                  <DetailTableCell>{detalle.nombre_producto}</DetailTableCell>
-                  <DetailTableCell>{detalle.cantidad}</DetailTableCell>
-                  <DetailTableCell>${detalle.precio}</DetailTableCell>
-                  <DetailTableCell>${detalle.subtotal}</DetailTableCell>
+                <DetailTableRow key={detalle.id} sx={{ '&:hover': { backgroundColor: '#f5f5f5' }, height: '36px' }}>
+                  <DetailTableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{detalle.nombre_producto}</DetailTableCell>
+                  <DetailTableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{detalle.cantidad}</DetailTableCell>
+                  <DetailTableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>${detalle.precio}</DetailTableCell>
+                  <DetailTableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>${detalle.subtotal}</DetailTableCell>
                 </DetailTableRow>
               ))}
             </DetailTableBody>
@@ -212,7 +249,7 @@ const Ventas = () => {
           <Button
             variant="contained"
             onClick={handleCloseModal}
-            sx={{ mt: 2, backgroundColor: '#424242', '&:hover': { backgroundColor: '#616161' } }}
+            sx={{ mt: 2, backgroundColor: '#0288d1', '&:hover': { backgroundColor: '#0277bd' } }}
           >
             Cerrar
           </Button>

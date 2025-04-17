@@ -1,33 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Box,
-  Typography,
-  IconButton
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, TablePagination, TextField, FormControl, InputLabel, Select, MenuItem,
+  Box, Typography, CircularProgress, InputAdornment,
 } from '@mui/material';
 import {
-  Person as PersonIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  CalendarToday as CalendarIcon,
-  AccessTime as TimeIcon,
-  MedicalServices as ServiceIcon,
-  AttachMoney as MoneyIcon,
-  CheckCircle as StatusIcon,
-  Create as CreateIcon,
-  DoneAll as DoneIcon
+  Person as PersonIcon, Email as EmailIcon, Phone as PhoneIcon,
+  CalendarToday as CalendarIcon, AccessTime as TimeIcon, MedicalServices as ServiceIcon,
+  AttachMoney as MoneyIcon, CheckCircle as StatusIcon, Create as CreateIcon,
+  DoneAll as DoneIcon, Search as SearchIcon,
 } from '@mui/icons-material';
 
 const DetalleCitas = () => {
@@ -39,6 +20,7 @@ const DetalleCitas = () => {
     fecha_cita: '',
     estado: ''
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     cargarCitas();
@@ -56,6 +38,8 @@ const DetalleCitas = () => {
       setCitasFiltradas(datos);
     } catch (error) {
       console.error('Error al cargar citas:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,7 +47,7 @@ const DetalleCitas = () => {
     let resultado = [...citas];
 
     if (filtros.fecha_cita) {
-      resultado = resultado.filter(cita => 
+      resultado = resultado.filter(cita =>
         new Date(cita.fecha_cita).toISOString().split('T')[0] === filtros.fecha_cita
       );
     }
@@ -84,38 +68,56 @@ const DetalleCitas = () => {
     });
   };
 
-  const manejarCambioPagina = (evento, nuevaPagina) => {
+  const manejarCambioPagina = (event, nuevaPagina) => {
     setPagina(nuevaPagina);
   };
 
-  const manejarCambioFilasPorPagina = (evento) => {
-    setFilasPorPagina(parseInt(evento.target.value, 10));
+  const manejarCambioFilasPorPagina = (event) => {
+    setFilasPorPagina(parseInt(event.target.value, 10));
     setPagina(0);
   };
 
-  const manejarCambioFiltro = (evento) => {
-    const { name, value } = evento.target;
+  const manejarCambioFiltro = (event) => {
+    const { name, value } = event.target;
     setFiltros(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>Detalle de Citas</Typography>
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress color="secondary" />
+      </Box>
+    );
+  }
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+  return (
+    <Box sx={{ p: 3, maxWidth: '92%', margin: '0 auto' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#424242', mb: 3 }}>
+        Detalle de Citas
+      </Typography>
+
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <TextField
-          label="Fecha de Cita"
+          variant="outlined"
+          placeholder="Filtrar por fecha..."
           type="date"
           name="fecha_cita"
           value={filtros.fecha_cita}
           onChange={manejarCambioFiltro}
           InputLabelProps={{ shrink: true }}
-          sx={{ width: 200 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: '#757575' }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ maxWidth: 250, borderRadius: 2 }}
         />
-        <FormControl sx={{ minWidth: 150 }}>
+        <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Estado</InputLabel>
           <Select
             name="estado"
@@ -131,99 +133,95 @@ const DetalleCitas = () => {
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)', borderRadius: '12px', overflow: 'hidden' }}>
+        <Table sx={{ '& .MuiTableCell-root': { padding: '6px 8px', fontSize: '0.875rem' } }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#e0e0e0' }}>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <PersonIcon sx={{ color: '#4caf50' }} />
-                </IconButton>
-                Usuario
+            <TableRow sx={{ backgroundColor: 'rgba(189, 189, 189, 0.2)' }}>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <PersonIcon sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Usuario
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <EmailIcon sx={{ color: '#f44336' }} />
-                </IconButton>
-                Correo
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <EmailIcon sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Correo
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <PhoneIcon sx={{ color: '#9c27b0' }} />
-                </IconButton>
-                Teléfono
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <PhoneIcon sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Teléfono
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <CalendarIcon sx={{ color: '#ff9800' }} />
-                </IconButton>
-                Fecha de Cita
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CalendarIcon sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Fecha de Cita
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <TimeIcon sx={{ color: '#2196f3' }} />
-                </IconButton>
-                Hora de Inicio
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <TimeIcon sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Hora de Inicio
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <TimeIcon sx={{ color: '#2196f3' }} />
-                </IconButton>
-                Hora de Fin
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <TimeIcon sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Hora de Fin
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <ServiceIcon sx={{ color: '#e91e63' }} />
-                </IconButton>
-                Servicio
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <ServiceIcon sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Servicio
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <MoneyIcon sx={{ color: '#4caf50' }} />
-                </IconButton>
-                Precio
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <MoneyIcon sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Precio
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <StatusIcon sx={{ color: '#ff5722' }} />
-                </IconButton>
-                Estado
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <StatusIcon sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Estado
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <CreateIcon sx={{ color: '#3f51b5' }} />
-                </IconButton>
-                Creado
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CreateIcon sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Creado
+                </Box>
               </TableCell>
-              <TableCell>
-                <IconButton size="small" disabled>
-                  <DoneIcon sx={{ color: '#009688' }} />
-                </IconButton>
-                Fecha Completada
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <DoneIcon sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Fecha Completada
+                </Box>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {citasFiltradas
-              .slice(pagina * filasPorPagina, pagina * filasPorPagina + filasPorPagina)
-              .map((cita) => (
-                <TableRow key={cita.id}>
-              
-                  <TableCell>{cita.nombre_usuario}</TableCell>
-                  <TableCell>{cita.correo_usuario}</TableCell>
-                  <TableCell>{cita.telefono_usuario}</TableCell>
-                  <TableCell>{formatearFecha(cita.fecha_cita)}</TableCell>
-                  <TableCell>{cita.hora_inicio}</TableCell>
-                  <TableCell>{cita.hora_fin}</TableCell>
-                  <TableCell>{cita.nombre_servicio}</TableCell>
-                  <TableCell>${parseFloat(cita.precio_servicio).toFixed(2)}</TableCell>
-                  <TableCell>{cita.estado}</TableCell>
-                  <TableCell>{new Date(cita.created_at).toLocaleString('es-ES')}</TableCell>
-                  <TableCell>
-                    {cita.fecha_completada ? new Date(cita.fecha_completada).toLocaleString('es-ES') : '-'}
-                  </TableCell>
-                </TableRow>
-              ))}
+            {citasFiltradas.length > 0 ? (
+              citasFiltradas
+                .slice(pagina * filasPorPagina, pagina * filasPorPagina + filasPorPagina)
+                .map((cita) => (
+                  <TableRow key={cita.id} sx={{ '&:hover': { backgroundColor: '#f5f5f5' }, height: '36px' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.nombre_usuario}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.correo_usuario}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.telefono_usuario}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{formatearFecha(cita.fecha_cita)}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.hora_inicio}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.hora_fin}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.nombre_servicio}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>${parseFloat(cita.precio_servicio).toFixed(2)}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{cita.estado}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{new Date(cita.created_at).toLocaleString('es-ES')}</TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>
+                      {cita.fecha_completada ? new Date(cita.fecha_completada).toLocaleString('es-ES') : '-'}
+                    </TableCell>
+                  </TableRow>
+                ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={11} align="center" sx={{ borderBottom: '1px solid #e0e0e0', height: '36px' }}>
+                  No hay citas disponibles
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
         <TablePagination
@@ -234,8 +232,7 @@ const DetalleCitas = () => {
           page={pagina}
           onPageChange={manejarCambioPagina}
           onRowsPerPageChange={manejarCambioFilasPorPagina}
-          labelRowsPerPage="Filas por página"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          sx={{ backgroundColor: 'rgba(189, 189, 189, 0.1)', fontSize: '0.875rem', padding: '4px' }}
         />
       </TableContainer>
     </Box>

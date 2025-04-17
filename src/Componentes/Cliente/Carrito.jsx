@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import Swal from 'sweetalert2';
 import { Button, Card, CardContent, Typography, Box, IconButton, Grid } from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
@@ -6,6 +7,7 @@ import { Delete as DeleteIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui
 const Carrito = () => {
   const [carrito, setCarrito] = useState([]);
   const [total, setTotal] = useState(0);
+  const navigate = useNavigate(); // Inicializar useNavigate
 
   useEffect(() => {
     const fetchCarrito = async () => {
@@ -28,8 +30,8 @@ const Carrito = () => {
         // Verificar que los datos tengan las propiedades esperadas
         const datosValidos = data.map(item => ({
           ...item,
-          subtotal: item.subtotal ?? item.precio_carrito * item.cantidad_carrito ?? 0, // Calcular subtotal si no está definido
-          precio_carrito: item.precio_carrito ?? item.precio ?? 0, // Usar precio si precio_carrito no está definido
+          subtotal: item.subtotal ?? item.precio_carrito * item.cantidad_carrito ?? 0,
+          precio_carrito: item.precio_carrito ?? item.precio ?? 0,
         }));
         setCarrito(datosValidos);
         calcularTotal(datosValidos);
@@ -147,7 +149,7 @@ const Carrito = () => {
       });
       return;
     }
-
+  
     // Verificar si alguna cantidad sobrepasa el stock disponible
     for (let item of carrito) {
       const responseStock = await fetch(`https://backendcentro.onrender.com/api/productos/${item.id}`);
@@ -159,53 +161,21 @@ const Carrito = () => {
         });
         return;
       }
-
+  
       const producto = await responseStock.json();
       if (item.cantidad_carrito > producto.cantidad) {
         Swal.fire({
           icon: 'error',
           title: '¡Stock insuficiente!',
-          html: `No hay suficiente stock de "<strong>${item.nombre}</strong>". Solo quedan <strong>${producto.cantidad}</strong> unidades disponibles. Has intentado comprar <strong>${item.cantidad_carrito}</strong> unidades.`,
+          html: `No hay suficiente stock de "<strong>${item.nombre}</strong>". Solo quedan <strong>${producto.cantidad}</strong> unidades disponibles. Has intentado comprar <strong>${item.cCantidad_carrito}</strong> unidades.`,
         });
         return;
       }
     }
-
-    // Si todo está bien, proceder con la compra
-    try {
-      const response = await fetch('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productos: carrito.map(item => ({ id: item.id, cantidad: item.cantidad_carrito })) }),
-      });
-
-      if (response.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Compra realizada con éxito',
-          text: 'Tu compra ha sido procesada correctamente.',
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        setCarrito([]); // Limpiar el carrito después de la compra
-        setTotal(0);
-      } else {
-        const errorData = await response.json();
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al procesar la compra',
-          text: errorData.message || 'Hubo un error al actualizar el inventario.',
-        });
-      }
-    } catch (error) {
-      console.error('Error al realizar la compra:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Hubo un error al procesar la compra. Intenta nuevamente.',
-      });
-    }
-  };
+  
+    // Navegar al componente 'metodo' pasando carrito y total
+    navigate('/metodo', { state: { carrito, total } });
+  }; 
 
   // Calcular días transcurridos desde que se agregó el producto
   const calcularDiasTranscurridos = (fechaAgregado) => {

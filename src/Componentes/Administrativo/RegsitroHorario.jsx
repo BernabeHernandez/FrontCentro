@@ -24,8 +24,19 @@ import {
   useTheme,
   FormControlLabel,
   Switch,
+  InputAdornment,
+  TablePagination,
 } from "@mui/material";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Inventory,
+  AccessTime,
+  Timelapse,
+  CheckCircle,
+  Build,
+  Search,
+} from "@mui/icons-material";
 
 const RegistroHorario = () => {
   const [newHorario, setNewHorario] = useState({
@@ -33,13 +44,15 @@ const RegistroHorario = () => {
     hora_inicio: "",
     hora_fin: "",
     intervalo: 30,
-    disponible: true, // Valor por defecto al crear
+    disponible: true,
   });
-
   const [horarios, setHorarios] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [editandoId, setEditandoId] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -81,7 +94,7 @@ const RegistroHorario = () => {
     try {
       const horarioData = {
         ...newHorario,
-        disponible: newHorario.disponible ? 1 : 0, // Convertimos booleano a 0 o 1 para el backend
+        disponible: newHorario.disponible ? 1 : 0,
       };
 
       if (editandoId) {
@@ -119,7 +132,7 @@ const RegistroHorario = () => {
       hora_inicio: horario.hora_inicio,
       hora_fin: horario.hora_fin,
       intervalo: horario.intervalo,
-      disponible: parseInt(horario.disponible) === 1, // Convertimos 0/1 a booleano
+      disponible: parseInt(horario.disponible) === 1,
     });
     setEditandoId(horario.id_horario);
     setModalAbierto(true);
@@ -167,18 +180,42 @@ const RegistroHorario = () => {
     setModalAbierto(false);
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const filteredHorarios = horarios.filter((horario) =>
+    horario.dia.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" component="h1" align="center" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: "bold", color: "#424242" }}>
         Registro de Horarios
       </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setModalAbierto(true)}
-        >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+        <TextField
+          fullWidth={isMobile}
+          variant="outlined"
+          placeholder="Buscar por día..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: "#757575" }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ maxWidth: 400, borderRadius: 2 }}
+        />
+        <Button variant="contained" color="primary" onClick={() => setModalAbierto(true)}>
           Agregar Horario
         </Button>
       </Box>
@@ -197,7 +234,7 @@ const RegistroHorario = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", color: "#424242" }}>
             {editandoId ? "Editar Horario" : "Registrar Horario"}
           </Typography>
           <Box
@@ -207,12 +244,7 @@ const RegistroHorario = () => {
           >
             <FormControl fullWidth>
               <InputLabel>Día</InputLabel>
-              <Select
-                name="dia"
-                value={newHorario.dia}
-                onChange={handleChange}
-                required
-              >
+              <Select name="dia" value={newHorario.dia} onChange={handleChange} required>
                 <MenuItem value="">Seleccione un día</MenuItem>
                 {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((dia) => (
                   <MenuItem key={dia} value={dia}>{dia}</MenuItem>
@@ -228,6 +260,7 @@ const RegistroHorario = () => {
               required
               fullWidth
               InputLabelProps={{ shrink: true }}
+              variant="outlined"
             />
             <TextField
               label="Hora Fin"
@@ -238,6 +271,7 @@ const RegistroHorario = () => {
               required
               fullWidth
               InputLabelProps={{ shrink: true }}
+              variant="outlined"
             />
             <TextField
               label="Duración (minutos)"
@@ -248,27 +282,17 @@ const RegistroHorario = () => {
               required
               fullWidth
               inputProps={{ min: 10 }}
+              variant="outlined"
             />
             <FormControlLabel
-              control={
-                <Switch
-                  checked={newHorario.disponible}
-                  onChange={handleChange}
-                  name="disponible"
-                />
-              }
+              control={<Switch checked={newHorario.disponible} onChange={handleChange} name="disponible" />}
               label="Disponible"
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button type="submit" variant="contained" color="primary">
                 {editandoId ? "Actualizar" : "Registrar"}
               </Button>
-              <Button
-                type="button"
-                variant="contained"
-                color="secondary"
-                onClick={limpiarFormulario}
-              >
+              <Button type="button" variant="outlined" color="secondary" onClick={limpiarFormulario}>
                 Cancelar
               </Button>
             </Box>
@@ -276,43 +300,63 @@ const RegistroHorario = () => {
         </Box>
       </Modal>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "12px", overflow: "hidden" }}>
+        <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem" } }}>
           <TableHead>
-            <TableRow>
-              <TableCell>Día</TableCell>
-              <TableCell>Inicio</TableCell>
-              <TableCell>Fin</TableCell>
-              <TableCell>Duración</TableCell>
-              <TableCell>Disponible</TableCell>
-              <TableCell>Acciones</TableCell>
+            <TableRow sx={{ backgroundColor: "rgba(189, 189, 189, 0.2)" }}>
+              <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Inventory sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Día
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <AccessTime sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Inicio
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <AccessTime sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Fin
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Timelapse sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Duración
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <CheckCircle sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Disponible
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Build sx={{ mr: 1, color: "#7b1fa2", fontSize: "1.2rem" }} /> Acciones
+                </Box>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {horarios.length > 0 ? (
-              horarios.map((horario) => (
-                <TableRow key={horario.id_horario}>
-                  <TableCell>{horario.dia}</TableCell>
-                  <TableCell>{horario.hora_inicio}</TableCell>
-                  <TableCell>{horario.hora_fin}</TableCell>
-                  <TableCell>{horario.intervalo} min</TableCell>
-                  <TableCell>{parseInt(horario.disponible) === 1 ? "Sí" : "No"}</TableCell>
-                  <TableCell>
+            {filteredHorarios.length > 0 ? (
+              filteredHorarios.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((horario) => (
+                <TableRow key={horario.id_horario} sx={{ "&:hover": { backgroundColor: "#f5f5f5" }, height: "36px" }}>
+                  <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{horario.dia}</TableCell>
+                  <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{horario.hora_inicio}</TableCell>
+                  <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{horario.hora_fin}</TableCell>
+                  <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{horario.intervalo} min</TableCell>
+                  <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>
+                    {parseInt(horario.disponible) === 1 ? "Sí" : "No"}
+                  </TableCell>
+                  <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>
                     <Box sx={{ display: "flex", gap: 1 }}>
                       <Tooltip title="Editar">
-                        <IconButton
-                          color="warning"
-                          onClick={() => handleEdit(horario)}
-                        >
-                          <EditIcon />
+                        <IconButton color="warning" size="small" onClick={() => handleEdit(horario)}>
+                          <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Eliminar">
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDelete(horario.id_horario)}
-                        >
-                          <DeleteIcon />
+                        <IconButton color="error" size="small" onClick={() => handleDelete(horario.id_horario)}>
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -321,13 +365,23 @@ const RegistroHorario = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={6} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
                   No hay horarios registrados.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredHorarios.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{ backgroundColor: "rgba(189, 189, 189, 0.1)", fontSize: "0.875rem", padding: "4px" }}
+        />
       </TableContainer>
     </Box>
   );

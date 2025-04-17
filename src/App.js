@@ -32,7 +32,6 @@ import VerifyMFA from './Componentes/Autenticacion/VerifyMFA';
 import Productos from './Componentes/Publico/Productos';
 import Servicios from './Componentes/Publico/Servicios';
 import DetalleProducto from './Componentes/Publico/DetalleProducto';
-import OpcionPago from './Componentes/Pagos/OpcionPago';
 import DetallesServicio from './Componentes/Publico/DetalleServicios';
 import OpcionPagoD from './Componentes/Pagos/OpcionPagoD';
 import PaginaError400 from './Paginas/PaginaError400';
@@ -72,6 +71,10 @@ import ValidarCodigoSMS from './Componentes/Autenticacion/RecuperacionPassword/S
 import Ventas from './Componentes/Administrativo/Ventas/Ventas';
 import DetallesVentas from './Componentes/Administrativo/Ventas/DetallesVenta';
 import DetalleCitas from './Componentes/Administrativo/Ventas/DetalleCitas';
+import PayPal from './Componentes/FormaPago/Paypal';
+import OpcionPago from './Componentes/FormaPago/OpcionPago';
+import MasterCard from './Componentes/FormaPago/MasterCard';
+import MercadoPago from './Componentes/FormaPago/MercadoPago';
 const App = () => {
   return (
     <AuthProvider>
@@ -149,7 +152,7 @@ const App = () => {
             <Route path="/detalles/:id" element={<DetalleProducto />} />
             <Route path="/servicios" element={<Servicios />} />
             <Route path="/detalle/:id" element={<DetallesServicio />} />
-            <Route path="/detalles/:id/opcionpago" element={<OpcionPago />} />
+            <Route path="/detalles/:id/opcionpago" element={<OpcionPagoD />} />
             <Route path="/detalle/:id/opcionpagos" element={<OpcionPagoD />} />
             <Route path="/error400" element={<PaginaError400 />} />  
             <Route path="/error500" element={<PaginaError500j />} /> 
@@ -168,6 +171,11 @@ const App = () => {
             <Route path="/cambiopasswordP" element={<CambioPasswordP/>} />
             <Route path="/verificarUserSMS" element={<VerificacionUsuarioSMS/>} />
             <Route path="/validarcodigoSMS" element={<ValidarCodigoSMS/>} />
+
+            <Route path="/paypal" element={<PayPal/>} />
+            <Route path="/metodo" element={<OpcionPago/>} />
+            <Route path="/mastercard" element={<MasterCard/>} />
+            <Route path="/mercadopago" element={<MercadoPago/>} />
             
 
             <Route path="*" element={<PaginaError404 />} />  

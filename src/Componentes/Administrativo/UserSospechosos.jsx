@@ -1,23 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Spin, message, Button } from 'antd';
 import axios from 'axios';
+import {
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  TablePagination,
+} from '@mui/material';
+import {
+  Person,
+  Email,
+  Warning,
+  Lock,
+  LockOpen,
+} from '@mui/icons-material';
 
 const UserSospechosos = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchUsuariosSospechosos = async () => {
       try {
         const response = await axios.get('https://backendcentro.onrender.com/api/sospechoso');
-        if (response.data.length === 0) {
-          
-        } else {
-          setUsuarios(response.data);
-        }
+        setUsuarios(response.data);
       } catch (err) {
-        message.info('No se encontraron usuarios sospechosos');
+        console.error('Error al obtener usuarios sospechosos:', err);
       } finally {
         setLoading(false);
       }
@@ -26,273 +43,130 @@ const UserSospechosos = () => {
     fetchUsuariosSospechosos();
   }, []);
 
-
   const handleBloquearDesbloquear = async (userId, estadoBloqueo) => {
     try {
       const action = estadoBloqueo ? 'desbloquear' : 'bloquear';
-
-      
       const response = await axios.patch(`https://backendcentro.onrender.com/api/sospechoso/${action}/${userId}`);
-
-      
-      const updatedUsuarios = usuarios.map(user => 
+      const updatedUsuarios = usuarios.map(user =>
         user.id === userId ? { ...user, estadoBloqueo: response.data.estadoBloqueo } : user
       );
       setUsuarios(updatedUsuarios);
-      message.success(`Usuario ${estadoBloqueo ? 'desbloqueado' : 'bloqueado'} con éxito`);
     } catch (err) {
-      message.error('Error al realizar la acción');
+      console.error('Error al realizar la acción:', err);
     }
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <Spin size="large" />
-      </div>
+      <Box sx={{ textAlign: 'center', padding: '50px 0' }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
-  if (error) {
-    return <div style={styles.errorMessage}>Error: {error}</div>;
-  }
-
-  const columns = [
-    {
-      title: <span style={styles.headerTitle}>Usuario</span>,
-      dataIndex: 'user',
-      key: 'user',
-      align: 'left',
-    },
-    {
-      title: <span style={styles.headerTitle}>Nombre</span>,
-      dataIndex: 'nombre',
-      key: 'nombre',
-      align: 'left',
-    },
-    {
-      title: <span style={styles.headerTitle}>Apellido PA</span>,
-      dataIndex: 'apellidopa',
-      key: 'apellidopa',
-      align: 'left',
-    },
-    {
-      title: <span style={styles.headerTitle}>Intentos</span>,
-      dataIndex: 'IntentoSospechosos',
-      key: 'IntentoSospechosos',
-      align: 'left',
-    },
-    {
-      title: <span style={styles.headerTitle}>Correo</span>,
-      dataIndex: 'gmail',
-      key: 'gmail',
-      align: 'left',
-    },
-    {
-      title: <span style={styles.headerTitle}>Acción</span>,
-      key: 'accion',
-      render: (text, record) => (
-        <Button
-          type="primary"
-          onClick={() => handleBloquearDesbloquear(record.id, record.estadoBloqueo)}
-        >
-          {record.estadoBloqueo ? 'Desbloquear' : 'Bloquear'}
-        </Button>
-      ),
-    },
-  ];
-
-  const rowClassName = (record) => {
-    return record.IntentoSospechosos >= 10 ? 'cliente-row' : 'administrativo-row';
-  };
-
-
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Lista negra</h2>
-      <div style={styles.tableContainer}>
-        <Table
-          dataSource={usuarios}
-          columns={columns}
-          rowKey="_id"
-          rowClassName={rowClassName}
-          pagination={false}
-          bordered
-          style={styles.table}
-          scroll={{ x: 'max-content' }}
+    <Box sx={{ padding: 3, maxWidth: '1200px', margin: '0 auto' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#424242', textAlign: 'center', mb: 4 }}>
+        Lista Negra
+      </Typography>
+
+      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)', borderRadius: '12px', overflow: 'hidden' }}>
+        <Table sx={{ '& .MuiTableCell-root': { padding: '6px 8px', fontSize: '0.875rem' } }}>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'rgba(189, 189, 189, 0.2)' }}>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Person sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Usuario
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Person sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Nombre
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Person sx={{ mr: 1, color: '#f57c00', fontSize: '1.2rem' }} /> Apellido PA
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Warning sx={{ mr: 1, color: '#d32f2f', fontSize: '1.2rem' }} /> Intentos
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Email sx={{ mr: 1, color: '#0288d1', fontSize: '1.2rem' }} /> Correo
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Lock sx={{ mr: 1, color: '#7b1fa2', fontSize: '1.2rem' }} /> Acción
+                </Box>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {usuarios.length > 0 ? (
+              usuarios.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => (
+                <TableRow
+                  key={user.id}
+                  sx={{
+                    '&:hover': { backgroundColor: '#f5f5f5' },
+                    height: '36px',
+                    backgroundColor: user.IntentoSospechosos >= 10 ? 'rgba(63, 134, 0, 0.1)' : 'rgba(250, 173, 20, 0.1)',
+                  }}
+                >
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{user.user}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{user.nombre}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{user.apellidopa}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{user.IntentoSospechosos}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{user.gmail}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <Button
+                      variant="contained"
+                      color={user.estadoBloqueo ? 'success' : 'error'}
+                      size="small"
+                      startIcon={user.estadoBloqueo ? <LockOpen /> : <Lock />}
+                      onClick={() => handleBloquearDesbloquear(user.id, user.estadoBloqueo)}
+                      sx={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                    >
+                      {user.estadoBloqueo ? 'Desbloquear' : 'Bloquear'}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ borderBottom: '1px solid #e0e0e0', height: '36px' }}>
+                  No se encontraron usuarios sospechosos
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={usuarios.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{ backgroundColor: 'rgba(189, 189, 189, 0.1)', fontSize: '0.875rem', padding: '4px' }}
         />
-      </div>
-      <style>{`
-        .container {
-          max-width: 1200px;
-          margin: 20px auto;
-          padding: 20px;
-          background-color: #f9f9f9;
-          border-radius: 10px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-          
-        }
-
-        .title {
-          font-size: 2rem;
-          color: #333;
-          text-align: center;
-          margin-bottom: 20px;
-        }
-
-        .loadingContainer {
-          text-align: center;
-          padding: 50px 0;
-        }
-
-        .errorMessage {
-          text-align: center;
-          font-size: 1.2rem;
-          color: #ff4d4f;
-        }
-
-        .headerTitle {
-          display: flex;
-          align-items: center;
-          color: #000;
-          font-weight: bold;
-        }
-
-        .table {
-          background-color: #fff;
-          border-radius: 8px;
-          overflow: hidden;
-          margin-top: 20px;
-        }
-
-        .tableContainer {
-          padding-bottom: 50px;
-        }
-
-        .cliente-row {
-          background-color: rgba(63, 134, 0, 0.1);
-        }
-
-        .administrativo-row {
-          background-color: rgba(250, 173, 20, 0.1);
-        }
-
-        .ant-table-header {
-          background-color: #1890ff;
-        }
-
-        .ant-table-header-column {
-          color: #000;
-          font-weight: bold;
-          padding: 16px;
-        }
-
-        .ant-table-header > tr > th {
-          background-color: #1890ff;
-          color: #000;
-          font-weight: bold;
-        }
-
-        .ant-table-cell {
-          border-bottom: 1px solid #e8e8e8;
-        }
-
-        .ant-table-row:hover {
-          background-color: #f0f5ff;
-        }
-
-        @media (max-width: 1024px) {
-          .title {
-            font-size: 1.8rem;
-          }
-
-          .headerTitle {
-            font-size: 1rem;
-          }
-
-          .ant-table-header > tr > th,
-          .ant-table-cell {
-            font-size: 0.9rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .container {
-            padding: 10px;
-          }
-
-          .title {
-            font-size: 1.5rem;
-          }
-
-          .headerTitle {
-            font-size: 0.9rem;
-          }
-
-          .ant-table-header > tr > th,
-          .ant-table-cell {
-            font-size: 0.8rem;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .title {
-            font-size: 1.2rem;
-          }
-
-          .headerTitle {
-            font-size: 0.8rem;
-          }
-
-          .ant-table-header > tr > th,
-          .ant-table-cell {
-            font-size: 0.7rem;
-          }
-        }
-      `}</style>
-    </div>
+      </TableContainer>
+    </Box>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: '1200px',
-    margin: '20px auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-  },
-  title: {
-    fontSize: '2rem',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: '20px',
-  },
-  loadingContainer: {
-    textAlign: 'center',
-    padding: '50px 0',
-  },
-  errorMessage: {
-    textAlign: 'center',
-    fontSize: '1.2rem',
-    color: '#ff4d4f',
-  },
-  headerTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    color: '#000',
-    fontWeight: 'bold',
-  },
-  tableContainer: {
-    paddingBottom: '50px',
-  },
-  table: {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    marginTop: '20px',
-  },
 };
 
 export default UserSospechosos;
