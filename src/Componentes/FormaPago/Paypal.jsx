@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   Box,
   Typography,
   Paper,
-  Button,
   Divider,
   Stack,
   useMediaQuery,
@@ -16,6 +15,7 @@ import {
   Link,
 } from '@mui/material';
 import SecurityIcon from '@mui/icons-material/Security';
+import Swal from 'sweetalert2';
 
 const Paypal = () => {
   const theme = useTheme();
@@ -25,6 +25,7 @@ const Paypal = () => {
   const { carrito = [], total = 0 } = location.state || {};
 
   const [expandedItems, setExpandedItems] = useState({});
+  const paypalButtonRef = useRef(null); // To store the PayPal button instance
 
   const toggleItemExpansion = (itemId) => {
     setExpandedItems((prev) => ({
@@ -36,36 +37,91 @@ const Paypal = () => {
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
     margin: 'auto',
-    marginTop: '10mm', // 1cm arriba
-    marginBottom: '10mm', // 1cm abajo
+    marginTop: '10mm',
+    marginBottom: '10mm',
     padding: theme.spacing(3),
     borderRadius: '12px',
     boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
     backgroundColor: '#fff',
   };
 
-  const paypalButtonStyles = {
-    backgroundColor: '#FFC107', // Amarillo característico de PayPal
-    color: '#003087', // Azul oscuro para el texto
-    textTransform: 'none',
-    fontWeight: 'bold',
-    fontSize: '16px',
-    padding: theme.spacing(1.5),
-    borderRadius: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '40%', // Nuevo ancho proporcionado
-    height: '48px',
-    '&:hover': {
-      backgroundColor: '#FFB300',
-    },
-  };
+  useEffect(() => {
+    if (window.paypal && total > 0 && carrito.length > 0) {
+      // Clear the container to prevent duplicate buttons
+      const container = document.getElementById('paypal-button-container');
+      if (container) {
+        container.innerHTML = ''; // Clear any existing buttons
+      }
+
+      // Destroy the previous PayPal button instance if it exists
+      if (paypalButtonRef.current) {
+        paypalButtonRef.current.close();
+        paypalButtonRef.current = null;
+      }
+
+      // Create and render the PayPal button
+      const button = window.paypal.Buttons({
+        style: {
+          color: 'gold',
+          shape: 'pill',
+          label: 'paypal',
+          layout: 'horizontal',
+        },
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: total.toFixed(2),
+                currency_code: 'MXN',
+              },
+              description: 'Pago en Centro de Rehabilitación Integral',
+            }],
+          });
+        },
+        onApprove: (data, actions) => {
+          return actions.order.capture().then((details) => {
+            Swal.fire({
+              title: 'Pago Completado',
+              text: `Pago completado por ${details.payer.name.given_name}`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+            });
+          });
+        },
+        onError: (err) => {
+          console.error('Error en el pago con PayPal:', err);
+          Swal.fire({
+            title: 'Error',
+            text: 'Ocurrió un error al procesar el pago.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        },
+      });
+
+      // Store the button instance
+      paypalButtonRef.current = button;
+
+      // Render the button
+      button.render('#paypal-button-container');
+    }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (paypalButtonRef.current) {
+        paypalButtonRef.current.close();
+        paypalButtonRef.current = null;
+      }
+      const container = document.getElementById('paypal-button-container');
+      if (container) {
+        container.innerHTML = ''; // Clear the container on cleanup
+      }
+    };
+  }, [total, carrito]);
 
   return (
     <Paper elevation={3} sx={containerStyles}>
       <Stack spacing={1}>
-        {/* Encabezado */}
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography variant="h5" fontWeight="bold" color="primary">
             Pagar con PayPal
@@ -80,11 +136,8 @@ const Paypal = () => {
 
         <Divider />
 
-        {/* Detalles del pago */}
         <Box>
-          <Typography variant="body1" color="text.secondary">
-            Total:
-          </Typography>
+          <Typography variant="body1" color="text.secondary">Total:</Typography>
           {total > 0 ? (
             <Typography variant="h6" fontWeight="bold">
               ${total.toFixed(2)} MXN
@@ -95,7 +148,6 @@ const Paypal = () => {
             </Alert>
           )}
 
-          {/* Lista de ítems del carrito */}
           {carrito.length > 0 ? (
             <Box mt={2}>
               <Typography variant="body2" color="text.secondary" fontWeight="medium">
@@ -120,9 +172,9 @@ const Paypal = () => {
                             {item.nombre} (x{item.cantidad_carrito})
                           </Typography>
                         }
-                        secondary={`Subtotal: $${
-                          (item.subtotal || item.precio_carrito * item.cantidad_carrito || 0).toFixed(2)
-                        } MXN`}
+                        secondary={`Subtotal: $${(
+                          item.subtotal || item.precio_carrito * item.cantidad_carrito || 0
+                        ).toFixed(2)} MXN`}
                         primaryTypographyProps={{ component: 'div' }}
                         secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
                       />
@@ -134,7 +186,7 @@ const Paypal = () => {
                         onClick={() => toggleItemExpansion(item.id)}
                         sx={{ mt: 0.5, color: theme.palette.primary.main }}
                       >
-              
+                        {expandedItems[item.id] ? 'Ver menos' : 'Ver más'}
                       </Link>
                     )}
                   </ListItem>
@@ -146,38 +198,18 @@ const Paypal = () => {
               No hay ítems para mostrar.
             </Typography>
           )}
-
         </Box>
 
-        {/* Botón de PayPal centrado */}
-        <Box display="flex" justifyContent="center">
-          <Button sx={paypalButtonStyles} disabled={total === 0 || carrito.length === 0}>
-            <Box
-              component="img"
-              src="https://www.paypalobjects.com/webstatic/icon/pp258.png"
-              alt="PayPal Logo"
-              sx={{ height: '24px', mr: 1 }}
-            />
-            PayPal
-          </Button>
+        {/* Contenedor del botón de PayPal */}
+        <Box display="flex" justifyContent="center" mt={2}>
+          <div id="paypal-button-container" style={{ width: isMobile ? '100%' : '300px' }} />
         </Box>
 
-        {/* Nota de seguridad */}
         <Box display="flex" alignItems="center" justifyContent="center" mt={2}>
           <SecurityIcon fontSize="small" color="action" sx={{ mr: 1 }} />
           <Typography variant="caption" color="text.secondary">
             Su pago está protegido con PayPal
           </Typography>
-        </Box>
-
-        {/* Logo de PayPal */}
-        <Box display="flex" justifyContent="center">
-          <Box
-            component="img"
-            src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_74x46.jpg"
-            alt="PayPal Accepted"
-            sx={{ height: '30px' }}
-          />
         </Box>
       </Stack>
     </Paper>

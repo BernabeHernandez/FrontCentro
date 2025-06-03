@@ -14,6 +14,7 @@ import {
   ListItem,
   ListItemText,
   Link,
+  CircularProgress,
 } from '@mui/material';
 import SecurityIcon from '@mui/icons-material/Security';
 
@@ -22,13 +23,10 @@ const MercadoPago = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
 
-  // Obtener carrito y total desde location.state
   const { carrito = [], total = 0 } = location.state || {};
-
-  // Estado para controlar qué ítems muestran el nombre completo
   const [expandedItems, setExpandedItems] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  // Función para alternar mostrar/ocultar nombre completo
   const toggleItemExpansion = (itemId) => {
     setExpandedItems((prev) => ({
       ...prev,
@@ -36,21 +34,52 @@ const MercadoPago = () => {
     }));
   };
 
-  // Estilos para el contenedor principal
+const pagarConMercadoPago = async () => {
+  try {
+    setLoading(true);
+    console.log('Carrito enviado:', carrito); // Depuración
+    const response = await fetch('https://backendcentro.onrender.com/pagos/create_preference', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ carrito }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error del servidor:', errorData);
+      throw new Error(errorData.error || 'Error en la respuesta del servidor');
+    }
+
+    const data = await response.json();
+    console.log('Respuesta de Mercado Pago:', data); // Depuración
+
+    if (data.sandbox_init_point) {
+      window.location.href = data.sandbox_init_point;
+    } else {
+      alert('No se pudo generar la preferencia de pago');
+    }
+  } catch (error) {
+    console.error('Error al procesar el pago:', error);
+    alert(`Error al intentar pagar con Mercado Pago: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
     margin: 'auto',
-    marginTop: '10mm', // 1cm arriba
-    marginBottom: '10mm', // 1cm abajo
+    marginTop: '10mm',
+    marginBottom: '10mm',
     padding: theme.spacing(3),
     borderRadius: '12px',
     boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
     backgroundColor: '#fff',
   };
 
-  // Estilo para el botón de Mercado Pago
   const mercadoPagoButtonStyles = {
-    backgroundColor: '#009ee3', // Azul característico de Mercado Pago
+    backgroundColor: '#009ee3',
     color: '#fff',
     textTransform: 'none',
     fontWeight: 'bold',
@@ -74,10 +103,9 @@ const MercadoPago = () => {
   return (
     <Paper elevation={3} sx={containerStyles}>
       <Stack spacing={0}>
-        {/* Encabezado */}
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography variant="h5" fontWeight="bold" color="primary">
-           Pagar con Mercado Pago
+            Pagar con Mercado Pago
           </Typography>
           <Box
             component="img"
@@ -89,7 +117,6 @@ const MercadoPago = () => {
 
         <Divider />
 
-        {/* Detalles del pago */}
         <Box>
           <Typography variant="body1" color="text.secondary">
             Monto del servicio:
@@ -104,7 +131,6 @@ const MercadoPago = () => {
             </Alert>
           )}
 
-          {/* Lista de ítems del carrito */}
           {carrito.length > 0 ? (
             <Box mt={2}>
               <Typography variant="body2" color="text.secondary" fontWeight="medium">
@@ -129,22 +155,12 @@ const MercadoPago = () => {
                             {item.nombre} (x{item.cantidad_carrito})
                           </Typography>
                         }
-                        secondary={`Subtotal: $${
-                          (item.subtotal || item.precio_carrito * item.cantidad_carrito || 0).toFixed(2)
-                        } MXN`}
+                        secondary={`Subtotal: $${(item.subtotal || item.precio_carrito * item.cantidad_carrito || 0).toFixed(2)
+                          } MXN`}
                         primaryTypographyProps={{ component: 'div' }}
                         secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
                       />
                     </Box>
-                    {item.nombre.length > 50 && (
-                      <Link
-                        component="button"
-                        variant="caption"
-                        onClick={() => toggleItemExpansion(item.id)}
-                        sx={{ mt: 0.5, color: theme.palette.primary.main }}
-                      >
-                      </Link>
-                    )}
                   </ListItem>
                 ))}
               </List>
@@ -156,14 +172,16 @@ const MercadoPago = () => {
           )}
         </Box>
 
-        {/* Botón de Mercado Pago centrado */}
-        <Box display="flex" justifyContent="center">
-          <Button sx={mercadoPagoButtonStyles} disabled={total === 0 || carrito.length === 0}>
-            Pagar
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Button
+            sx={mercadoPagoButtonStyles}
+            disabled={total === 0 || carrito.length === 0 || loading}
+            onClick={pagarConMercadoPago}
+          >
+            {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Pagar'}
           </Button>
         </Box>
 
-        {/* Nota de seguridad */}
         <Box display="flex" alignItems="center" justifyContent="center" mt={2}>
           <SecurityIcon fontSize="small" color="action" sx={{ mr: 1 }} />
           <Typography variant="caption" color="text.secondary">
@@ -171,7 +189,6 @@ const MercadoPago = () => {
           </Typography>
         </Box>
 
-        {/* Logo de Mercado Pago */}
         <Box display="flex" justifyContent="center">
           <Box
             component="img"
