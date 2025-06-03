@@ -38,7 +38,7 @@ const pagarConMercadoPago = async () => {
   try {
     setLoading(true);
     console.log('Carrito enviado:', carrito); // Depuración
-    const response = await fetch('https://backendcentro.onrender.com/pagos/create_preference', {
+    const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ carrito }),
