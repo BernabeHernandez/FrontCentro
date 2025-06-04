@@ -52,7 +52,7 @@ const MercadoPago = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:3302/api/pagos/create_preference', {
+      const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ carrito }),
