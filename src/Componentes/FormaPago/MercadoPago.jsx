@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -13,7 +13,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Link,
   CircularProgress,
 } from '@mui/material';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -22,10 +21,24 @@ const MercadoPago = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const { carrito = [], total = 0 } = location.state || {};
+  const [carrito, setCarrito] = useState([]);
+  const [total, setTotal] = useState(0);
   const [expandedItems, setExpandedItems] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Verifica si location.state existe
+    if (!location.state || !Array.isArray(location.state.carrito)) {
+      setError('No se recibió información del carrito. Regresa e intenta de nuevo.');
+      console.error('location.state inválido:', location.state);
+      return;
+    }
+    setCarrito(location.state.carrito);
+    setTotal(location.state.total || 0);
+  }, [location.state]);
 
   const toggleItemExpansion = (itemId) => {
     setExpandedItems((prev) => ({
@@ -34,38 +47,37 @@ const MercadoPago = () => {
     }));
   };
 
-const pagarConMercadoPago = async () => {
-  try {
-    setLoading(true);
-    console.log('Carrito enviado:', carrito); // Depuración
-    const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ carrito }),
-    });
+  const pagarConMercadoPago = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Error del servidor:', errorData);
-      throw new Error(errorData.error || 'Error en la respuesta del servidor');
+      const response = await fetch('http://localhost:3302/api/pagos/create_preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ carrito }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta MP:', data);
+
+      const checkoutUrl = data.sandbox_init_point || data.init_point;
+      if (!checkoutUrl) {
+        throw new Error("No se recibió una URL válida para iniciar el pago.");
+      }
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error('Error en el pago:', error);
+      setError(error.message || 'Ocurrió un error al procesar el pago.');
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
-    console.log('Respuesta de Mercado Pago:', data); // Depuración
-
-    if (data.sandbox_init_point) {
-      window.location.href = data.sandbox_init_point;
-    } else {
-      alert('No se pudo generar la preferencia de pago');
-    }
-  } catch (error) {
-    console.error('Error al procesar el pago:', error);
-    alert(`Error al intentar pagar con Mercado Pago: ${error.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
@@ -91,18 +103,13 @@ const pagarConMercadoPago = async () => {
     justifyContent: 'center',
     width: '40%',
     height: '48px',
-    '&:hover': {
-      backgroundColor: '#0088cc',
-    },
-    '&:disabled': {
-      backgroundColor: '#bdbdbd',
-      color: '#fff',
-    },
+    '&:hover': { backgroundColor: '#0088cc' },
+    '&:disabled': { backgroundColor: '#bdbdbd', color: '#fff' },
   };
 
   return (
     <Paper elevation={3} sx={containerStyles}>
-      <Stack spacing={0}>
+      <Stack spacing={2}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography variant="h5" fontWeight="bold" color="primary">
             Pagar con Mercado Pago
@@ -117,19 +124,15 @@ const pagarConMercadoPago = async () => {
 
         <Divider />
 
+        {error && <Alert severity="error">{error}</Alert>}
+
         <Box>
           <Typography variant="body1" color="text.secondary">
             Monto del servicio:
           </Typography>
-          {total > 0 ? (
-            <Typography variant="h6" fontWeight="bold">
-              ${total.toFixed(2)} MXN
-            </Typography>
-          ) : (
-            <Alert severity="warning">
-              No se pudo cargar el monto. Por favor, regresa e intenta de nuevo.
-            </Alert>
-          )}
+          <Typography variant="h6" fontWeight="bold">
+            ${total.toFixed(2)} MXN
+          </Typography>
 
           {carrito.length > 0 ? (
             <Box mt={2}>
@@ -137,8 +140,12 @@ const pagarConMercadoPago = async () => {
                 Detalles del pago:
               </Typography>
               <List dense>
-                {carrito.map((item) => (
-                  <ListItem key={item.id} disablePadding sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                {carrito.map((item, index) => (
+                  <ListItem
+                    key={item.id || index}
+                    disablePadding
+                    sx={{ flexDirection: 'column', alignItems: 'flex-start' }}
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                       <ListItemText
                         primary={
@@ -155,8 +162,10 @@ const pagarConMercadoPago = async () => {
                             {item.nombre} (x{item.cantidad_carrito})
                           </Typography>
                         }
-                        secondary={`Subtotal: $${(item.subtotal || item.precio_carrito * item.cantidad_carrito || 0).toFixed(2)
-                          } MXN`}
+                        secondary={`Subtotal: $${(
+                          item.subtotal ||
+                          (item.precio_carrito ?? 0) * (item.cantidad_carrito ?? 0)
+                        ).toFixed(2)} MXN`}
                         primaryTypographyProps={{ component: 'div' }}
                         secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
                       />
@@ -187,15 +196,6 @@ const pagarConMercadoPago = async () => {
           <Typography variant="caption" color="text.secondary">
             Su pago está protegido con Mercado Pago
           </Typography>
-        </Box>
-
-        <Box display="flex" justifyContent="center">
-          <Box
-            component="img"
-            src="https://logospng.org/download/mercado-pago/logo-mercado-pago-256.png"
-            alt="Mercado Pago Accepted"
-            sx={{ height: '50px' }}
-          />
         </Box>
       </Stack>
     </Paper>
