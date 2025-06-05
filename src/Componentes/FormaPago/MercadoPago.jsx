@@ -47,37 +47,54 @@ const MercadoPago = () => {
     }));
   };
 
-  const pagarConMercadoPago = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+const pagarConMercadoPago = async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
-      const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ carrito }),
-      });
+    // 🔍 Validación: precios y cantidades mayores a cero
+    const carritoValido = carrito.every((item) => {
+      const precio = Number(item.precio_carrito);
+      const cantidad = Number(item.cantidad_carrito);
+      return (
+        !isNaN(precio) &&
+        !isNaN(cantidad) &&
+        precio > 0 &&
+        cantidad > 0
+      );
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Respuesta MP:', data);
-
-      const checkoutUrl = data.sandbox_init_point || data.init_point;
-      if (!checkoutUrl) {
-        throw new Error("No se recibió una URL válida para iniciar el pago.");
-      }
-
-      window.location.href = checkoutUrl;
-    } catch (error) {
-      console.error('Error en el pago:', error);
-      setError(error.message || 'Ocurrió un error al procesar el pago.');
-    } finally {
-      setLoading(false);
+    if (!carritoValido) {
+      throw new Error("Uno o más productos tienen precio o cantidad inválida (deben ser mayores a 0).");
     }
-  };
+
+    const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ carrito }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Respuesta MP:', data);
+
+    const checkoutUrl = data.sandbox_init_point || data.init_point;
+    if (!checkoutUrl) {
+      throw new Error("No se recibió una URL válida para iniciar el pago.");
+    }
+
+    window.location.href = checkoutUrl;
+  } catch (error) {
+    console.error('Error en el pago:', error);
+    setError(error.message || 'Ocurrió un error al procesar el pago.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
