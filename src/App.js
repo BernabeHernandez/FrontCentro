@@ -75,6 +75,7 @@ import PayPal from './Componentes/FormaPago/Paypal';
 import OpcionPago from './Componentes/FormaPago/OpcionPago';
 import MasterCard from './Componentes/FormaPago/MasterCard';
 import MercadoPago from './Componentes/FormaPago/MercadoPago';
+import PagoCorrectoMercado from './Componentes/Pagos/PagoCorrectoMercado';
 const App = () => {
   return (
     <AuthProvider>
@@ -176,6 +177,9 @@ const App = () => {
             <Route path="/metodo" element={<OpcionPago/>} />
             <Route path="/mastercard" element={<MasterCard/>} />
             <Route path="/mercadopago" element={<MercadoPago/>} />
+            <Route path="/pago/resultado" element={<PagoCorrectoMercado />} />
+
+
             
 
             <Route path="*" element={<PaginaError404 />} />  
