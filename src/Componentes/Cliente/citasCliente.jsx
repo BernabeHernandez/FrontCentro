@@ -2,16 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format, addDays, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import jsPDF from 'jspdf';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
-import logo from '../Imagenes/Logo_Circular.png';
-import ReactDOM from 'react-dom';
-import html2canvas from 'html2canvas';
-import { FaUser, FaIdCard, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
-import { QRCodeCanvas } from 'qrcode.react';
 import {
   Container,
   Typography,
@@ -26,7 +20,6 @@ import {
   CircularProgress
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import Icono from '../Icono';
 
 const theme = createTheme({
   palette: {
@@ -35,17 +28,6 @@ const theme = createTheme({
   },
   typography: { fontFamily: 'Poppins, sans-serif' },
 });
-
-const generarQRComoImagen = async () => {
-  const qrDiv = document.createElement('div');
-  qrDiv.style.position = 'absolute';
-  qrDiv.style.left = '-9999px';
-  document.body.appendChild(qrDiv);
-  ReactDOM.render(<QRCodeCanvas value="https://tu-aplicacion.com" size={128} />, qrDiv);
-  const canvas = await html2canvas(qrDiv);
-  document.body.removeChild(qrDiv);
-  return canvas.toDataURL('image/png');
-};
 
 const CitasCliente = () => {
   const [diasDisponibles, setDiasDisponibles] = useState([]);
@@ -56,10 +38,12 @@ const CitasCliente = () => {
   const [usuarioId, setUsuarioId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
+  const [precioServicio, setPrecioServicio] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
 
+  // Validar servicioId
   useEffect(() => {
     if (!servicioId) {
       Swal.fire({
@@ -71,20 +55,156 @@ const CitasCliente = () => {
     }
   }, [servicioId, navigate]);
 
+  // Cargar datos del servicio
   useEffect(() => {
-    const fetchNombreServicio = async () => {
+    const fetchServicioData = async () => {
       if (servicioId) {
         try {
           const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
           setNombreServicio(response.data.nombre);
+          setPrecioServicio(response.data.precio || 0);
         } catch (error) {
-          console.error('Error al obtener el nombre del servicio:', error);
+          console.error('Error al obtener los datos del servicio:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo cargar la información del servicio.',
+            confirmButtonText: 'Entendido',
+          });
         }
       }
     };
-    fetchNombreServicio();
+    fetchServicioData();
   }, [servicioId]);
 
+  // Verificar usuario registrado
+  useEffect(() => {
+    const verificarUsuarioRegistrado = async () => {
+      try {
+        const usuario = localStorage.getItem('usuario');
+        if (!usuario) {
+          setUsuarioRegistrado(false);
+          Swal.fire({
+            icon: 'warning',
+            title: 'Acceso restringido',
+            text: 'Necesitas iniciar sesión o registrarte para reservar una cita.',
+            confirmButtonText: 'Entendido',
+          }).then(() => navigate('/login'));
+          return;
+        }
+        const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
+        if (response.data.existe) {
+          setUsuarioRegistrado(true);
+          if (response.data.usuario && response.data.usuario.id) {
+            setUsuarioId(response.data.usuario.id);
+            localStorage.setItem('usuario_id', response.data.usuario.id);
+          }
+        } else {
+          setUsuarioRegistrado(false);
+          Swal.fire({
+            icon: 'warning',
+            title: 'Usuario no registrado',
+            text: 'El usuario no está registrado. Por favor, regístrate.',
+            confirmButtonText: 'Entendido',
+          }).then(() => navigate('/login'));
+        }
+      } catch (error) {
+        console.error('Error al verificar el usuario:', error);
+        setUsuarioRegistrado(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al verificar tu cuenta. Por favor, intenta nuevamente.',
+          confirmButtonText: 'Entendido',
+        }).then(() => navigate('/login'));
+      }
+    };
+    verificarUsuarioRegistrado();
+  }, [navigate]);
+
+  // Obtener días disponibles
+  useEffect(() => {
+    const getDiasDisponibles = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
+        const diasConHorario = response.data;
+        if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
+          throw new Error('No se encontraron días disponibles');
+        }
+
+        const hoy = new Date();
+        const diaActual = hoy.getDay();
+        const horaActual = hoy.getHours();
+
+        const horarioHoy = diasConHorario.find(dia => dia.dia.toLowerCase() === format(hoy, 'EEEE', { locale: es }).toLowerCase());
+        let dentroDelHorario = false;
+        if (horarioHoy && typeof horarioHoy.hora_inicio === 'string' && typeof horarioHoy.hora_fin === 'string') {
+          const horaInicioHoy = parseInt(horarioHoy.hora_inicio.split(':')[0], 10);
+          const horaFinHoy = parseInt(horarioHoy.hora_fin.split(':')[0], 10);
+          dentroDelHorario = horaActual >= horaInicioHoy && horaActual < horaFinHoy;
+        }
+
+        let diasDisponiblesAjustados = dentroDelHorario
+          ? diasConHorario.slice(diaActual - 1).concat(diasConHorario.slice(0, diaActual - 1))
+          : diasConHorario.slice(diaActual).concat(diasConHorario.slice(0, diaActual));
+
+        const diasConFechas = diasDisponiblesAjustados.map((dia, index) => {
+          const fecha = addDays(hoy, index);
+          const nombreDia = format(fecha, 'EEEE', { locale: es }).toLowerCase();
+          return {
+            nombre: nombreDia,
+            fecha: fecha,
+            fechaFormateada: format(fecha, "EEEE, d 'de' MMMM", { locale: es }),
+            hora_inicio: dia.hora_inicio || '00:00',
+            hora_fin: dia.hora_fin || '23:59',
+            disponible: dia.disponible || 0
+          };
+        });
+
+        setDiasDisponibles(diasConFechas);
+      } catch (error) {
+        console.error('Error al obtener los días disponibles:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los días disponibles. Por favor, intenta nuevamente.',
+          confirmButtonText: 'Entendido',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (usuarioRegistrado) getDiasDisponibles();
+  }, [usuarioRegistrado]);
+
+  // Seleccionar día
+  const handleSelectDay = async (dia, fecha, disponible) => {
+    if (disponible === 0) return;
+    setSelectedDay(dia);
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
+      setHorarios(response.data);
+    } catch (error) {
+      console.error('Error al obtener las franjas horarias:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron cargar las franjas horarias.',
+        confirmButtonText: 'Entendido',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Seleccionar hora
+  const handleSelectTime = (time, disponible) => {
+    if (disponible) setSelectedTime(time);
+  };
+
+  // Verificar si la franja ha pasado
   const haPasadoLaFranja = (horaInicioFranja, fechaSeleccionada) => {
     if (!isToday(fechaSeleccionada)) return false;
     const ahora = new Date();
@@ -94,233 +214,7 @@ const CitasCliente = () => {
     return (horaActual > horaFranja || (horaActual === horaFranja && minutosActuales >= minutosFranja));
   };
 
-  const verificarUsuarioRegistrado = async () => {
-    try {
-      const usuario = localStorage.getItem('usuario');
-      if (!usuario) {
-        setUsuarioRegistrado(false);
-        Swal.fire({
-          icon: 'warning',
-          title: 'Acceso restringido',
-          text: 'Necesitas iniciar sesión o registrarte para reservar una cita.',
-          confirmButtonText: 'Entendido',
-        }).then(() => navigate('/login'));
-        return;
-      }
-      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
-      if (response.data.existe) {
-        setUsuarioRegistrado(true);
-        if (response.data.usuario && response.data.usuario.id) {
-          setUsuarioId(response.data.usuario.id);
-          localStorage.setItem('usuario_id', response.data.usuario.id);
-        }
-      } else {
-        setUsuarioRegistrado(false);
-        Swal.fire({
-          icon: 'warning',
-          title: 'Usuario no registrado',
-          text: 'El usuario no está registrado. Por favor, regístrate.',
-          confirmButtonText: 'Entendido',
-        }).then(() => navigate('/login'));
-      }
-    } catch (error) {
-      console.error('Error al verificar el usuario:', error);
-      setUsuarioRegistrado(false);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Hubo un error al verificar tu cuenta. Por favor, intenta nuevamente.',
-        confirmButtonText: 'Entendido',
-      }).then(() => navigate('/login'));
-    }
-  };
-
-  useEffect(() => {
-    verificarUsuarioRegistrado();
-  }, []);
-
-  const getDiasDisponibles = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
-      const diasConHorario = response.data;
-      const hoy = new Date();
-      const diaActual = hoy.getDay();
-      const horaActual = hoy.getHours();
-
-      const horarioHoy = diasConHorario.find(dia => dia.dia.toLowerCase() === format(hoy, 'EEEE', { locale: es }).toLowerCase());
-      const horaInicioHoy = parseInt(horarioHoy?.hora_inicio.split(':')[0], 10);
-      const horaFinHoy = parseInt(horarioHoy?.hora_fin.split(':')[0], 10);
-
-      const dentroDelHorario = horaActual >= horaInicioHoy && horaActual < horaFinHoy;
-
-      let diasDisponiblesAjustados = dentroDelHorario
-        ? diasConHorario.slice(diaActual - 1).concat(diasConHorario.slice(0, diaActual - 1))
-        : diasConHorario.slice(diaActual).concat(diasConHorario.slice(0, diaActual));
-
-      const diasConFechas = diasDisponiblesAjustados.map((dia, index) => {
-        const fecha = addDays(hoy, index);
-        const nombreDia = format(fecha, 'EEEE', { locale: es }).toLowerCase();
-        return {
-          nombre: nombreDia,
-          fecha: fecha,
-          fechaFormateada: format(fecha, "EEEE, d 'de' MMMM", { locale: es }),
-          hora_inicio: dia.hora_inicio,
-          hora_fin: dia.hora_fin,
-          disponible: dia.disponible // Agregar el campo disponible desde la API
-        };
-      });
-
-      setDiasDisponibles(diasConFechas);
-    } catch (error) {
-      console.error('Error al obtener los días disponibles:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (usuarioRegistrado) getDiasDisponibles();
-  }, [usuarioRegistrado]);
-
-  const handleSelectDay = async (dia, fecha, disponible) => {
-    if (disponible === 0) return; // No hacer nada si el día no está disponible
-    setSelectedDay(dia);
-    setLoading(true);
-    try {
-      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
-      setHorarios(response.data);
-    } catch (error) {
-      console.error('Error al obtener las franjas horarias:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSelectTime = (time, disponible) => {
-    if (disponible) setSelectedTime(time);
-  };
-
-  const generarPDF = async () => {
-    const doc = new jsPDF();
-    const usuario = localStorage.getItem('usuario');
-    const usuarioId = localStorage.getItem('usuario_id');
-
-    if (!usuarioId) {
-      console.error('El id_usuario no está disponible en localStorage.');
-      return;
-    }
-
-    const diaSeleccionado = diasDisponibles.find(dia => dia.nombre === selectedDay);
-    const fechaCita = format(diaSeleccionado.fecha, 'EEEE, d \'de\' MMMM', { locale: es });
-
-    doc.addImage(logo, 'PNG', 80, 10, 50, 50);
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 128, 0);
-    doc.text("Centro de Rehabilitación Integral San Juan", 10, 75);
-    doc.setDrawColor(0, 128, 0);
-    doc.setLineWidth(0.5);
-    doc.line(10, 80, 200, 80);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text("Comprobante de Cita", 70, 90);
-
-    const convertirIconoAImagen = async (icono, color) => {
-      const div = document.createElement('div');
-      div.style.position = 'absolute';
-      div.style.left = '-9999px';
-      document.body.appendChild(div);
-      ReactDOM.render(<Icono icono={icono} color={color} />, div);
-      const canvas = await html2canvas(div);
-      document.body.removeChild(div);
-      return canvas.toDataURL('image/png');
-    };
-
-    const iconoUsuarioImg = await convertirIconoAImagen(FaUser, 'green');
-    doc.addImage(iconoUsuarioImg, 'PNG', 10, 100, 10, 10);
-    doc.text(`Paciente: ${usuario}`, 25, 108);
-
-    const iconoIDImg = await convertirIconoAImagen(FaIdCard, 'blue');
-    doc.addImage(iconoIDImg, 'PNG', 10, 115, 10, 10);
-    doc.text(`ID de Usuario: ${usuarioId}`, 25, 123);
-
-    const iconoCalendarioImg = await convertirIconoAImagen(FaCalendarAlt, 'orange');
-    doc.addImage(iconoCalendarioImg, 'PNG', 10, 130, 10, 10);
-    doc.text(`Fecha: ${fechaCita}`, 25, 138);
-
-    const iconoRelojImg = await convertirIconoAImagen(FaClock, 'purple');
-    doc.addImage(iconoRelojImg, 'PNG', 10, 145, 10, 10);
-    doc.text(`Hora: ${selectedTime}`, 25, 153);
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Servicio: ${nombreServicio}`, 25, 168);
-
-    doc.setDrawColor(0, 128, 0);
-    doc.setLineWidth(0.5);
-    doc.line(10, 175, 200, 175);
-
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 0, 0);
-    doc.text("Importante", 10, 185);
-
-    const iconoUbicacionImg = await convertirIconoAImagen(FaMapMarkerAlt, 'red');
-    doc.addImage(iconoUbicacionImg, 'PNG', 10, 195, 10, 10);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Calle Clavel, Col. Valle del Encinal, Huejutla, Mexico', 25, 203);
-
-    const iconoTelefonoImg = await convertirIconoAImagen(FaPhone, 'teal');
-    doc.addImage(iconoTelefonoImg, 'PNG', 10, 210, 10, 10);
-    doc.text('Teléfono: (+51) 771 162 8377', 25, 218);
-
-    const iconoCorreoImg = await convertirIconoAImagen(FaEnvelope, 'blue');
-    doc.addImage(iconoCorreoImg, 'PNG', 10, 225, 10, 10);
-    doc.text('Correo: Ltfmariela@hotmail.com', 25, 233);
-
-    doc.setDrawColor(0, 128, 0);
-    doc.setLineWidth(0.5);
-    doc.line(10, 240, 200, 240);
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 0, 0);
-    doc.text("Aviso:", 10, 250);
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text('- Por favor, preséntese 15 minutos antes de su cita.', 15, 260);
-    doc.text('- En caso de cancelación, notificar con al menos 24 horas de anticipación.', 15, 270);
-    doc.text('- No presentarse a la cita puede generar cargos adicionales.', 15, 280);
-
-    const qrImage = await generarQRComoImagen();
-    doc.addImage(qrImage, 'PNG', 150, 100, 50, 50);
-    doc.setFontSize(10);
-    doc.text('Escanea este código QR para más información:', 150, 95);
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text('Términos y condiciones aplican. Consulta más detalles en nuestra página web.', 10, 295);
-
-    doc.save("comprobante_cita.pdf");
-  };
-
-  const actualizarHorariosLocalmente = (dia, horaInicio) => {
-    setHorarios((prevHorarios) =>
-      prevHorarios.map((horario) => ({
-        ...horario,
-        franjas: horario.franjas.map((franja) =>
-          franja.hora_inicio === horaInicio ? { ...franja, disponible: false } : franja
-        ),
-      }))
-    );
-    setSelectedTime(null);
-  };
-
+  // Manejar la acción de sacar cita
   const handleSacarCita = async () => {
     const usuario = localStorage.getItem('usuario');
     if (!usuario || !usuarioId) {
@@ -345,7 +239,7 @@ const CitasCliente = () => {
         return;
       }
 
-      if (selectedDay && selectedTime) {
+      if (selectedDay && selectedTime && precioServicio !== null) {
         const franjaSeleccionada = horarios
           .flatMap(horario => horario.franjas)
           .find(franja => franja.hora_inicio === selectedTime);
@@ -360,7 +254,36 @@ const CitasCliente = () => {
           return;
         }
 
-        const horaFin = franjaSeleccionada.hora_fin;
+        // Validar disponibilidad de la franja
+        try {
+          const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${selectedDay}`);
+          const horariosData = responseHorarios.data;
+          const franjaValida = horariosData
+            .flatMap(horario => horario.franjas)
+            .find(franja => franja.hora_inicio === selectedTime && franja.disponible);
+
+          if (!franjaValida) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Franja no disponible',
+              text: 'La franja horaria seleccionada ya no está disponible. Por favor, elige otra.',
+              confirmButtonText: 'Entendido',
+            });
+            setSelectedTime(null);
+            setHorarios(horariosData);
+            return;
+          }
+        } catch (error) {
+          console.error('Error al validar la franja horaria:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo validar la franja horaria. Por favor, intenta nuevamente.',
+            confirmButtonText: 'Entendido',
+          });
+          return;
+        }
+
         const diaSeleccionado = diasDisponibles.find(dia => dia.nombre === selectedDay);
         const fechaCita = format(diaSeleccionado.fecha, 'yyyy-MM-dd');
 
@@ -376,39 +299,34 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
-          const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
-            dia: selectedDay,
-            horaInicio: selectedTime,
-            horaFin: horaFin,
-            usuario_id: usuarioId,
-            fecha_cita: fechaCita,
-            servicio_id: servicioId,
-            estado: 'pendiente',
+          navigate('/metodoServicios', {
+            state: {
+              id_usuario: usuarioId,
+              id_servicio: servicioId,
+              nombre_servicio: nombreServicio,
+              dia: selectedDay,
+              fecha: fechaCita,
+              hora: selectedTime,
+              horaFin: franjaSeleccionada.hora_fin, // Pasar horaFin
+              precio: precioServicio,
+              notas: null,
+            },
           });
-
-          actualizarHorariosLocalmente(selectedDay, selectedTime);
-
-          Swal.fire({
-            icon: 'success',
-            title: 'Cita reservada',
-            text: reservaResponse.data.message,
-            confirmButtonText: 'Entendido',
-          }).then(() => generarPDF());
         }
       } else {
         Swal.fire({
           icon: 'warning',
           title: 'Selección incompleta',
-          text: 'Por favor selecciona un día y una hora para reservar la cita.',
+          text: 'Por favor selecciona un día, una hora y asegúrate de que el servicio esté cargado.',
           confirmButtonText: 'Entendido',
         });
       }
     } catch (error) {
-      console.error('Error al reservar la cita:', error);
+      console.error('Error al procesar la cita:', error);
       Swal.fire({
         icon: 'error',
-        title: 'Error al reservar la cita',
-        text: 'Hubo un problema al reservar la cita. Por favor, intenta nuevamente.',
+        title: 'Error',
+        text: 'Hubo un problema al procesar la cita. Por favor, intenta nuevamente.',
         confirmButtonText: 'Entendido',
       });
     }

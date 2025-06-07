@@ -76,6 +76,10 @@ import OpcionPago from './Componentes/FormaPago/OpcionPago';
 import MasterCard from './Componentes/FormaPago/MasterCard';
 import MercadoPago from './Componentes/FormaPago/MercadoPago';
 import PagoCorrectoMercado from './Componentes/Pagos/PagoCorrectoMercado';
+import MetodoPagoServicios from './Componentes/FormaPago/MetodoPagoServicios';
+import PayPalServicio from './Componentes/FormaPago/PayPalServicio';
+import MercadoPagoServicio from './Componentes/FormaPago/MercadoPagoServicio';
+
 const App = () => {
   return (
     <AuthProvider>
@@ -174,13 +178,13 @@ const App = () => {
             <Route path="/validarcodigoSMS" element={<ValidarCodigoSMS/>} />
 
             <Route path="/paypal" element={<PayPal/>} />
+            <Route path="/pago-servicio/paypal" element={<PayPalServicio/>} />
             <Route path="/metodo" element={<OpcionPago/>} />
             <Route path="/mastercard" element={<MasterCard/>} />
             <Route path="/mercadopago" element={<MercadoPago/>} />
+            <Route path="/pago-servicio/mercadopago" element={<MercadoPagoServicio/>} />
             <Route path="/pago/resultado" element={<PagoCorrectoMercado />} />
-
-
-            
+             <Route path="/metodoServicios" element={<MetodoPagoServicios />} />
 
             <Route path="*" element={<PaginaError404 />} />  
           </Routes>
