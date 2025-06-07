@@ -14,7 +14,7 @@ const PagoCorrectoMercado = () => {
 
     const registrarVenta = async () => {
       try {
-        const response = await fetch('https://backendcentro.onrender.com/api/carrito/reducir-inventario', {
+        const response = await fetch('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productos: carrito }), // 💡 Este nombre debe coincidir con el esperado en el backend
