@@ -35,21 +35,36 @@ const PagoCorrectoMercado = () => {
 
         const carrito = JSON.parse(carritoRaw) || [];
         if (!carrito.length) {
-          throw new Error('No se encontraron productos en el carrito. Por favor, intenta realizar la compra nuevamente.');
+          // Intentar obtener el carrito desde el backend como respaldo
+          const id_usuario = localStorage.getItem('usuario_id');
+          if (!id_usuario) {
+            throw new Error('No se encontró el ID del usuario. Por favor, inicia sesión nuevamente.');
+          }
+
+          const responseCarrito = await axios.get(`https://backendcentro.onrender.com/carrito/${id_usuario}`);
+          const carritoBackend = responseCarrito.data;
+          console.log('Carrito obtenido desde el backend:', carritoBackend);
+
+          if (!carritoBackend.length) {
+            throw new Error('No se encontraron productos en el carrito. Por favor, intenta realizar la compra nuevamente.');
+          }
+
+          localStorage.setItem('carrito', JSON.stringify(carritoBackend));
+          carrito.push(...carritoBackend);
         }
 
         // Depuración: verificar el formato del carrito
         console.log('Carrito parseado:', carrito);
 
         // Validar que el carrito tenga los campos necesarios
-        const carritoValido = carrito.every(item => item.id_producto && item.cantidad_carrito > 0);
+        const carritoValido = carrito.every(item => item.id && item.cantidad_carrito > 0);
         if (!carritoValido) {
-          throw new Error('El carrito contiene datos inválidos (falta id_producto o cantidad_carrito).');
+          throw new Error('El carrito contiene datos inválidos (falta id o cantidad_carrito).');
         }
 
         // Preparar los datos para la ruta /carrito/reducir-inventario
         const productos = carrito.map(item => ({
-          id: item.id_producto,
+          id: item.id, // Usar item.id en lugar de item.id_producto
           cantidad: item.cantidad_carrito,
         }));
 
@@ -68,7 +83,8 @@ const PagoCorrectoMercado = () => {
           confirmButtonText: 'Ir al carrito',
           allowOutsideClick: false,
         }).then(() => {
-  
+          // Limpiar el carrito en localStorage
+          localStorage.removeItem('carrito');
           navigate('/carrito');
         });
       } catch (error) {
