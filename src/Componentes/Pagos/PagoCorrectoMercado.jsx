@@ -71,7 +71,7 @@ const PagoCorrectoMercado = () => {
         console.log('Productos enviados a /carrito/reducir-inventario:', productos);
 
         // Llamar a la ruta para reducir inventario y registrar la venta
-        const response = await axios.put('https://backendcentro.onrender.com/carrito/reducir-inventario', {
+        const response = await axios.put('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
           productos,
         });
 
