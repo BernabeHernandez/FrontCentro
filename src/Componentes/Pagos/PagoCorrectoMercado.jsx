@@ -54,8 +54,7 @@ const PagoCorrectoMercado = () => {
           confirmButtonText: 'Ir al carrito',
           allowOutsideClick: false,
         }).then(() => {
-          // Limpiar el carrito en localStorage
-          localStorage.removeItem('carrito');
+
           navigate('/carrito');
         });
       } catch (error) {
