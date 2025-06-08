@@ -38,29 +38,107 @@ const Paypal = () => {
     }));
   };
 
+  const handlePostPaymentOperations = async (paymentDetails) => {
+    try {
+      // Obtener el carrito desde localStorage
+      const carritoRaw = localStorage.getItem('carrito');
+      let carritoProcesar = JSON.parse(carritoRaw) || [];
+      
+      // Si no hay carrito en localStorage, intentar recuperarlo del backend
+      if (!carritoProcesar.length) {
+        const id_usuario = localStorage.getItem('usuario_id');
+        if (!id_usuario) {
+          throw new Error('No se encontró el ID del usuario. Por favor, inicia sesión nuevamente.');
+        }
+
+        const responseCarrito = await axios.get(`https://backendcentro.onrender.com/carrito/${id_usuario}`);
+        carritoProcesar = responseCarrito.data;
+        localStorage.setItem('carrito', JSON.stringify(carritoProcesar));
+      }
+
+      // Validar el carrito
+      const carritoValido = carritoProcesar.every(item => item.id && item.cantidad_carrito > 0);
+      if (!carritoValido) {
+        throw new Error('El carrito contiene datos inválidos (falta id o cantidad_carrito).');
+      }
+
+      // Preparar datos para reducir inventario
+      const productos = carritoProcesar.map(item => ({
+        id: item.id,
+        cantidad: item.cantidad_carrito,
+      }));
+
+      // Llamar a la ruta para reducir inventario
+      const response = await axios.put('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
+        productos,
+      });
+
+      // Mostrar mensaje de éxito
+      Swal.fire({
+        title: '¡Compra exitosa!',
+        text: `Pago completado por ${paymentDetails.payer.name.given_name}. ${response.data.message}`,
+        icon: 'success',
+        confirmButtonText: 'Ir al carrito',
+        allowOutsideClick: false,
+      }).then(() => {
+        localStorage.removeItem('carrito');
+        navigate('/carrito');
+      });
+    } catch (error) {
+      console.error('Error en operaciones post-pago:', error);
+      Swal.fire({
+        title: 'Advertencia',
+        text: 'El pago se completó pero hubo un problema al actualizar el inventario. Por favor contacta al soporte.',
+        icon: 'warning',
+        confirmButtonText: 'Entendido'
+      });
+    }
+  };
+
+  const checkPopupBlocked = () => {
+    const popup = window.open('', '_blank');
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      setError('Las ventanas emergentes están bloqueadas. Por favor, permite ventanas emergentes para este sitio.');
+      return false;
+    }
+    popup.close();
+    return true;
+  };
+
   useEffect(() => {
     // Verificar si el carrito y el total son válidos
-    if (!Array.isArray(carrito) || carrito.length === 0) {
+    if (!Array.isArray(carrito)) {
       setError('No se recibió información del carrito. Regresa e intenta de nuevo.');
-      console.error('location.state inválido:', JSON.stringify(location.state, null, 2));
       return;
     }
 
-    // Depuración: verificar el carrito recibido
-    console.log('Carrito recibido en Paypal:', JSON.stringify(carrito, null, 2));
-
     // Guardar el carrito en localStorage
     localStorage.setItem('carrito', JSON.stringify(carrito));
-    console.log('Carrito guardado en localStorage desde Paypal:', JSON.stringify(carrito, null, 2));
 
-    // Configurar el botón de PayPal
-    if (window.paypal && total > 0 && carrito.length > 0) {
-      console.log('Inicializando botón de PayPal, total:', total);
+    // Verificar si el SDK de PayPal está cargado
+    if (!window.paypal) {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=Abr47HRyGorI1kKWNP_0LtDnm-fobtGYNCCcSkzl5p3176ruG0JwOYk8pWAe-IJWR2vYbGz8qzuBOCYg&currency=MXN&intent=capture&components=buttons`;
+      script.async = true;
+      
+      script.onload = () => initializePayPalButton();
+      script.onerror = () => setError('Error al cargar PayPal. Recarga la página.');
+      
+      document.body.appendChild(script);
+      
+      return () => {
+        document.body.removeChild(script);
+      };
+    } else {
+      initializePayPalButton();
+    }
+
+    function initializePayPalButton() {
       const container = document.getElementById('paypal-button-container');
-      if (container) {
-        container.innerHTML = ''; // Limpiar contenedor
-      }
+      if (!container || total <= 0 || carrito.length === 0) return;
 
+      container.innerHTML = '';
+      
       if (paypalButtonRef.current) {
         paypalButtonRef.current.close();
         paypalButtonRef.current = null;
@@ -71,10 +149,9 @@ const Paypal = () => {
           color: 'gold',
           shape: 'pill',
           label: 'paypal',
-          layout: 'horizontal',
+          layout: isMobile ? 'vertical' : 'horizontal',
         },
         createOrder: (data, actions) => {
-          console.log('Creando orden en PayPal, total:', total);
           const customId = localStorage.getItem('usuario_id') || 'unknown';
           return actions.order.create({
             purchase_units: [{
@@ -91,141 +168,65 @@ const Paypal = () => {
           try {
             setLoading(true);
             setError(null);
-
-            console.log('Iniciando captura del pago, orderID:', data.orderID);
+            
             const details = await actions.order.capture();
-            console.log('Pago capturado:', JSON.stringify(details, null, 2));
-
-            // Obtener el carrito desde localStorage
-            const carritoRaw = localStorage.getItem('carrito');
-            console.log('Carrito en localStorage:', carritoRaw);
-
-            let carritoProcesar = JSON.parse(carritoRaw) || [];
-            if (!carritoProcesar.length) {
-              const id_usuario = localStorage.getItem('usuario_id');
-              if (!id_usuario) {
-                throw new Error('No se encontró el ID del usuario. Por favor, inicia sesión nuevamente.');
-              }
-
-              console.log('Obteniendo carrito desde el backend para usuario:', id_usuario);
-              const responseCarrito = await axios.get(`https://backendcentro.onrender.com/carrito/${id_usuario}`);
-              carritoProcesar = responseCarrito.data;
-              console.log('Carrito obtenido desde el backend:', JSON.stringify(carritoProcesar, null, 2));
-
-              if (!carritoProcesar.length) {
-                throw new Error('No se encontraron productos en el carrito. Por favor, intenta realizar la compra nuevamente.');
-              }
-
-              localStorage.setItem('carrito', JSON.stringify(carritoProcesar));
-            }
-
-            // Validar el carrito
-            const carritoValido = carritoProcesar.every(item => item.id && item.cantidad_carrito > 0);
-            if (!carritoValido) {
-              throw new Error('El carrito contiene datos inválidos (falta id o cantidad_carrito).');
-            }
-
-            // Preparar datos para /carrito/reducir-inventario
-            const productos = carritoProcesar.map(item => ({
-              id: item.id,
-              cantidad: item.cantidad_carrito,
-            }));
-
-            console.log('Productos enviados a /carrito/reducir-inventario:', JSON.stringify(productos, null, 2));
-
-            // Llamar a la ruta
-            const response = await axios.put('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
-              productos,
-            });
-            console.log('Respuesta de /carrito/reducir-inventario:', response.data);
-
-            // Mostrar mensaje de éxito
+            
+            // Mostrar confirmación inmediata
             Swal.fire({
-              title: '¡Compra exitosa!',
-              text: `Pago completado por ${details.payer.name.given_name}. ${response.data.message}`,
+              title: '¡Pago exitoso!',
+              text: `Gracias por tu pago ${details.payer.name.given_name}. Procesando tu compra...`,
               icon: 'success',
-              confirmButtonText: 'Ir al carrito',
-              allowOutsideClick: false,
-            }).then(() => {
-              localStorage.removeItem('carrito');
-              console.log('Carrito eliminado de localStorage');
-              navigate('/carrito');
+              timer: 2000,
+              showConfirmButton: false
             });
+            
+            // Manejar operaciones post-pago sin bloquear
+            handlePostPaymentOperations(details);
+            
           } catch (error) {
-            console.error('Error al procesar la compra:', error);
-            let errorMessage = 'Ocurrió un error al procesar la compra. Por favor, intenta de nuevo.';
-            if (error.message.includes('Window closed before response')) {
-              errorMessage = 'La ventana de PayPal se cerró antes de completar el pago. Por favor, intenta de nuevo sin cerrar la ventana.';
-            }
-            setError(errorMessage);
-            Swal.fire({
-              title: 'Error',
-              text: errorMessage,
-              icon: 'error',
-              confirmButtonText: 'Volver al inicio',
-              allowOutsideClick: false,
-            }).then(() => {
-              navigate('/');
-            });
+            console.error('Error al procesar el pago:', error);
+            setError(error.message.includes('Window closed') ? 
+              'No cierres la ventana de PayPal durante el pago' : 
+              'Error al procesar el pago');
           } finally {
             setLoading(false);
           }
         },
+        onCancel: () => {
+          setError('Pago cancelado por el usuario');
+        },
         onError: (err) => {
-          console.error('Error en el pago con PayPal:', err);
-          let errorMessage = 'Ocurrió un error al procesar el pago.';
-          if (err.message && err.message.includes('Window closed before response')) {
-            errorMessage = 'La ventana de PayPal se cerró antes de completar el pago. Por favor, intenta de nuevo sin cerrar la ventana.';
-          } else if (err.message && err.message.includes('popup_blocked')) {
-            errorMessage = 'El navegador bloqueó la ventana de PayPal. Por favor, permite las ventanas emergentes para este sitio e intenta de nuevo.';
-          }
-          setError(errorMessage);
-          Swal.fire({
-            title: 'Error',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'Volver al inicio',
-          }).then(() => {
-            navigate('/');
-          });
+          console.error('Error PayPal:', err);
+          setError(err.message.includes('popup_blocked') ? 
+            'Permite ventanas emergentes para pagar con PayPal' : 
+            'Error en el proceso de pago');
         },
         onClick: () => {
-          console.log('Botón de PayPal clickeado, verificando ventanas emergentes');
-          if (!window.open) {
-            setError('Las ventanas emergentes están bloqueadas. Por favor, permite las ventanas emergentes para este sitio.');
-            Swal.fire({
-              title: 'Error',
-              text: 'Las ventanas emergentes están bloqueadas. Por favor, permite las ventanas emergentes para este sitio.',
-              icon: 'error',
-              confirmButtonText: 'OK',
-            });
+          if (!checkPopupBlocked()) {
+            return false; // Previene que PayPal continúe
           }
-        },
+          return true;
+        }
       });
 
-      paypalButtonRef.current = button;
-      console.log('Renderizando botón de PayPal');
-      button.render('#paypal-button-container').catch(err => {
-        console.error('Error al renderizar el botón de PayPal:', err);
-        setError('No se pudo cargar el botón de PayPal. Por favor, recarga la página.');
-      });
-    } else {
-      console.warn('PayPal SDK no cargado o carrito/total inválidos:', { paypal: !!window.paypal, total, carritoLength: carrito.length });
+      if (button.isEligible()) {
+        paypalButtonRef.current = button;
+        button.render('#paypal-button-container').catch(err => {
+          console.error('Error renderizando botón PayPal:', err);
+          setError('Error al cargar PayPal. Recarga la página.');
+        });
+      } else {
+        setError('PayPal no está disponible en tu navegador');
+      }
     }
 
-    // Cleanup
     return () => {
       if (paypalButtonRef.current) {
         paypalButtonRef.current.close();
         paypalButtonRef.current = null;
       }
-      const container = document.getElementById('paypal-button-container');
-      if (container) {
-        container.innerHTML = '';
-      }
-      console.log('Limpiando botón de PayPal');
     };
-  }, [total, carrito, navigate]);
+  }, [total, carrito, navigate, isMobile]);
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
