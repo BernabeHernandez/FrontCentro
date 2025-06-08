@@ -1,50 +1,80 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 const PagoCorrectoMercado = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const status = queryParams.get('status');
+    const processPayment = async () => {
+      const queryParams = new URLSearchParams(location.search);
+      const status = queryParams.get('status');
 
-    const carrito = location.state?.carrito || JSON.parse(localStorage.getItem('carrito')) || [];
-
-    const registrarVenta = async () => {
-      try {
-        const response = await fetch('https://backendcentro.onrender.com/api/carrito/carrito/reducir-inventario', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productos: carrito }), // 💡 Este nombre debe coincidir con el esperado en el backend
+      if (status !== 'success') {
+        Swal.fire({
+          title: 'Pago no completado',
+          text: 'El pago no se procesó correctamente. Estado: ' + status,
+          icon: 'error',
+          confirmButtonText: 'Volver al inicio',
+          allowOutsideClick: false,
+        }).then(() => {
+          navigate('/');
         });
+        return;
+      }
 
-        if (!response.ok) {
-          const errorBody = await response.json();
-          throw new Error(errorBody.message || 'Error al registrar la venta');
+      setProcessing(true);
+
+      try {
+        // Obtener el carrito desde localStorage
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        if (!carrito.length) {
+          throw new Error('No se encontraron productos en el carrito.');
         }
 
-      } catch (error) {
-        console.error('Error al registrar venta:', error);
-      }
-    };
+        // Preparar los datos para la ruta /carrito/reducir-inventario
+        const productos = carrito.map(item => ({
+          id: item.id_producto,
+          cantidad: item.cantidad_carrito,
+        }));
 
-    if (status === 'success') {
-      registrarVenta().finally(() => {
+        // Llamar a la ruta para reducir inventario y registrar la venta
+        const response = await axios.put('https://backendcentro.onrender.com/carrito/carrito/reducir-inventario', {
+          productos,
+        });
+
+        // Mostrar mensaje de éxito
         Swal.fire({
-          title: '¡Pago exitoso!',
-          text: 'Tu pago se completó correctamente.',
+          title: '¡Compra exitosa!',
+          text: response.data.message,
           icon: 'success',
           confirmButtonText: 'Ir al carrito',
           allowOutsideClick: false,
         }).then(() => {
+          // Limpiar el carrito en localStorage
+          localStorage.removeItem('carrito');
           navigate('/carrito');
         });
-      });
-    } else {
-      navigate('/');
-    }
+      } catch (error) {
+        console.error('Error al procesar la compra:', error);
+        Swal.fire({
+          title: 'Error',
+          text: error.response?.data?.message || 'Ocurrió un error al procesar la compra.',
+          icon: 'error',
+          confirmButtonText: 'Volver al inicio',
+          allowOutsideClick: false,
+        }).then(() => {
+          navigate('/');
+        });
+      } finally {
+        setProcessing(false);
+      }
+    };
+
+    processPayment();
   }, [navigate, location]);
 
   return null;
