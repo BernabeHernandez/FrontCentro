@@ -29,10 +29,22 @@ const PagoCorrectoMercado = () => {
       setProcessing(true);
 
       try {
-        // Obtener el carrito desde localStorage
-        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        // Depuración: verificar el contenido de localStorage
+        const carritoRaw = localStorage.getItem('carrito');
+        console.log('Carrito en localStorage:', carritoRaw);
+
+        const carrito = JSON.parse(carritoRaw) || [];
         if (!carrito.length) {
-          throw new Error('No se encontraron productos en el carrito.');
+          throw new Error('No se encontraron productos en el carrito. Por favor, intenta realizar la compra nuevamente.');
+        }
+
+        // Depuración: verificar el formato del carrito
+        console.log('Carrito parseado:', carrito);
+
+        // Validar que el carrito tenga los campos necesarios
+        const carritoValido = carrito.every(item => item.id_producto && item.cantidad_carrito > 0);
+        if (!carritoValido) {
+          throw new Error('El carrito contiene datos inválidos (falta id_producto o cantidad_carrito).');
         }
 
         // Preparar los datos para la ruta /carrito/reducir-inventario
@@ -41,8 +53,10 @@ const PagoCorrectoMercado = () => {
           cantidad: item.cantidad_carrito,
         }));
 
+        console.log('Productos enviados a /carrito/reducir-inventario:', productos);
+
         // Llamar a la ruta para reducir inventario y registrar la venta
-        const response = await axios.put('https://backendcentro.onrender.com/carrito/carrito/reducir-inventario', {
+        const response = await axios.put('https://backendcentro.onrender.com/carrito/reducir-inventario', {
           productos,
         });
 
@@ -54,14 +68,14 @@ const PagoCorrectoMercado = () => {
           confirmButtonText: 'Ir al carrito',
           allowOutsideClick: false,
         }).then(() => {
-
+  
           navigate('/carrito');
         });
       } catch (error) {
         console.error('Error al procesar la compra:', error);
         Swal.fire({
           title: 'Error',
-          text: error.response?.data?.message || 'Ocurrió un error al procesar la compra.',
+          text: error.message || 'Ocurrió un error al procesar la compra. Por favor, intenta de nuevo.',
           icon: 'error',
           confirmButtonText: 'Volver al inicio',
           allowOutsideClick: false,
