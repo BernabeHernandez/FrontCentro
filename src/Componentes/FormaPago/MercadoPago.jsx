@@ -1,3 +1,4 @@
+// En MercadoPago.js
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -36,8 +37,13 @@ const MercadoPago = () => {
       console.error('location.state inválido:', location.state);
       return;
     }
+    console.log('Carrito recibido en MercadoPago:', location.state.carrito);
     setCarrito(location.state.carrito);
     setTotal(location.state.total || 0);
+
+    // Guardar en localStorage al cargar el componente
+    localStorage.setItem('carrito', JSON.stringify(location.state.carrito));
+    console.log('Carrito guardado en localStorage desde MercadoPago:', location.state.carrito);
   }, [location.state]);
 
   const toggleItemExpansion = (itemId) => {
@@ -47,55 +53,53 @@ const MercadoPago = () => {
     }));
   };
 
-const pagarConMercadoPago = async () => {
-  try {
-    setLoading(true);
-    setError(null);
+  const pagarConMercadoPago = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    // 🔍 Validación: precios y cantidades mayores a cero
-    const carritoValido = carrito.every((item) => {
-      const precio = Number(item.precio_carrito);
-      const cantidad = Number(item.cantidad_carrito);
-      return (
-        !isNaN(precio) &&
-        !isNaN(cantidad) &&
-        precio > 0 &&
-        cantidad > 0
-      );
-    });
+      // Validación: precios y cantidades mayores a cero
+      const carritoValido = carrito.every((item) => {
+        const precio = Number(item.precio_carrito);
+        const cantidad = Number(item.cantidad_carrito);
+        return !isNaN(precio) && !isNaN(cantidad) && precio > 0 && cantidad > 0;
+      });
 
-    if (!carritoValido) {
-      throw new Error("Uno o más productos tienen precio o cantidad inválida (deben ser mayores a 0).");
+      if (!carritoValido) {
+        throw new Error('Uno o más productos tienen precio o cantidad inválida (deben ser mayores a 0).');
+      }
+
+      // Depuración: verificar el carrito antes de enviar a la API
+      console.log('Carrito enviado a /create_preference:', carrito);
+
+      const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ carrito }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta MP:', data);
+
+      const checkoutUrl = data.init_point;
+      if (!checkoutUrl) {
+        throw new Error('No se recibió una URL válida para iniciar el pago.');
+      }
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error('Error en el pago:', error);
+      setError(error.message || 'Ocurrió un error al procesar el pago.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const response = await fetch('https://backendcentro.onrender.com/api/pagos/create_preference', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ carrito }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('Respuesta MP:', data);
-
-    const checkoutUrl = data.init_point;
-    if (!checkoutUrl) {
-      throw new Error("No se recibió una URL válida para iniciar el pago.");
-    }
-
-    window.location.href = checkoutUrl;
-  } catch (error) {
-    console.error('Error en el pago:', error);
-    setError(error.message || 'Ocurrió un error al procesar el pago.');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  // Resto del código (estilos, JSX) permanece igual
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
     margin: 'auto',
