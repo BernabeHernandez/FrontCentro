@@ -160,12 +160,6 @@ const DetallesServicio = () => {
                     {servicio.descripcion}
                   </Typography>
                   <Box sx={{ mb: 2 }}>
-                    <Chip
-                      label={`Categoría: ${servicio.id_categoria}`} // Usar id_categoria como placeholder
-                      variant="outlined"
-                      color="primary"
-                      sx={{ fontWeight: "bold", mr: 1 }}
-                    />
                     {servicio.tiene_promocion ? (
                       <>
                         <Typography
