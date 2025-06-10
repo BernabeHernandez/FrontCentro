@@ -27,6 +27,9 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   boxShadow: `0 4px 20px rgba(0, 0, 0, 0.05)`,
   background: "linear-gradient(145deg, #ffffff 0%, #f5f7fa 100%)",
   border: "1px solid #e0e4e8",
+  display: "flex",
+  flexDirection: "column",
+  height: "100%", // Asegurar que ocupe toda la altura disponible
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -49,32 +52,52 @@ const DetallesServicio = () => {
   useEffect(() => {
     const fetchServicio = async () => {
       try {
-        const response = await fetch(`https://backendcentro.onrender.com/api/servicios/${id}`);
-        if (!response.ok) throw new Error("Error al obtener el servicio");
-        const data = await response.json();
-        setServicio(data);
+        // Obtener servicios con promociones
+        const response = await fetch(
+          `https://backendcentro.onrender.com/api/serviciosConDes/todos-con-y-sin-descuento`
+        );
+        if (!response.ok) throw new Error("Error al obtener los servicios");
+        const serviciosData = await response.json();
+        
+        // Filtrar el servicio por id
+        const servicioEncontrado = serviciosData.find(
+          (serv) => serv.id === parseInt(id)
+        );
+        if (!servicioEncontrado) throw new Error("Servicio no encontrado");
+        setServicio(servicioEncontrado);
 
-        const categoriaId = data.categoria_id;
+        // Obtener servicios relacionados por categoría
+        const categoriaId = servicioEncontrado.id_categoria;
         const responseProductos = await fetch(
           `https://backendcentro.onrender.com/api/servicios?categoriaId=${categoriaId}`
         );
+        if (!responseProductos.ok) throw new Error("Error al obtener servicios relacionados");
         const productosRelacionadosData = await responseProductos.json();
-        setProductosRelacionados(productosRelacionadosData);
+        // Excluir el servicio actual de los relacionados
+        const productosFiltrados = productosRelacionadosData.filter(
+          (prod) => prod.id !== parseInt(id)
+        );
+        setProductosRelacionados(productosFiltrados);
       } catch (error) {
         console.error("Error:", error);
+        navigate("/error404"); // Redirigir a una página de error si no se encuentra el servicio
       }
     };
 
     fetchServicio();
-  }, [id]);
+  }, [id, navigate]);
 
   const handlePagoClick = () => {
-    navigate("/CitasCliente", { state: { servicioId: id } });
+    // Pasar el precio correcto (con descuento si aplica) y el nombre del servicio
+    const precioFinal = servicio.tiene_promocion
+      ? parseFloat(servicio.promocion.precio_con_descuento)
+      : parseFloat(servicio.precio_original);
+    navigate("/CitasCliente", {
+      state: { servicioId: id, precio: precioFinal, nombre_servicio: servicio.nombre },
+    });
   };
 
   const manejarProductoRelacionadoClick = (idProducto) => {
-    const productosRestantes = productosRelacionados.filter((prod) => prod.id !== idProducto);
-    setProductosRelacionados(productosRestantes);
     navigate(`/detalle/${idProducto}`);
   };
 
@@ -96,9 +119,14 @@ const DetallesServicio = () => {
     );
   }
 
+  // Determinar el precio a mostrar
+  const precioFinal = servicio.tiene_promocion
+    ? parseFloat(servicio.promocion.precio_con_descuento)
+    : parseFloat(servicio.precio_original);
+
   return (
     <Fade in={true} timeout={700}>
-      <Box sx={{ bgcolor: "#fafafa", minHeight: "100vh" }}>
+      <Box sx={{ bgcolor: "#fafafa", minHeight: "100vh", pb: { xs: 8, md: 10 } }}>
         <BreadcrumbsServicios />
         <Container maxWidth="lg" sx={{ py: 5 }}>
           <Grid container spacing={4}>
@@ -118,47 +146,79 @@ const DetallesServicio = () => {
                     }}
                   />
                 </Box>
-                <Typography variant="h4" fontWeight="bold" color="text.primary" gutterBottom>
-                  {servicio.nombre}
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Rating value={4.5} precision={0.5} readOnly size="small" />
-                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                    (4.5/5 - 85 reseñas)
+                <Box sx={{ flexGrow: 1 }}> {/* Contenedor flexible para el contenido */}
+                  <Typography variant="h4" fontWeight="bold" color="text.primary" gutterBottom>
+                    {servicio.nombre}
                   </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <Rating value={4.5} precision={0.5} readOnly size="small" />
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                      (4.5/5 - 85 reseñas)
+                    </Typography>
+                  </Box>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 2, lineHeight: 1.8 }}>
+                    {servicio.descripcion}
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    <Chip
+                      label={`Categoría: ${servicio.id_categoria}`} // Usar id_categoria como placeholder
+                      variant="outlined"
+                      color="primary"
+                      sx={{ fontWeight: "bold", mr: 1 }}
+                    />
+                    {servicio.tiene_promocion ? (
+                      <>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ textDecoration: "line-through", display: "inline", mr: 1 }}
+                        >
+                          ${parseFloat(servicio.precio_original).toFixed(2)}
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          color="primary"
+                          fontWeight="bold"
+                          sx={{ display: "inline" }}
+                        >
+                          ${precioFinal.toFixed(2)} ({servicio.promocion.descuento}% OFF)
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="h5" color="primary" fontWeight="bold">
+                        ${precioFinal.toFixed(2)}
+                      </Typography>
+                    )}
+                  </Box>
+                  {servicio.tiene_promocion && (
+                    <Chip
+                      label={`Promoción: ${servicio.promocion.promocion_titulo}`}
+                      color="secondary"
+                      size="small"
+                      sx={{ mb: 2 }}
+                    />
+                  )}
                 </Box>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 2, lineHeight: 1.8 }}>
-                  {servicio.descripcion}
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-                  <Chip
-                    label={`Categoría: ${servicio.categoria_nombre}`}
-                    variant="outlined"
+                <Box sx={{ mt: "auto" }}> {/* Alinear el botón en la parte inferior */}
+                  <Button
+                    variant="contained"
                     color="primary"
-                    sx={{ fontWeight: "bold" }}
-                  />
-                  <Typography variant="h5" color="primary" fontWeight="bold">
-                    ${servicio.precio.toFixed(2)}
-                  </Typography>
+                    startIcon={<CalendarToday />}
+                    onClick={handlePagoClick}
+                    sx={{
+                      py: 1.5,
+                      px: 3,
+                      fontSize: "1rem",
+                      borderRadius: 2,
+                      boxShadow: "0 2px 10px rgba(25, 118, 210, 0.3)",
+                      textTransform: "none",
+                      width: "100%", // Ajuste para consistencia
+                      maxWidth: "250px",
+                    }}
+                  >
+                    Sacar cita
+                  </Button>
                 </Box>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<CalendarToday />}
-                  onClick={handlePagoClick}
-                  sx={{
-                    py: 1, // Reducido de 1.5 a 1
-                    px: 3, // Añadido padding horizontal para equilibrio
-                    fontSize: "1rem", // Reducido de 1.1rem a 1rem
-                    borderRadius: 2,
-                    boxShadow: "0 2px 10px rgba(25, 118, 210, 0.3)",
-                    textTransform: "none",
-                    width: "auto", // Cambiado de fullWidth a auto para un tamaño más natural
-                    maxWidth: "200px", // Límite máximo para evitar que crezca demasiado
-                  }}
-                >
-                  Sacar cita
-                </Button>
               </StyledPaper>
             </Grid>
 

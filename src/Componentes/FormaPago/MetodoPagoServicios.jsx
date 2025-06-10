@@ -43,13 +43,23 @@ const MetodoPagoServicios = () => {
   // Validar datos recibidos
   useEffect(() => {
     console.log('Datos recibidos en MetodoPagoServicios:', location.state);
-    if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !horaFin || !precio) {
+    const missingFields = [];
+    if (!id_usuario) missingFields.push('ID de usuario');
+    if (!id_servicio) missingFields.push('ID del servicio');
+    if (!nombre_servicio) missingFields.push('Nombre del servicio');
+    if (!dia) missingFields.push('Día');
+    if (!fecha) missingFields.push('Fecha');
+    if (!hora) missingFields.push('Hora');
+    if (!horaFin) missingFields.push('Hora de fin');
+    if (!precio) missingFields.push('Precio');
+
+    if (missingFields.length > 0) {
       Swal.fire({
         icon: 'error',
         title: 'Datos incompletos',
-        text: 'Faltan datos para procesar el pago. Por favor, regresa e intenta de nuevo.',
+        text: `Faltan los siguientes datos para procesar el pago: ${missingFields.join(', ')}. Por favor, regresa e intenta de nuevo.`,
         confirmButtonText: 'Entendido',
-      }).then(() => navigate('/CitasCliente', { state: { servicioId: id_servicio } }));
+      }).then(() => navigate('/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate]);
 

@@ -60,9 +60,16 @@ const CitasCliente = () => {
     const fetchServicioData = async () => {
       if (servicioId) {
         try {
-          const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
-          setNombreServicio(response.data.nombre);
-          setPrecioServicio(response.data.precio || 0);
+          // Priorizar el precio recibido desde location.state si existe
+          if (location.state?.precio !== undefined) {
+            setPrecioServicio(location.state.precio);
+            setNombreServicio(location.state?.nombre_servicio || ''); // Usar nombre del state si existe
+          } else {
+            // Si no hay precio en state, consultar al backend
+            const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
+            setNombreServicio(response.data.nombre);
+            setPrecioServicio(response.data.precio || 0);
+          }
         } catch (error) {
           console.error('Error al obtener los datos del servicio:', error);
           Swal.fire({
@@ -75,7 +82,7 @@ const CitasCliente = () => {
       }
     };
     fetchServicioData();
-  }, [servicioId]);
+  }, [servicioId, location.state?.precio, location.state?.nombre_servicio]);
 
   // Verificar usuario registrado
   useEffect(() => {
@@ -287,6 +294,17 @@ const CitasCliente = () => {
         const diaSeleccionado = diasDisponibles.find(dia => dia.nombre === selectedDay);
         const fechaCita = format(diaSeleccionado.fecha, 'yyyy-MM-dd');
 
+        // Verificar que nombreServicio no esté vacío
+        if (!nombreServicio || nombreServicio.trim() === '') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Datos incompletos',
+            text: 'El nombre del servicio no está disponible. Por favor, intenta de nuevo.',
+            confirmButtonText: 'Entendido',
+          });
+          return;
+        }
+
         const confirmacion = await Swal.fire({
           icon: 'question',
           title: 'Confirmar cita',
@@ -307,7 +325,7 @@ const CitasCliente = () => {
               dia: selectedDay,
               fecha: fechaCita,
               hora: selectedTime,
-              horaFin: franjaSeleccionada.hora_fin, // Pasar horaFin
+              horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
               notas: null,
             },
