@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  HomeOutlined, LogoutOutlined, UserOutlined, ShoppingCartOutlined, AppstoreOutlined, SearchOutlined
-  , QuestionCircleOutlined, ShoppingOutlined
-} from '@ant-design/icons';
+  Home, Logout, Person, ShoppingCart, Apps, Search, HelpOutline, Store
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -64,14 +63,9 @@ const EncabezadoCliente = () => {
       case "cerrarSesion":
         try {
           console.log('Cerrando sesión...');
-          // Eliminar datos del usuario de localStorage
-          localStorage.removeItem('user'); // Eliminar el usuario
-          localStorage.removeItem('token'); // Eliminar el token (si lo tienes)
-
-          // Eliminar datos de sessionStorage (si los usas)
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
           sessionStorage.removeItem('token');
-
-          // Redirigir al usuario a la página de inicio
           navigate('/');
         } catch (error) {
           console.error('Error al cerrar sesión:', error);
@@ -108,7 +102,7 @@ const EncabezadoCliente = () => {
           --color-primary: #000000; 
           --color-secondary: #FFFFFF; 
           --color-highlight: #4682B4; 
-          --color-hover: #A9DFBF; 
+          --color-hover: #D3D3D3; /* Gris suave para hover */
           --color-mobile-bg: #333333; 
           --color-mobile-text: #FFFFFF;
           --color-icon: #00B300; 
@@ -169,11 +163,13 @@ const EncabezadoCliente = () => {
         .menu ul li:hover {
           background-color: var(--color-hover);
           border-radius: 5px;
+          color: #000000; /* Texto negro en hover */
         }
 
         .menu ul li.active {
-          background-color: #A9DFBF;
+          background-color: #D3D3D3; /* Gris suave para la opción seleccionada */
           border-radius: 5px;
+          color: #000000; /* Texto negro en active */
         }
 
         .search-container {
@@ -227,7 +223,7 @@ const EncabezadoCliente = () => {
             left: -100%;
             width: 70%;
             height: 100%;
-            background-color: var( --color-primary); 
+            background-color: var(--color-primary); 
             padding: 20px;
             transition: left 0.3s ease-in-out;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
@@ -235,7 +231,7 @@ const EncabezadoCliente = () => {
 
           .menu.menu-open ul {
             left: 0;
-              z-index: 1000;
+            z-index: 1000;
           }
 
           .menu ul li {
@@ -245,13 +241,21 @@ const EncabezadoCliente = () => {
             color: var(--color-mobile-text); 
           }
 
+          .menu ul li:hover {
+            background-color: var(--color-hover);
+            color: #000000; /* Texto negro en hover también en móvil */
+          }
+
+          .menu ul li.active {
+            background-color: #D3D3D3; /* Gris suave para la opción seleccionada en móvil */
+            color: #000000; /* Texto negro en active también en móvil */
+          }
+
           .mobile-menu-icon {
             display: flex;
           }
         }
       `}</style>
-
-
 
       <header className="header">
         <div className="logo">
@@ -269,35 +273,33 @@ const EncabezadoCliente = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button className="search-button" onClick={handleSearch}>
-            <SearchOutlined style={{ color: '#FFFFFF', fontSize: '18px' }} />
+            <Search style={{ color: '#2196F3', fontSize: '18px' }} />
           </button>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
             <li className={active === 'home' ? 'active' : ''} onClick={() => { handleClick('home'); handleMenuClick('home'); }}>
-              <HomeOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              <Home style={{ color: '#4CAF50', marginRight: '8px' }} />
               Home
             </li>
             <li className={active === 'servicios' ? 'active' : ''} onClick={() => { handleClick('servicios'); handleMenuClick('servicios'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} />
+              <Apps style={{ color: '#FF9800' }} />
               Servicios
             </li>
             <li className={active === 'productos' ? 'active' : ''} onClick={() => { handleClick('productos'); handleMenuClick('productos'); }}>
-              < ShoppingOutlined style={{ color: '#00B300' }} />
+              <Store style={{ color: '#E91E63' }} />
               Productos
             </li>
-
             <li className={active === 'carrito' ? 'active' : ''} onClick={() => { handleClick('carrito'); handleMenuClick('carrito'); }}>
-              <ShoppingCartOutlined style={{ color: '#00B300' }} />
+              <ShoppingCart style={{ color: '#9C27B0' }} />
               Carrito
             </li>
-
             <li className={active === 'perfilUsuario' ? 'active' : ''} onClick={() => { handleClick('perfilUsuario'); handleMenuClick('perfilUsuario'); }}>
-              <QuestionCircleOutlined style={{ color: '#00B300' }} />
+              <Person style={{ color: '#00BCD4' }} />
               Perfil
             </li>
             <li className={active === 'cerrarSesion' ? 'active' : ''} onClick={() => { handleClick('cerrarSesion'); handleMenuClick('cerrarSesion'); }}>
-              <LogoutOutlined style={{ color: '#00B300', marginRight: '8px' }} />
+              <Logout style={{ color: '#F44336', marginRight: '8px' }} />
               Cerrar Sesión
             </li>
           </ul>

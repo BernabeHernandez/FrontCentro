@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  HomeOutlined, LoginOutlined, CustomerServiceOutlined, ShoppingCartOutlined, AppstoreOutlined, SearchOutlined
-  , QuestionCircleOutlined, EnvironmentOutlined,  // Mapa
-  PhoneOutlined, ShoppingOutlined
-} from '@ant-design/icons';
+  Home, Login, SupportAgent, ShoppingCart, Apps, Search,
+  HelpOutline, LocationOn, Phone, Store
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -17,7 +16,6 @@ const EncabezadoPublico = () => {
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const contactoRef = useRef(null);
-
 
   const handleClick = (option) => {
     setActive(option);
@@ -97,7 +95,7 @@ const EncabezadoPublico = () => {
           --color-primary: #000000; 
           --color-secondary: #FFFFFF; 
           --color-highlight: #4682B4; 
-          --color-hover: #A9DFBF; 
+          --color-hover: #D3D3D3; /* Gris suave para hover */
           --color-mobile-bg: #333333; 
           --color-mobile-text: #FFFFFF;
           --color-icon: #00B300; 
@@ -158,11 +156,13 @@ const EncabezadoPublico = () => {
         .menu ul li:hover {
           background-color: var(--color-hover);
           border-radius: 5px;
+          color: #000000; /* Texto negro en hover */
         }
 
         .menu ul li.active {
-          background-color: #A9DFBF;
+          background-color: #D3D3D3; /* Gris suave para la opción seleccionada */
           border-radius: 5px;
+          color: #000000; /* Texto negro en active */
         }
 
         .search-container {
@@ -224,7 +224,7 @@ const EncabezadoPublico = () => {
 
           .menu.menu-open ul {
             left: 0;
-              z-index: 1000;
+            z-index: 1000;
           }
 
           .menu ul li {
@@ -232,6 +232,16 @@ const EncabezadoPublico = () => {
             border-bottom: 1px solid var(--color-hover);
             text-align: left;
             color: var(--color-mobile-text); 
+          }
+
+          .menu ul li:hover {
+            background-color: var(--color-hover);
+            color: #000000; /* Texto negro en hover también en móvil */
+          }
+
+          .menu ul li.active {
+            background-color: #D3D3D3; /* Gris suave para la opción seleccionada en móvil */
+            color: #000000; /* Texto negro en active también en móvil */
           }
 
           .mobile-menu-icon {
@@ -259,35 +269,33 @@ const EncabezadoPublico = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button className="search-button" onClick={handleSearch}>
-            <SearchOutlined style={{ color: '#00B300', fontSize: '18px' }} />
+            <Search style={{ color: '#2196F3', fontSize: '18px' }} />
           </button>
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
             <li className={active === 'home' ? 'active' : ''} onClick={() => { handleClick('home'); handleMenuClick('home'); }}>
-              <HomeOutlined style={{ color: '#00B300' }} />
+              <Home style={{ color: '#4CAF50' }} />
               Home
             </li>
             <li className={active === 'servicios' ? 'active' : ''} onClick={() => { handleClick('servicios'); handleMenuClick('servicios'); }}>
-              <AppstoreOutlined style={{ color: '#00B300' }} />
+              <Apps style={{ color: '#FF9800' }} />
               Servicios
             </li>
             <li className={active === 'productos' ? 'active' : ''} onClick={() => { handleClick('productos'); handleMenuClick('productos'); }}>
-              <ShoppingOutlined style={{ color: '#00B300' }} />
+              <Store style={{ color: '#E91E63' }} />
               Productos
             </li>
-
             <li className={active === 'carrito' ? 'active' : ''} onClick={() => { handleClick('carrito'); handleMenuClick('carrito'); }}>
-              <ShoppingCartOutlined style={{ color: '#00B300' }} />
+              <ShoppingCart style={{ color: '#9C27B0' }} />
               Carrito
             </li>
-
             <li className={active === 'ayuda' ? 'active' : ''} onClick={() => { handleClick('ayuda'); handleMenuClick('ayuda'); }}>
-              <QuestionCircleOutlined style={{ color: '#00B300' }} />
+              <HelpOutline style={{ color: '#00BCD4' }} />
               Ayuda
             </li>
             <li className={active === 'login' ? 'active' : ''} onClick={() => { handleClick('login'); handleMenuClick('login'); }}>
-              <LoginOutlined style={{ color: '#00B300' }} />
+              <Login style={{ color: '#F44336' }} />
               Iniciar sesión
             </li>
           </ul>
