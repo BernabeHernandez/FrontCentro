@@ -145,7 +145,11 @@ const App = () => {
 
             <Route path="/cliente/paypal" element={<ProtectedRoute allowedRoles={['Cliente']}><PayPal /></ProtectedRoute>} />  
             <Route path="/cliente/mastercard" element={<ProtectedRoute allowedRoles={['Cliente']}><MasterCard /></ProtectedRoute>} />  
-            <Route path="/cliente/mercadopago" element={<ProtectedRoute allowedRoles={['Cliente']}><MercadoPago /></ProtectedRoute>} />            
+            <Route path="/cliente/mercadopago" element={<ProtectedRoute allowedRoles={['Cliente']}><MercadoPago /></ProtectedRoute>} />     
+            <Route path="/cliente/metodoServicios" element={<ProtectedRoute allowedRoles={['Cliente']}><MetodoPagoServicios /></ProtectedRoute>} />       
+
+            <Route path="/cliente/pago-servicio/paypal" element={<ProtectedRoute allowedRoles={['Cliente']}><PayPalServicio /></ProtectedRoute>} />  
+            <Route path="/cliente/pago-servicio/mercadopago" element={<ProtectedRoute allowedRoles={['Cliente']}><MercadoPagoServicio /></ProtectedRoute>} />   
 
             {/* Rutas públicas */}
             <Route path="/verificar_correo" element={<SolicitarCodigo />} />

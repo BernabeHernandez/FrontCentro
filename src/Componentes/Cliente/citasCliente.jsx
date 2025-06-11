@@ -317,7 +317,7 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
-          navigate('/metodoServicios', {
+          navigate('/cliente/metodoServicios', {
             state: {
               id_usuario: usuarioId,
               id_servicio: servicioId,

@@ -12,9 +12,10 @@ import {
   Fade,
   Pagination,
   Button,
+  Chip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { CalendarToday, ArrowForwardIos } from "@mui/icons-material";
+import { CalendarToday } from "@mui/icons-material";
 import Breadcrumbs from "../Navegacion/BreadcrumbsServicios";
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -27,6 +28,9 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
   cursor: "pointer",
   backgroundColor: "#fff",
+  minHeight: "460px",
+  display: "flex",
+  flexDirection: "column",
 }));
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
@@ -57,17 +61,18 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 const ServiciosC = () => {
   const [servicios, setServicios] = useState([]);
   const [page, setPage] = useState(1);
-  const serviciosPorPagina = 10; // 5 por fila, 2 filas por página
+  const serviciosPorPagina = 10; 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchServicios = async () => {
       try {
-        const response = await fetch("https://backendcentro.onrender.com/api/servicios");
+        const response = await fetch("https://backendcentro.onrender.com/api/serviciosConDes/todos-con-y-sin-descuento");
         if (!response.ok) {
-          throw new Error("Error al obtener los servicios");
+          throw new Error(`Error al obtener los servicios: ${response.statusText}`);
         }
         const data = await response.json();
+        console.log("Datos recibidos del backend:", data); 
         setServicios(data);
       } catch (error) {
         console.error("Error:", error);
@@ -84,10 +89,9 @@ const ServiciosC = () => {
 
   const handlePageChange = (event, value) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Desplaza al inicio de la página
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Calcular servicios a mostrar en la página actual
   const serviciosPaginados = servicios.slice(
     (page - 1) * serviciosPorPagina,
     page * serviciosPorPagina
@@ -97,13 +101,11 @@ const ServiciosC = () => {
     <Fade in={true} timeout={700}>
       <Box sx={{ bgcolor: "#fafafa", minHeight: "100vh", py: 5 }}>
         <Container maxWidth="xl">
-          {/* Breadcrumbs */}
           <Breadcrumbs sx={{ mb: 4 }} />
           <Typography variant="h4" fontWeight="bold" color="text.primary" gutterBottom>
             Servicios Disponibles
           </Typography>
 
-          {/* Grid de servicios */}
           {servicios.length === 0 ? (
             <Grid container spacing={3}>
               {[...Array(serviciosPorPagina)].map((_, index) => (
@@ -140,14 +142,32 @@ const ServiciosC = () => {
                         >
                           {servicio.nombre}
                         </Typography>
-                        <Typography
-                          variant="h6"
-                          color="primary"
-                          fontWeight="bold"
-                          sx={{ mt: 1 }}
-                        >
-                          ${servicio.precio.toFixed(2)}
-                        </Typography>
+                        <Box sx={{ mt: 1 }}>
+                          {servicio.tiene_promocion ? (
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ textDecoration: "line-through" }}
+                              >
+                                ${servicio.precio_original}
+                              </Typography>
+                              <Typography variant="h6" color="primary" fontWeight="bold">
+                                ${servicio.promocion?.precio_con_descuento} ({servicio.promocion?.descuento}% OFF)
+                              </Typography>
+                              <Chip
+                                label={`Promoción: ${servicio.promocion?.promocion_titulo}`}
+                                color="secondary"
+                                size="small"
+                                sx={{ mt: 1 }}
+                              />
+                            </>
+                          ) : (
+                            <Typography variant="h6" color="primary" fontWeight="bold">
+                              ${servicio.precio_original}
+                            </Typography>
+                          )}
+                        </Box>
                         <Button
                           variant="outlined"
                           color="primary"
@@ -155,7 +175,7 @@ const ServiciosC = () => {
                           startIcon={<CalendarToday />}
                           sx={{ mt: 2, borderRadius: 2, textTransform: "none" }}
                           onClick={(e) => {
-                            e.stopPropagation(); // Evita que el click en el botón active el Card
+                            e.stopPropagation();
                             handleServicioClick(servicio.id);
                           }}
                         >
@@ -167,7 +187,6 @@ const ServiciosC = () => {
                 ))}
               </Grid>
 
-              {/* Paginación */}
               {servicios.length > serviciosPorPagina && (
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                   <StyledPagination

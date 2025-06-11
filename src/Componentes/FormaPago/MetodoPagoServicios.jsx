@@ -59,7 +59,7 @@ const MetodoPagoServicios = () => {
         title: 'Datos incompletos',
         text: `Faltan los siguientes datos para procesar el pago: ${missingFields.join(', ')}. Por favor, regresa e intenta de nuevo.`,
         confirmButtonText: 'Entendido',
-      }).then(() => navigate('/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
+      }).then(() => navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate]);
 
@@ -69,21 +69,21 @@ const MetodoPagoServicios = () => {
       name: 'Tarjetas de crédito y débito',
       description: 'Visa, MasterCard, American Express y más...',
       logos: [visaLogo, masterCardLogo],
-      route: '/pago-servicio/stripe',
+      route: '/cliente/pago-servicio/stripe',
     },
     {
       id: 'mercadopago',
       name: 'Mercado Pago',
       description: 'Paga con tarjeta, débito o transferencia.',
       logo: mercadoPagoLogo,
-      route: '/pago-servicio/mercadopago',
+      route: '/cliente/pago-servicio/mercadopago',
     },
     {
       id: 'paypal',
       name: 'PayPal',
       description: 'Paga fácilmente con tu cuenta PayPal.',
       logo: payPalLogo,
-      route: '/pago-servicio/paypal',
+      route: '/cliente/pago-servicio/paypal',
     },
   ];
 

@@ -255,7 +255,7 @@ const MercadoPagoServicio = () => {
   useEffect(() => {
     console.log('Datos recibidos en MercadoPagoServicio:', location.state);
     if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !precio) {
-      setError('Faltan datos para procesar el pago. Por favor, regresa e intenta de nuevo.');
+      setError('Espera un momento... Estamos validando el pago');
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario]);
 
