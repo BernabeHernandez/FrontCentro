@@ -311,7 +311,7 @@ const MercadoPagoServicio = () => {
                 icon: 'success',
                 confirmButtonText: 'Aceptar',
               });
-              navigate('/CitasCliente', {
+              navigate('/cliente/CitasCliente', {
                 state: { servicioId: id_servicio },
                 replace: true,
               });

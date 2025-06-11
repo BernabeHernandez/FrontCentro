@@ -315,7 +315,7 @@ const PayPalServicio = () => {
               confirmButtonText: 'Aceptar',
             });
 
-            navigate('/CitasCliente', {
+            navigate('/cliente/CitasCliente', {
               state: {
                 servicioId: id_servicio,
               },
@@ -329,7 +329,7 @@ const PayPalServicio = () => {
               confirmButtonText: 'Aceptar',
             });
 
-            navigate('/CitasCliente', {
+            navigate('/cliente/CitasCliente', {
               state: {
                 servicioId: id_servicio,
               },
@@ -345,7 +345,7 @@ const PayPalServicio = () => {
             confirmButtonText: 'Aceptar',
           });
 
-          navigate('/CitasCliente', {
+          navigate('/cliente/CitasCliente', {
             state: {
               servicioId: id_servicio,
             },
