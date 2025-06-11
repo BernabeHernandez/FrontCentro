@@ -83,7 +83,7 @@ const PagoCorrectoMercado = () => {
           confirmButtonText: 'Ir al carrito',
           allowOutsideClick: false,
         }).then(() => {
-          navigate('/carrito');
+          navigate('/cliente/carrito');
         });
       } catch (error) {
         console.error('Error al procesar la compra:', error);

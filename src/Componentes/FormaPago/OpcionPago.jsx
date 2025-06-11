@@ -36,7 +36,7 @@ const OpcionPago = () => {
       name: 'Tarjetas de crédito y débito',
       description: 'Visa, MasterCard, American Express y más...',
       logos: [visaLogo, masterCardLogo],
-      route: '/mastercard',
+      route: '/cliente/mastercard',
     },
     {
       id: 'mercadopago',
@@ -44,14 +44,14 @@ const OpcionPago = () => {
       description:
         'Compra a través de Mercado Pago con tarjeta de crédito, tarjeta de débito, transferencias o dinero en cuenta.',
       logo: mercadoPagoLogo,
-      route: '/mercadopago',
+      route: '/cliente/mercadopago',
     },
     {
       id: 'paypal',
       name: 'PayPal',
       description: 'Compra el curso usando PayPal.',
       logo: payPalLogo,
-      route: '/paypal',
+      route: '/cliente/paypal',
     },
   ];
 

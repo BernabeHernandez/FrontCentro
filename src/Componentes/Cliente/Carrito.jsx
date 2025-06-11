@@ -174,7 +174,7 @@ const Carrito = () => {
     }
   
     // Navegar al componente 'metodo' pasando carrito y total
-    navigate('/metodo', { state: { carrito, total } });
+    navigate('/cliente/metodo', { state: { carrito, total } });
   }; 
 
   // Calcular días transcurridos desde que se agregó el producto
