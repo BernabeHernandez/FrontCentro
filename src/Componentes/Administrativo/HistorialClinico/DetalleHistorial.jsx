@@ -15,7 +15,7 @@ const DetalleHistorial = () => {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`http://localhost:3302/api/historial-clinico/${id}`)
+    fetch(`https://backendcentro.onrender.com/api/historial-clinico/${id}`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setHistorial(data);

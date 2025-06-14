@@ -17,15 +17,8 @@ import {
   Paper,
   Divider,
   Chip,
-  CircularProgress,
-  TextField,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
+  CircularProgress
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -46,58 +39,9 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
-  const [archivos, setArchivos] = useState([]); // Archivos seleccionados
-  const [descripciones, setDescripciones] = useState([]); // Descripciones de los archivos
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
-
-  // Manejar la selección de archivos
-  const handleFileChange = (event) => {
-    const nuevosArchivos = Array.from(event.target.files);
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    const archivosValidos = nuevosArchivos.filter(file => {
-      if (!validTypes.includes(file.type)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Archivo no válido',
-          text: `El archivo ${file.name} no es una imagen (jpeg, jpg, png) o PDF.`,
-          confirmButtonText: 'Entendido',
-        });
-        return false;
-      }
-      if (file.size > maxSize) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Archivo demasiado grande',
-          text: `El archivo ${file.name} excede el límite de 5MB.`,
-          confirmButtonText: 'Entendido',
-        });
-        return false;
-      }
-      return true;
-    });
-
-    setArchivos(prev => [...prev, ...archivosValidos]);
-    setDescripciones(prev => [...prev, ...archivosValidos.map(() => '')]);
-  };
-
-  // Eliminar un archivo
-  const handleRemoveFile = (index) => {
-    setArchivos(prev => prev.filter((_, i) => i !== index));
-    setDescripciones(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Actualizar la descripción de un archivo
-  const handleDescriptionChange = (index, value) => {
-    setDescripciones(prev => {
-      const newDescripciones = [...prev];
-      newDescripciones[index] = value;
-      return newDescripciones;
-    });
-  };
 
   // Validar servicioId
   useEffect(() => {
@@ -364,7 +308,7 @@ const CitasCliente = () => {
         const confirmacion = await Swal.fire({
           icon: 'question',
           title: 'Confirmar cita',
-          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}${archivos.length > 0 ? ' con ' + archivos.length + ' archivo(s)?' : ''}?`,
+          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}?`,
           showCancelButton: true,
           confirmButtonText: 'Sí, reservar',
           cancelButtonText: 'No, cancelar',
@@ -384,8 +328,6 @@ const CitasCliente = () => {
               horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
               notas: null,
-              archivos,
-              descripciones,
             },
           });
         }
@@ -517,49 +459,6 @@ const CitasCliente = () => {
               )}
             </Box>
           )}
-
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              Subir Archivos (Opcional)
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              Puedes subir imágenes (jpeg, jpg, png) o PDFs relacionados con tu cita. Máximo 5MB por archivo.
-            </Typography>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/jpg,application/pdf"
-              multiple
-              onChange={handleFileChange}
-              style={{ marginTop: '16px', marginBottom: '16px' }}
-            />
-            {archivos.length > 0 && (
-              <List>
-                {archivos.map((file, index) => (
-                  <ListItem key={index} divider>
-                    <ListItemText
-                      primary={file.name}
-                      secondary={
-                        <TextField
-                          label="Descripción (opcional)"
-                          variant="outlined"
-                          size="small"
-                          value={descripciones[index]}
-                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                          fullWidth
-                          sx={{ mt: 1 }}
-                        />
-                      }
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton edge="end" onClick={() => handleRemoveFile(index)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-            )}
-          </Box>
 
           <Divider sx={{ my: 4 }} />
 
