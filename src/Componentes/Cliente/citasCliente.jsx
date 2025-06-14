@@ -17,8 +17,15 @@ import {
   Paper,
   Divider,
   Chip,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -39,9 +46,58 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
+  const [archivos, setArchivos] = useState([]); // Archivos seleccionados
+  const [descripciones, setDescripciones] = useState([]); // Descripciones de los archivos
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
+
+  // Manejar la selección de archivos
+  const handleFileChange = (event) => {
+    const nuevosArchivos = Array.from(event.target.files);
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    const archivosValidos = nuevosArchivos.filter(file => {
+      if (!validTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Archivo no válido',
+          text: `El archivo ${file.name} no es una imagen (jpeg, jpg, png) o PDF.`,
+          confirmButtonText: 'Entendido',
+        });
+        return false;
+      }
+      if (file.size > maxSize) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Archivo demasiado grande',
+          text: `El archivo ${file.name} excede el límite de 5MB.`,
+          confirmButtonText: 'Entendido',
+        });
+        return false;
+      }
+      return true;
+    });
+
+    setArchivos(prev => [...prev, ...archivosValidos]);
+    setDescripciones(prev => [...prev, ...archivosValidos.map(() => '')]);
+  };
+
+  // Eliminar un archivo
+  const handleRemoveFile = (index) => {
+    setArchivos(prev => prev.filter((_, i) => i !== index));
+    setDescripciones(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Actualizar la descripción de un archivo
+  const handleDescriptionChange = (index, value) => {
+    setDescripciones(prev => {
+      const newDescripciones = [...prev];
+      newDescripciones[index] = value;
+      return newDescripciones;
+    });
+  };
 
   // Validar servicioId
   useEffect(() => {
@@ -66,7 +122,7 @@ const CitasCliente = () => {
             setNombreServicio(location.state?.nombre_servicio || ''); // Usar nombre del state si existe
           } else {
             // Si no hay precio en state, consultar al backend
-            const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
+            const response = await axios.get(`http://localhost:3302/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
           }
@@ -99,7 +155,7 @@ const CitasCliente = () => {
           }).then(() => navigate('/login'));
           return;
         }
-        const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
+        const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
         if (response.data.existe) {
           setUsuarioRegistrado(true);
           if (response.data.usuario && response.data.usuario.id) {
@@ -134,7 +190,7 @@ const CitasCliente = () => {
     const getDiasDisponibles = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
+        const response = await axios.get('http://localhost:3302/api/citasC/dias-disponibles');
         const diasConHorario = response.data;
         if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
           throw new Error('No se encontraron días disponibles');
@@ -191,7 +247,7 @@ const CitasCliente = () => {
     setSelectedDay(dia);
     setLoading(true);
     try {
-      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
+      const response = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
       setHorarios(response.data);
     } catch (error) {
       console.error('Error al obtener las franjas horarias:', error);
@@ -235,7 +291,7 @@ const CitasCliente = () => {
     }
 
     try {
-      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
+      const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -263,7 +319,7 @@ const CitasCliente = () => {
 
         // Validar disponibilidad de la franja
         try {
-          const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${selectedDay}`);
+          const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${selectedDay}`);
           const horariosData = responseHorarios.data;
           const franjaValida = horariosData
             .flatMap(horario => horario.franjas)
@@ -308,7 +364,7 @@ const CitasCliente = () => {
         const confirmacion = await Swal.fire({
           icon: 'question',
           title: 'Confirmar cita',
-          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}?`,
+          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}${archivos.length > 0 ? ' con ' + archivos.length + ' archivo(s)?' : ''}?`,
           showCancelButton: true,
           confirmButtonText: 'Sí, reservar',
           cancelButtonText: 'No, cancelar',
@@ -328,6 +384,8 @@ const CitasCliente = () => {
               horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
               notas: null,
+              archivos,
+              descripciones,
             },
           });
         }
@@ -459,6 +517,49 @@ const CitasCliente = () => {
               )}
             </Box>
           )}
+
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              Subir Archivos (Opcional)
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Puedes subir imágenes (jpeg, jpg, png) o PDFs relacionados con tu cita. Máximo 5MB por archivo.
+            </Typography>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/jpg,application/pdf"
+              multiple
+              onChange={handleFileChange}
+              style={{ marginTop: '16px', marginBottom: '16px' }}
+            />
+            {archivos.length > 0 && (
+              <List>
+                {archivos.map((file, index) => (
+                  <ListItem key={index} divider>
+                    <ListItemText
+                      primary={file.name}
+                      secondary={
+                        <TextField
+                          label="Descripción (opcional)"
+                          variant="outlined"
+                          size="small"
+                          value={descripciones[index]}
+                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                          fullWidth
+                          sx={{ mt: 1 }}
+                        />
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <IconButton edge="end" onClick={() => handleRemoveFile(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Box>
 
           <Divider sx={{ my: 4 }} />
 

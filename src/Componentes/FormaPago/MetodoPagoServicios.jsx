@@ -38,6 +38,8 @@ const MetodoPagoServicios = () => {
     horaFin,
     precio,
     notas,
+    archivos,
+    descripciones,
   } = location.state || {};
 
   // Validar datos recibidos
@@ -104,6 +106,8 @@ const MetodoPagoServicios = () => {
           horaFin,
           precio,
           notas,
+          archivos,
+          descripciones,
         },
       });
     }

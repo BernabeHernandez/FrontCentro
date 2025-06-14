@@ -59,6 +59,7 @@ const EncabezadoAdministrativo = () => {
       case "registroHo": navigate('/admin/registroH'); break;
       case "horariosDis": navigate('/admin/horariosD'); break;
       case "promociones": navigate('/admin/promociones'); break;
+      case "historialclinico": navigate('/admin/historial'); break;
       case "ventas": navigate('/admin/ventas'); break;
       case "detalleventas": navigate('/admin/detalleventas'); break;
       case "detallecitas": navigate('/admin/detallecitas'); break;
@@ -100,6 +101,7 @@ const EncabezadoAdministrativo = () => {
         { key: 'registroHo', label: 'Registro Horario' },
         { key: 'horariosDis', label: 'Disponibilidad' },
         { key: 'promociones', label: 'Promociones' },
+        { key: 'historialclinico', label: 'Historial Clinico' },
       ]
     },
     {
