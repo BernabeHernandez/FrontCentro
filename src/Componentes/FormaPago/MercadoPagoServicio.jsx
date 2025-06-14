@@ -207,7 +207,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
 
     if (!horaFinNormalizada) {
       console.log(`Consultando franjas para ${dia} debido a horaFin faltante`);
-      const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
+      const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
       const horariosData = responseHorarios.data;
       console.log('Respuesta de la API de franjas:', horariosData);
 
@@ -256,11 +256,24 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       console.log(`FormData entry: ${key} =`, value instanceof File ? { name: value.name, type: value.type, size: value.size } : value);
     }
 
-    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', formData, {
+    const reservaResponse = await axios.put('http://localhost:3302/api/citasC/sacar-cita', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+    }).catch(error => {
+      console.error('Error en la solicitud a /sacar-cita:', error);
+      console.error('Detalles del error:', {
+        message: error.message,
+        code: error.code,
+        response: error.response ? {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers,
+        } : null,
+      });
+      throw error;
     });
+
     console.log('Respuesta de registro de cita:', reservaResponse.data);
 
     actualizarHorariosLocalmente(horarios, setHorarios, dia, horaNormalizada);
@@ -268,7 +281,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
     return reservaResponse.data.message;
   } catch (error) {
     console.error('Error al registrar la cita:', error);
-    console.error('Detalles del error:', error.response?.data);
+    console.error('Detalles del error:', error.response?.data || error.message);
     throw new Error(`No se pudo registrar la cita: ${error.response?.data?.error || error.message}`);
   }
 };
@@ -362,7 +375,7 @@ const MercadoPagoServicio = () => {
                 confirmButtonText: 'Aceptar',
               });
               sessionStorage.removeItem('citaData');
-              navigate('/cliente/CitasCliente', {
+              navigate('/cliente/Citas', {
                 state: { 
                   servicioId: id_servicio, 
                   nombre_servicio: nombreServicio, 
@@ -380,7 +393,7 @@ const MercadoPagoServicio = () => {
                 confirmButtonText: 'Aceptar',
               });
               sessionStorage.removeItem('citaData');
-              navigate('/cliente/CitasCliente', {
+              navigate('/cliente/Citas', {
                 state: { servicioId: id_servicio },
                 replace: true,
               });
@@ -394,7 +407,7 @@ const MercadoPagoServicio = () => {
             confirmButtonText: 'Aceptar',
           });
           sessionStorage.removeItem('citaData');
-          navigate('/cliente/CitasCliente', {
+          navigate('/cliente/Citas', {
             state: { servicioId: id_servicio },
             replace: true,
           });
@@ -408,7 +421,7 @@ const MercadoPagoServicio = () => {
           confirmButtonText: 'Aceptar',
         });
         sessionStorage.removeItem('citaData');
-        navigate('/cliente/CitasCliente', {
+        navigate('/cliente/Citas', {
           state: { servicioId: id_servicio },
           replace: true,
         });
@@ -445,7 +458,7 @@ const MercadoPagoServicio = () => {
       // Guardar datos en sessionStorage
       sessionStorage.setItem('citaData', JSON.stringify(servicio));
 
-      const response = await axios.post('https://backendcentro.onrender.com/api/mercadopago/pagar', {
+      const response = await axios.post('http://localhost:3302/api/mercadopago/pagar', {
         servicio,
       });
 
@@ -469,7 +482,7 @@ const MercadoPagoServicio = () => {
         confirmButtonText: 'Aceptar',
       });
       sessionStorage.removeItem('citaData');
-      navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio } });
+      navigate('/cliente/Citas', { state: { servicioId: id_servicio } });
     }
   };
 

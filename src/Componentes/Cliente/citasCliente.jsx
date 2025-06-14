@@ -72,7 +72,7 @@ const CitasCliente = () => {
             setPrecioServicio(location.state.precio);
             setNombreServicio(location.state?.nombre_servicio || '');
           } else {
-            const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
+            const response = await axios.get(`http://localhost:3302/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
           }
@@ -105,7 +105,7 @@ const CitasCliente = () => {
           }).then(() => navigate('/login'));
           return;
         }
-        const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
+        const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
         if (response.data.existe) {
           setUsuarioRegistrado(true);
           if (response.data.usuario && response.data.usuario.id) {
@@ -140,7 +140,7 @@ const CitasCliente = () => {
     const getDiasDisponibles = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
+        const response = await axios.get('http://localhost:3302/api/citasC/dias-disponibles');
         const diasConHorario = response.data;
         if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
           throw new Error('No se encontraron días disponibles');
@@ -197,7 +197,7 @@ const CitasCliente = () => {
     setSelectedDay(dia);
     setLoading(true);
     try {
-      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
+      const response = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
       setHorarios(response.data);
     } catch (error) {
       console.error('Error al obtener las franjas horarias:', error);
@@ -252,6 +252,7 @@ const CitasCliente = () => {
         });
         return false;
       }
+      console.log(`Archivo válido: ${file.name}, tipo: ${file.type}, tamaño: ${file.size} bytes`);
       return true;
     });
 
@@ -288,7 +289,7 @@ const CitasCliente = () => {
     }
 
     try {
-      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
+      const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -316,7 +317,7 @@ const CitasCliente = () => {
 
         // Validar disponibilidad de la franja
         try {
-          const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${selectedDay}`);
+          const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${selectedDay}`);
           const horariosData = responseHorarios.data;
           const franjaValida = horariosData
             .flatMap(horario => horario.franjas)
@@ -369,6 +370,18 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
+          console.log('Navegando a /cliente/pago-servicio con datos:', {
+            id_usuario: usuarioId,
+            id_servicio: servicioId,
+            nombre_servicio: nombreServicio,
+            dia: selectedDay,
+            fecha: fechaCita,
+            hora: selectedTime,
+            horaFin: franjaSeleccionada.hora_fin,
+            precio: precioServicio,
+            archivos: archivos.map(f => ({ name: f.name, type: f.type })),
+            descripciones,
+          });
           navigate('/cliente/metodoServicios', {
             state: {
               id_usuario: usuarioId,
@@ -469,7 +482,7 @@ const CitasCliente = () => {
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                   <CircularProgress />
-                </Box>
+              </Box>
               ) : horarios.length === 0 ? (
                 <Typography>No hay horarios disponibles para este día.</Typography>
               ) : (
