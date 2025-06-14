@@ -122,7 +122,7 @@ const CitasCliente = () => {
             setNombreServicio(location.state?.nombre_servicio || ''); // Usar nombre del state si existe
           } else {
             // Si no hay precio en state, consultar al backend
-            const response = await axios.get(`http://localhost:3302/api/servicios/${servicioId}`);
+            const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
           }
@@ -155,7 +155,7 @@ const CitasCliente = () => {
           }).then(() => navigate('/login'));
           return;
         }
-        const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+        const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
         if (response.data.existe) {
           setUsuarioRegistrado(true);
           if (response.data.usuario && response.data.usuario.id) {
@@ -190,7 +190,7 @@ const CitasCliente = () => {
     const getDiasDisponibles = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3302/api/citasC/dias-disponibles');
+        const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
         const diasConHorario = response.data;
         if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
           throw new Error('No se encontraron días disponibles');
@@ -247,7 +247,7 @@ const CitasCliente = () => {
     setSelectedDay(dia);
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
       setHorarios(response.data);
     } catch (error) {
       console.error('Error al obtener las franjas horarias:', error);
@@ -291,7 +291,7 @@ const CitasCliente = () => {
     }
 
     try {
-      const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -319,7 +319,7 @@ const CitasCliente = () => {
 
         // Validar disponibilidad de la franja
         try {
-          const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${selectedDay}`);
+          const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${selectedDay}`);
           const horariosData = responseHorarios.data;
           const franjaValida = horariosData
             .flatMap(horario => horario.franjas)
