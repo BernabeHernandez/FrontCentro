@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClock, faFileUpload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import {
   Container,
   Typography,
@@ -17,7 +17,13 @@ import {
   Paper,
   Divider,
   Chip,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -39,6 +45,8 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
+  const [archivos, setArchivos] = useState([]);
+  const [descripciones, setDescripciones] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
@@ -60,12 +68,10 @@ const CitasCliente = () => {
     const fetchServicioData = async () => {
       if (servicioId) {
         try {
-          // Priorizar el precio recibido desde location.state si existe
           if (location.state?.precio !== undefined) {
             setPrecioServicio(location.state.precio);
-            setNombreServicio(location.state?.nombre_servicio || ''); // Usar nombre del state si existe
+            setNombreServicio(location.state?.nombre_servicio || '');
           } else {
-            // Si no hay precio en state, consultar al backend
             const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
@@ -221,6 +227,53 @@ const CitasCliente = () => {
     return (horaActual > horaFranja || (horaActual === horaFranja && minutosActuales >= minutosFranja));
   };
 
+  // Manejar cambio de archivos
+  const handleFileChange = (event) => {
+    const nuevosArchivos = Array.from(event.target.files);
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    const archivosValidos = nuevosArchivos.filter(file => {
+      if (!validTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Archivo no válido',
+          text: `El archivo ${file.name} no es una imagen (jpeg, jpg, png) o PDF.`,
+          confirmButtonText: 'Entendido',
+        });
+        return false;
+      }
+      if (file.size > maxSize) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Archivo demasiado grande',
+          text: `El archivo ${file.name} excede el límite de 5MB.`,
+          confirmButtonText: 'Entendido',
+        });
+        return false;
+      }
+      return true;
+    });
+
+    setArchivos(prev => [...prev, ...archivosValidos]);
+    setDescripciones(prev => [...prev, ...archivosValidos.map(() => '')]);
+  };
+
+  // Manejar eliminación de archivo
+  const handleRemoveFile = (index) => {
+    setArchivos(prev => prev.filter((_, i) => i !== index));
+    setDescripciones(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Manejar cambio de descripción
+  const handleDescriptionChange = (index, value) => {
+    setDescripciones(prev => {
+      const newDescripciones = [...prev];
+      newDescripciones[index] = value;
+      return newDescripciones;
+    });
+  };
+
   // Manejar la acción de sacar cita
   const handleSacarCita = async () => {
     const usuario = localStorage.getItem('usuario');
@@ -294,7 +347,6 @@ const CitasCliente = () => {
         const diaSeleccionado = diasDisponibles.find(dia => dia.nombre === selectedDay);
         const fechaCita = format(diaSeleccionado.fecha, 'yyyy-MM-dd');
 
-        // Verificar que nombreServicio no esté vacío
         if (!nombreServicio || nombreServicio.trim() === '') {
           Swal.fire({
             icon: 'warning',
@@ -328,6 +380,8 @@ const CitasCliente = () => {
               horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
               notas: null,
+              archivos,
+              descripciones,
             },
           });
         }
@@ -459,6 +513,54 @@ const CitasCliente = () => {
               )}
             </Box>
           )}
+
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FontAwesomeIcon icon={faFileUpload} /> Subir archivos (opcional)
+            </Typography>
+            <Button
+              variant="contained"
+              component="label"
+              startIcon={<FontAwesomeIcon icon={faFileUpload} />}
+              sx={{ mb: 2 }}
+            >
+              Seleccionar archivos
+              <input
+                type="file"
+                hidden
+                multiple
+                accept=".jpg,.jpeg,.png,.pdf"
+                onChange={handleFileChange}
+              />
+            </Button>
+            {archivos.length > 0 && (
+              <List>
+                {archivos.map((archivo, index) => (
+                  <ListItem key={index} divider>
+                    <ListItemText
+                      primary={archivo.name}
+                      secondary={
+                        <TextField
+                          label="Descripción (opcional)"
+                          value={descripciones[index] || ''}
+                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                          fullWidth
+                          variant="outlined"
+                          size="small"
+                          sx={{ mt: 1 }}
+                        />
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <IconButton edge="end" onClick={() => handleRemoveFile(index)}>
+                        <FontAwesomeIcon icon={faTrash} />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Box>
 
           <Divider sx={{ my: 4 }} />
 

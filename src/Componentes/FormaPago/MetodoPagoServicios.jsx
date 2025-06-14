@@ -38,6 +38,8 @@ const MetodoPagoServicios = () => {
     horaFin,
     precio,
     notas,
+    archivos,
+    descripciones,
   } = location.state || {};
 
   // Validar datos recibidos
@@ -61,7 +63,7 @@ const MetodoPagoServicios = () => {
         confirmButtonText: 'Entendido',
       }).then(() => navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
     }
-  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate]);
+  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate, location.state?.servicioId]);
 
   const paymentMethods = [
     {
@@ -104,6 +106,8 @@ const MetodoPagoServicios = () => {
           horaFin,
           precio,
           notas,
+          archivos,
+          descripciones,
         },
       });
     }
@@ -217,11 +221,16 @@ const MetodoPagoServicios = () => {
                   Fecha: {fecha || 'No especificada'}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Hora: {hora || 'No especificada'}
+                  Hora: {hora || 'No especificada'} - {horaFin || 'No especificada'}
                 </Typography>
                 {notas && (
                   <Typography variant="body2" color="textSecondary">
                     Notas: {notas}
+                  </Typography>
+                )}
+                {archivos && archivos.length > 0 && (
+                  <Typography variant="body2" color="textSecondary">
+                    Archivos: {archivos.length} archivo(s)
                   </Typography>
                 )}
               </Box>

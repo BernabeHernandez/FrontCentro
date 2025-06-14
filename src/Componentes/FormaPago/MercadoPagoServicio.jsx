@@ -24,6 +24,7 @@ import html2canvas from 'html2canvas';
 import { FaUser, FaIdCard, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { QRCodeCanvas } from 'qrcode.react';
 import Icono from '../Icono';
+import { v4 as uuidv4 } from 'uuid';
 
 // Función para generar el QR
 const generarQRComoImagen = async () => {
@@ -185,16 +186,24 @@ const normalizarHora = hora => {
 // Función para registrar la cita en la base de datos
 const registrarCita = async (citaData, horarios, setHorarios) => {
   try {
-    const { id_usuario, id_servicio, dia, fecha, hora, horaFin } = citaData;
-    console.log('Datos enviados a registrarCita:', citaData);
+    const { id_usuario, id_servicio, dia, fecha, hora, horaFin, archivos, descripciones } = citaData;
+    console.log('Datos enviados a registrarCita:', {
+      id_usuario,
+      id_servicio,
+      dia,
+      fecha,
+      hora,
+      horaFin,
+      archivos: archivos ? archivos.map(f => ({ name: f.name, type: f.type, size: f.size })) : [],
+      descripciones,
+    });
 
     const horaNormalizada = normalizarHora(hora);
-    const horaFinNormalizada = normalizarHora(horaFin);
+    let horaFinNormalizada = normalizarHora(horaFin);
+
     console.log('Hora normalizada:', horaNormalizada);
     console.log('Hora fin normalizada:', horaFinNormalizada);
     console.log('Día:', dia);
-
-    let horaFinFinal = horaFinNormalizada;
 
     if (!horaFinNormalizada) {
       console.log(`Consultando franjas para ${dia} debido a horaFin faltante`);
@@ -211,20 +220,45 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       }
 
       console.log('Franja encontrada:', franjaSeleccionada);
-      horaFinFinal = normalizarHora(franjaSeleccionada.hora_fin);
+      horaFinNormalizada = normalizarHora(franjaSeleccionada.hora_fin);
     }
 
-    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
-      dia,
-      horaInicio: horaNormalizada,
-      horaFin: horaFinFinal,
-      usuario_id: id_usuario,
-      fecha_cita: fecha,
-      servicio_id: id_servicio,
-      estado: 'confirmada',
-    }, {
+    // Crear FormData para enviar datos y archivos
+    const formData = new FormData();
+    formData.append('dia', dia);
+    formData.append('horaInicio', horaNormalizada);
+    formData.append('horaFin', horaFinNormalizada);
+    formData.append('usuario_id', id_usuario);
+    formData.append('fecha_cita', fecha);
+    formData.append('servicio_id', id_servicio);
+    formData.append('estado', 'confirmada');
+
+    // Agregar descripciones
+    if (descripciones && Array.isArray(descripciones) && descripciones.length > 0) {
+      console.log('Descripciones enviadas:', descripciones);
+      formData.append('descripciones', JSON.stringify(descripciones));
+    } else {
+      console.log('No se enviaron descripciones');
+    }
+
+    // Agregar archivos
+    if (archivos && Array.isArray(archivos) && archivos.length > 0) {
+      archivos.forEach((file, index) => {
+        console.log(`Agregando archivo ${index + 1}:`, { name: file.name, type: file.type, size: file.size });
+        formData.append('archivos', file);
+      });
+    } else {
+      console.log('No se enviaron archivos');
+    }
+
+    // Depurar contenido de FormData
+    for (let [key, value] of formData.entries()) {
+      console.log(`FormData entry: ${key} =`, value instanceof File ? { name: value.name, type: value.type, size: value.size } : value);
+    }
+
+    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', formData, {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
       },
     });
     console.log('Respuesta de registro de cita:', reservaResponse.data);
@@ -235,7 +269,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
   } catch (error) {
     console.error('Error al registrar la cita:', error);
     console.error('Detalles del error:', error.response?.data);
-    throw new Error(`No se pudo registrar la cita: ${error.response?.data?.message || error.message}`);
+    throw new Error(`No se pudo registrar la cita: ${error.response?.data?.error || error.message}`);
   }
 };
 
@@ -245,19 +279,26 @@ const MercadoPagoServicio = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario } = location.state || {};
+  const { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, notas, archivos, descripciones } = location.state || {};
 
   const [error, setError] = useState(null);
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processed, setProcessed] = useState(false);
 
+  // Restaurar datos de sessionStorage si location.state está vacío
   useEffect(() => {
-    console.log('Datos recibidos en MercadoPagoServicio:', location.state);
     if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !precio) {
-      setError('Espera un momento... Estamos validando el pago');
+      const storedData = sessionStorage.getItem('citaData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        console.log('Restaurando datos de sessionStorage:', parsedData);
+        navigate(location.pathname, { state: { ...parsedData, archivos, descripciones }, replace: true });
+      } else {
+        setError('Espera un momento... Estamos validando el pago');
+      }
     }
-  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario]);
+  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, precio, navigate, location.pathname, archivos, descripciones]);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -284,11 +325,20 @@ const MercadoPagoServicio = () => {
             throw new Error('Tipo de pago inválido');
           }
 
-          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = refData;
-          const citaData = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
+          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombreServicio } = refData;
+          const citaData = { 
+            id_usuario, 
+            id_servicio, 
+            dia, 
+            fecha, 
+            hora, 
+            horaFin,
+            archivos: location.state?.archivos || [],
+            descripciones: location.state?.descripciones || [],
+          };
           console.log('Validando citaData:', citaData);
 
-          if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio) {
+          if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombreServicio) {
             throw new Error('Faltan datos en external_reference para registrar la cita');
           }
 
@@ -300,31 +350,37 @@ const MercadoPagoServicio = () => {
                 id_usuario,
                 fecha,
                 hora,
-                nombre_servicio
+                nombreServicio
               );
             })
             .then(() => {
               console.log('PDF generado exitosamente');
               Swal.fire({
-                title: 'Pago Exitoso',
-                text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.`,
                 icon: 'success',
+                title: 'Pago Exitoso',
+                text: `Cita confirmada para ${nombreServicio}. Comprobante generado.`,
                 confirmButtonText: 'Aceptar',
               });
+              sessionStorage.removeItem('citaData');
               navigate('/cliente/CitasCliente', {
-                state: { servicioId: id_servicio },
+                state: { 
+                  servicioId: id_servicio, 
+                  nombre_servicio: nombreServicio, 
+                  precio: refData.precio 
+                },
                 replace: true,
               });
             })
-            .catch((error) => {
+            .catch(error => {
               console.error('Error en el flujo de pago:', error);
               Swal.fire({
+                icon: 'error',
                 title: 'Error',
                 text: error.message || 'Ocurrió un error al confirmar la cita. Por favor, intenta nuevamente.',
-                icon: 'error',
                 confirmButtonText: 'Aceptar',
               });
-              navigate('/CitasCliente', {
+              sessionStorage.removeItem('citaData');
+              navigate('/cliente/CitasCliente', {
                 state: { servicioId: id_servicio },
                 replace: true,
               });
@@ -332,12 +388,13 @@ const MercadoPagoServicio = () => {
         } catch (error) {
           console.error('Error al procesar el resultado del pago:', error);
           Swal.fire({
+            icon: 'error',
             title: 'Error',
             text: error.message || 'Error al procesar el pago.',
-            icon: 'error',
             confirmButtonText: 'Aceptar',
           });
-          navigate('/CitasCliente', {
+          sessionStorage.removeItem('citaData');
+          navigate('/cliente/CitasCliente', {
             state: { servicioId: id_servicio },
             replace: true,
           });
@@ -345,18 +402,76 @@ const MercadoPagoServicio = () => {
       } else {
         console.error('Estado del pago no es success:', status);
         Swal.fire({
+          icon: 'error',
           title: 'Error',
           text: `El pago no se completó correctamente (estado: ${status}).`,
-          icon: 'error',
           confirmButtonText: 'Aceptar',
         });
-        navigate('/CitasCliente', {
+        sessionStorage.removeItem('citaData');
+        navigate('/cliente/CitasCliente', {
           state: { servicioId: id_servicio },
           replace: true,
         });
       }
     }
-  }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed]);
+  }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed, archivos, descripciones]);
+
+  const pagarConMercadoPago = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (precio <= 0) {
+        throw new Error('El precio del servicio debe ser mayor a 0.');
+      }
+
+      const tempId = uuidv4();
+      const servicio = {
+        id_usuario,
+        id_servicio,
+        nombre: nombre_servicio,
+        precio,
+        dia,
+        fecha,
+        hora,
+        horaFin,
+        tempId,
+        tipo: 'servicio',
+        archivos: archivos ? archivos.map(file => ({ name: file.name, type: file.type })) : [],
+        descripciones: descripciones || [],
+      };
+      console.log('Enviando datos a create_preference:', servicio);
+
+      // Guardar datos en sessionStorage
+      sessionStorage.setItem('citaData', JSON.stringify(servicio));
+
+      const response = await axios.post('https://backendcentro.onrender.com/api/mercadopago/pagar', {
+        servicio,
+      });
+
+      console.log('Respuesta de create_preference:', response.data);
+
+      const checkoutUrl = response.data.init_point;
+      if (!checkoutUrl) {
+        throw new Error('No se recibió una URL válida para iniciar el pago.');
+      }
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error('Error al iniciar el pago:', error);
+      console.error('Detalles del error:', error.response?.data);
+      setError(error.message || 'Ocurrió un error al procesar el pago.');
+      setLoading(false);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Ocurrió un error al procesar el pago.',
+        confirmButtonText: 'Aceptar',
+      });
+      sessionStorage.removeItem('citaData');
+      navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio } });
+    }
+  };
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
@@ -386,54 +501,6 @@ const MercadoPagoServicio = () => {
     '&:disabled': { backgroundColor: '#bdbdbd', color: '#fff' },
   };
 
-  const pagarConMercadoPago = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      if (precio <= 0) {
-        throw new Error('El precio del servicio debe ser mayor a 0.');
-      }
-
-      const servicio = {
-        id_usuario,
-        id_servicio,
-        nombre: nombre_servicio,
-        precio,
-        dia,
-        fecha,
-        hora,
-        horaFin,
-      };
-      console.log('Enviando datos a create_preference:', servicio);
-
-      const response = await axios.post('https://backendcentro.onrender.com/api/mercadopago/pagar', {
-        servicio,
-      });
-
-      console.log('Respuesta de create_preference:', response.data);
-
-      const checkoutUrl = response.data.init_point;
-      if (!checkoutUrl) {
-        throw new Error('No se recibió una URL válida para iniciar el pago.');
-      }
-
-      window.location.href = checkoutUrl;
-    } catch (error) {
-      console.error('Error al iniciar el pago:', error);
-      console.error('Detalles del error:', error.response?.data);
-      setError(error.message || 'Ocurrió un error al procesar el pago.');
-      setLoading(false);
-      Swal.fire({
-        title: 'Error',
-        text: error.message || 'Ocurrió un error al procesar el pago.',
-        icon: 'error',
-        confirmButtonText: 'Aceptar',
-      });
-      navigate('/CitasCliente', { state: { servicioId: id_servicio } });
-    }
-  };
-
   if (error) {
     return (
       <Paper elevation={3} sx={containerStyles}>
@@ -460,7 +527,9 @@ const MercadoPagoServicio = () => {
         <Divider />
 
         <Box>
-          <Typography variant="body1" color="text.secondary">Datos:</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Datos:
+          </Typography>
           {precio > 0 ? (
             <Typography variant="h6" fontWeight="bold">
               ${parseFloat(precio).toFixed(2)} MXN
@@ -471,7 +540,7 @@ const MercadoPagoServicio = () => {
             </Alert>
           )}
 
-          <Box mt={2}>
+          <Box sx={{ mt: 2 }}>
             <Typography variant="body2" color="text.secondary" fontWeight="medium">
               Detalles de la cita:
             </Typography>
@@ -488,9 +557,14 @@ const MercadoPagoServicio = () => {
               <Typography variant="body2">
                 Hora: {hora || 'No especificada'}
               </Typography>
-              {horario && (
+              {notas && (
                 <Typography variant="body2">
-                  Notas: {horario}
+                  Notas: {notas}
+                </Typography>
+              )}
+              {archivos && archivos.length > 0 && (
+                <Typography variant="body2">
+                  Archivos: {archivos.length} archivo(s) cargado(s)
                 </Typography>
               )}
             </Box>
