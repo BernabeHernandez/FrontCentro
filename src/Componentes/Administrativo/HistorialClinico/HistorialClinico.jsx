@@ -50,37 +50,19 @@ const HistorialClinico = () => {
       sx={{
         height: "100vh",
         width: "100vw",
-        bgcolor: "background.default", // fondo default (blanco o el que tenga el tema)
+        bgcolor: "background.default",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        p: 3,
+        justifyContent: "center",
+        alignItems: "flex-start",
+        pt: 6,
+        pb: 6,
+        px: 2,
+        overflowX: "hidden", // sin scroll horizontal
       }}
     >
-      {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          mb: 4,
-          color: "text.primary",
-          fontWeight: "bold",
-          fontSize: 28,
-          userSelect: "none",
-        }}
-      >
-        <PeopleIcon color="primary" sx={{ fontSize: 36 }} />
-        <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
-          Pacientes
-        </Typography>
-      </Box>
-
-      {/* Card container */}
       <Paper
         elevation={10}
         sx={{
-          flex: 1,
           width: "100%",
           maxWidth: 700,
           borderRadius: 3,
@@ -88,9 +70,29 @@ const HistorialClinico = () => {
           bgcolor: "background.paper",
           display: "flex",
           flexDirection: "column",
+          maxHeight: "90vh", // para que no crezca demasiado en vertical
           boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
         }}
       >
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 4,
+            color: "text.primary",
+            fontWeight: "bold",
+            fontSize: 28,
+            userSelect: "none",
+          }}
+        >
+          <PeopleIcon color="primary" sx={{ fontSize: 36 }} />
+          <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
+            Pacientes
+          </Typography>
+        </Box>
+
         {/* Search box */}
         <TextField
           fullWidth
@@ -102,13 +104,11 @@ const HistorialClinico = () => {
             mb: 3,
             "& .MuiOutlinedInput-root": {
               borderRadius: 3,
-              boxShadow:
-                "0 4px 6px rgba(0, 0, 0, 0.05)",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
               transition: "box-shadow 0.3s ease-in-out",
             },
             "& .MuiOutlinedInput-root:hover": {
-              boxShadow:
-                "0 6px 12px rgba(0, 0, 0, 0.1)",
+              boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
             },
           }}
           InputProps={{
@@ -120,7 +120,7 @@ const HistorialClinico = () => {
           }}
         />
 
-        {/* Loading indicator */}
+        {/* Contenido: loading o lista */}
         {loading ? (
           <Box
             sx={{
@@ -145,13 +145,11 @@ const HistorialClinico = () => {
           <List
             sx={{
               overflowY: "auto",
-              maxHeight: "calc(100% - 70px)",
+              maxHeight: "calc(90vh - 160px)", // espacio para header y buscador
             }}
           >
             {pacientesFiltrados.map((p) => {
-              const initials = `${p.nombre.charAt(0)}${p.apellidopa.charAt(
-                0
-              )}`.toUpperCase();
+              const initials = `${p.nombre.charAt(0)}${p.apellidopa.charAt(0)}`.toUpperCase();
               return (
                 <ListItemButton
                   key={p.id}
@@ -159,14 +157,12 @@ const HistorialClinico = () => {
                   sx={{
                     borderRadius: 2,
                     mb: 1,
-                    boxShadow:
-                      "0 1px 5px rgba(0, 0, 0, 0.08)",
+                    boxShadow: "0 1px 5px rgba(0, 0, 0, 0.08)",
                     transition: "background-color 0.25s ease",
                     "&:hover": {
                       bgcolor: "primary.main",
                       color: "common.white",
-                      boxShadow:
-                        "0 4px 12px rgba(0, 0, 0, 0.15)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                       "& .MuiAvatar-root": {
                         bgcolor: "primary.dark",
                         color: "common.white",

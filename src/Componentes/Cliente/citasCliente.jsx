@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faClock, faFileUpload, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 import {
   Container,
   Typography,
@@ -19,11 +19,6 @@ import {
   Chip,
   CircularProgress,
   TextField,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -45,8 +40,8 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
-  const [archivos, setArchivos] = useState([]);
-  const [descripciones, setDescripciones] = useState([]);
+  const [files, setFiles] = useState([]); // Estado para los archivos
+  const [descripcionArchivos, setDescripcionArchivos] = useState(''); // Descripción de los archivos
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
@@ -217,6 +212,40 @@ const CitasCliente = () => {
     if (disponible) setSelectedTime(time);
   };
 
+  // Manejar cambio de archivos
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    const validFiles = selectedFiles.filter(file => {
+      const fileType = file.type;
+      const isImage = fileType.startsWith('image/');
+      const isPDF = fileType === 'application/pdf';
+      return isImage || isPDF;
+    });
+
+    if (validFiles.length !== selectedFiles.length) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Archivos no válidos',
+        text: 'Solo se permiten imágenes y PDFs.',
+        confirmButtonText: 'Entendido',
+      });
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const oversizedFiles = validFiles.filter(file => file.size > maxSize);
+    if (oversizedFiles.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Archivos demasiado grandes',
+        text: 'Los archivos no deben exceder los 5MB.',
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
+
+    setFiles(validFiles);
+  };
+
   // Verificar si la franja ha pasado
   const haPasadoLaFranja = (horaInicioFranja, fechaSeleccionada) => {
     if (!isToday(fechaSeleccionada)) return false;
@@ -225,54 +254,6 @@ const CitasCliente = () => {
     const horaActual = ahora.getHours();
     const minutosActuales = ahora.getMinutes();
     return (horaActual > horaFranja || (horaActual === horaFranja && minutosActuales >= minutosFranja));
-  };
-
-  // Manejar cambio de archivos
-  const handleFileChange = (event) => {
-    const nuevosArchivos = Array.from(event.target.files);
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    const archivosValidos = nuevosArchivos.filter(file => {
-      if (!validTypes.includes(file.type)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Archivo no válido',
-          text: `El archivo ${file.name} no es una imagen (jpeg, jpg, png) o PDF.`,
-          confirmButtonText: 'Entendido',
-        });
-        return false;
-      }
-      if (file.size > maxSize) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Archivo demasiado grande',
-          text: `El archivo ${file.name} excede el límite de 5MB.`,
-          confirmButtonText: 'Entendido',
-        });
-        return false;
-      }
-      console.log(`Archivo válido: ${file.name}, tipo: ${file.type}, tamaño: ${file.size} bytes`);
-      return true;
-    });
-
-    setArchivos(prev => [...prev, ...archivosValidos]);
-    setDescripciones(prev => [...prev, ...archivosValidos.map(() => '')]);
-  };
-
-  // Manejar eliminación de archivo
-  const handleRemoveFile = (index) => {
-    setArchivos(prev => prev.filter((_, i) => i !== index));
-    setDescripciones(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Manejar cambio de descripción
-  const handleDescriptionChange = (index, value) => {
-    setDescripciones(prev => {
-      const newDescripciones = [...prev];
-      newDescripciones[index] = value;
-      return newDescripciones;
-    });
   };
 
   // Manejar la acción de sacar cita
@@ -370,18 +351,6 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
-          console.log('Navegando a /cliente/pago-servicio con datos:', {
-            id_usuario: usuarioId,
-            id_servicio: servicioId,
-            nombre_servicio: nombreServicio,
-            dia: selectedDay,
-            fecha: fechaCita,
-            hora: selectedTime,
-            horaFin: franjaSeleccionada.hora_fin,
-            precio: precioServicio,
-            archivos: archivos.map(f => ({ name: f.name, type: f.type })),
-            descripciones,
-          });
           navigate('/cliente/metodoServicios', {
             state: {
               id_usuario: usuarioId,
@@ -392,9 +361,8 @@ const CitasCliente = () => {
               hora: selectedTime,
               horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
-              notas: null,
-              archivos,
-              descripciones,
+              files, // Pasar los archivos
+              descripcionArchivos, // Pasar la descripción
             },
           });
         }
@@ -482,7 +450,7 @@ const CitasCliente = () => {
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                   <CircularProgress />
-              </Box>
+                </Box>
               ) : horarios.length === 0 ? (
                 <Typography>No hay horarios disponibles para este día.</Typography>
               ) : (
@@ -528,50 +496,30 @@ const CitasCliente = () => {
           )}
 
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FontAwesomeIcon icon={faFileUpload} /> Subir archivos (opcional)
+            <Typography variant="h6" gutterBottom>
+              Subir archivos (opcional)
             </Typography>
-            <Button
-              variant="contained"
-              component="label"
-              startIcon={<FontAwesomeIcon icon={faFileUpload} />}
+            <TextField
+              type="file"
+              inputProps={{ multiple: true, accept: 'image/*,application/pdf' }}
+              onChange={handleFileChange}
+              fullWidth
+              variant="outlined"
               sx={{ mb: 2 }}
-            >
-              Seleccionar archivos
-              <input
-                type="file"
-                hidden
-                multiple
-                accept=".jpg,.jpeg,.png,.pdf"
-                onChange={handleFileChange}
-              />
-            </Button>
-            {archivos.length > 0 && (
-              <List>
-                {archivos.map((archivo, index) => (
-                  <ListItem key={index} divider>
-                    <ListItemText
-                      primary={archivo.name}
-                      secondary={
-                        <TextField
-                          label="Descripción (opcional)"
-                          value={descripciones[index] || ''}
-                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                          fullWidth
-                          variant="outlined"
-                          size="small"
-                          sx={{ mt: 1 }}
-                        />
-                      }
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton edge="end" onClick={() => handleRemoveFile(index)}>
-                        <FontAwesomeIcon icon={faTrash} />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
+            />
+            <TextField
+              label="Descripción de los archivos"
+              value={descripcionArchivos}
+              onChange={(e) => setDescripcionArchivos(e.target.value)}
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+            />
+            {files.length > 0 && (
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Archivos seleccionados: {files.map(file => file.name).join(', ')}
+              </Typography>
             )}
           </Box>
 
