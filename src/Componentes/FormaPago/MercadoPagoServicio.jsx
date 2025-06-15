@@ -182,10 +182,10 @@ const normalizarHora = hora => {
   return hora;
 };
 
-// Función para subir archivos a Cloudinary
-const subirArchivos = async (citaId, archivos, descripcion) => {
+// Función para subir archivos a Cloudinary (pre-pago)
+const subirArchivosPrePago = async (archivos, descripcion) => {
   try {
-    console.log('Iniciando subida de archivos:', { citaId, archivos: archivos ? archivos.map(f => f.name) : null, descripcion });
+    console.log('Iniciando subida pre-pago de archivos:', { archivos: archivos ? archivos.map(f => f.name) : null, descripcion });
     const formData = new FormData();
     if (archivos && archivos.length > 0) {
       archivos.forEach((file, index) => {
@@ -193,23 +193,22 @@ const subirArchivos = async (citaId, archivos, descripcion) => {
         console.log(`Añadiendo archivo ${index}:`, file.name);
       });
     }
-    formData.append('cita_id', citaId);
     formData.append('descripcion', descripcion || '');
 
-    const response = await axios.post('http://localhost:3302/api/citasC/subir-archivos', formData, {
+    const response = await axios.post('http://localhost:3302/api/citasC/subir-archivos-pre-pago', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-    console.log('Respuesta de subida de archivos:', response.data);
-    return response.data;
+    console.log('Respuesta de subida pre-pago de archivos:', response.data);
+    return response.data; // Devuelve las URLs o IDs de los archivos subidos
   } catch (error) {
-    console.error('Error al subir archivos:', {
+    console.error('Error al subir archivos pre-pago:', {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
     });
-    throw new Error('No se pudieron subir los archivos asociados a la cita');
+    throw new Error('No se pudieron subir los archivos antes del pago');
   }
 };
 
@@ -280,6 +279,7 @@ const MercadoPagoServicio = () => {
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processed, setProcessed] = useState(false);
+  const [fileUrls, setFileUrls] = useState([]); // Para almacenar URLs de archivos subidos
 
   // Recuperar datos iniciales desde location.state o sessionStorage
   const initialState = location.state || {};
@@ -296,7 +296,7 @@ const MercadoPagoServicio = () => {
     horaFin,
     precio,
     horario,
-    archivos,
+    archivos: initialArchivos,
     descripcionArchivos,
   } = citaData;
 
@@ -311,14 +311,14 @@ const MercadoPagoServicio = () => {
       horaFin,
       precio,
       horario,
-      archivos: archivos ? archivos.map(f => f.name) : null,
+      archivos: initialArchivos ? initialArchivos.map(f => f.name || f) : null,
       descripcionArchivos,
     });
     if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !precio) {
       setError('Espera un momento... Estamos validando el pago');
       console.log('Datos incompletos detectados:', { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, precio });
     }
-  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, archivos, descripcionArchivos]);
+  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, initialArchivos, descripcionArchivos]);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -364,13 +364,22 @@ const MercadoPagoServicio = () => {
               const citaId = response.cita_id;
               console.log('Cita ID obtenido:', citaId);
 
-              // Subir archivos si existen
-              if (citaData?.archivos && citaData.archivos.length > 0) {
-                console.log('Intentando subir archivos:', { citaId, archivos: citaData.archivos.map(f => f.name), descripcionArchivos: citaData.descripcionArchivos });
-                await subirArchivos(citaId, citaData.archivos, citaData.descripcionArchivos);
-                console.log('Subida de archivos completada para citaId:', citaId);
+              // Subir archivos si existen y se subieron pre-pago
+              if (fileUrls.length > 0) {
+                console.log('Asociando archivos pre-subidos:', { citaId, fileUrls, descripcionArchivos: citaData.descripcionArchivos });
+                const formData = new FormData();
+                formData.append('cita_id', citaId);
+                fileUrls.forEach((url, index) => formData.append(`file_urls_${index}`, url));
+                formData.append('descripcion', citaData.descripcionArchivos || '');
+
+                const response = await axios.post('http://localhost:3302/api/citasC/asociar-archivos', formData, {
+                  headers: {
+                    'Content-Type': 'multipart/form-data',
+                  },
+                });
+                console.log('Respuesta de asociación de archivos:', response.data);
               } else {
-                console.log('No hay archivos para subir o datos no recuperados:', { archivos: citaData?.archivos });
+                console.log('No hay archivos pre-subidos para asociar:', { fileUrls });
               }
 
               return generarPDF(
@@ -444,7 +453,7 @@ const MercadoPagoServicio = () => {
         });
       }
     }
-  }, [location, navigate, horarios, processed, citaData]);
+  }, [location, navigate, horarios, processed, citaData, fileUrls]);
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
@@ -478,11 +487,29 @@ const MercadoPagoServicio = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Iniciando pago con Mercado Pago:', { precio, archivos: archivos ? archivos.map(f => f.name) : null });
+      console.log('Iniciando pago con Mercado Pago:', { precio, archivos: initialArchivos ? initialArchivos.map(f => f.name || f) : null });
 
       if (precio <= 0) {
         throw new Error('El precio del servicio debe ser mayor a 0.');
       }
+
+      // Subir archivos antes del pago si existen
+      let fileUrlsToStore = [];
+      if (initialArchivos && initialArchivos.length > 0) {
+        console.log('Subiendo archivos antes del pago:', { archivos: initialArchivos.map(f => f.name) });
+        const uploadResponse = await subirArchivosPrePago(initialArchivos, descripcionArchivos);
+        fileUrlsToStore = uploadResponse.fileUrls || []; // Ajusta según la respuesta del servidor
+        console.log('Archivos subidos con URLs:', fileUrlsToStore);
+      }
+
+      setFileUrls(fileUrlsToStore);
+
+      // Actualizar citaData en sessionStorage con las URLs de los archivos
+      const updatedCitaData = {
+        ...citaData,
+        archivos: fileUrlsToStore, // Reemplazar archivos con URLs
+      };
+      sessionStorage.setItem('citaData', JSON.stringify(updatedCitaData));
 
       const servicio = {
         id_usuario,
@@ -493,7 +520,7 @@ const MercadoPagoServicio = () => {
         fecha,
         hora,
         horaFin,
-        archivos: archivos ? archivos.map(file => file.name) : [], // Enviar nombres de archivos
+        archivos: fileUrlsToStore, // Enviar URLs de archivos
         descripcionArchivos,
       };
       console.log('Enviando datos a create_preference:', servicio);
@@ -587,14 +614,14 @@ const MercadoPagoServicio = () => {
                   Notas: {horario}
                 </Typography>
               )}
-              {archivos && archivos.length > 0 && (
+              {initialArchivos && initialArchivos.length > 0 && (
                 <Box sx={{ mt: 1 }}>
                   <Typography variant="body2" fontWeight="medium">
                     Archivos adjuntos:
                   </Typography>
                   <ul>
-                    {archivos.map((file, index) => (
-                      <li key={index}>{file.name}</li>
+                    {initialArchivos.map((file, index) => (
+                      <li key={index}>{typeof file === 'string' ? file : file.name}</li>
                     ))}
                   </ul>
                 </Box>
