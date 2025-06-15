@@ -1,202 +1,225 @@
-import React, { useEffect, useState, useMemo } from "react";
-import {
-  Box,
-  Typography,
-  List,
-  ListItemButton,
-  ListItemAvatar,
-  Avatar,
-  ListItemText,
-  CircularProgress,
-  TextField,
-  InputAdornment,
-  Paper,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import PeopleIcon from "@mui/icons-material/People";
-import { useNavigate } from "react-router-dom";
+"use client"
 
-const HistorialClinico = () => {
-  const [pacientes, setPacientes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const navigate = useNavigate();
+import { useState, useEffect } from "react"
+import { Paper, TextField, InputAdornment, Typography, Box, Avatar, IconButton } from "@mui/material"
+import { Search, Phone, ChevronRight, Person } from "@mui/icons-material"
+import { useNavigate } from "react-router-dom" // Import useNavigate
+
+const HistorialClinicoListaUs = ({ onSelectPatient }) => {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [pacientes, setPacientes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate() // Initialize useNavigate
 
   useEffect(() => {
     fetch("https://backendcentro.onrender.com/api/historial-clinico/pacientes")
       .then((res) => res.json())
       .then((data) => {
-        setPacientes(data);
-        setLoading(false);
+        setPacientes(data)
+        setLoading(false)
       })
       .catch((err) => {
-        console.error("Error al obtener pacientes:", err);
-        setLoading(false);
-      });
-  }, []);
+        console.error("Error al obtener pacientes:", err)
+        setLoading(false)
+      })
+  }, [])
 
-  const pacientesFiltrados = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return pacientes;
+  const filteredPacientes = pacientes.filter((paciente) => {
+    const matchesSearch = paciente.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesSearch
+  })
 
-    return pacientes.filter((p) => {
-      const nombreCompleto = `${p.nombre} ${p.apellidopa} ${p.apellidoma}`.toLowerCase();
-      return nombreCompleto.includes(term);
-    });
-  }, [search, pacientes]);
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "#ffffff",
+          padding: 3,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Person sx={{ fontSize: 48, color: "#6b7280" }} />
+      </Box>
+    )
+  }
 
   return (
     <Box
       sx={{
-        height: "100vh",
-        width: "100vw",
-        bgcolor: "background.default",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        pt: 6,
-        pb: 6,
-        px: 2,
-        overflowX: "hidden", // sin scroll horizontal
+        minHeight: "100vh",
+        background: "#ffffff",
+        padding: 3,
       }}
     >
-      <Paper
-        elevation={10}
-        sx={{
-          width: "100%",
-          maxWidth: 700,
-          borderRadius: 3,
-          p: 4,
-          bgcolor: "background.paper",
-          display: "flex",
-          flexDirection: "column",
-          maxHeight: "90vh", // para que no crezca demasiado en vertical
-          boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
-        }}
-      >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            mb: 4,
-            color: "text.primary",
-            fontWeight: "bold",
-            fontSize: 28,
-            userSelect: "none",
-          }}
-        >
-          <PeopleIcon color="primary" sx={{ fontSize: 36 }} />
-          <Typography variant="h4" component="h1" fontWeight="bold" color="text.primary">
-            Pacientes
+      <Box sx={{ maxWidth: "1280px", margin: "0 auto" }}>
+        {/* Header de la sección */}
+        <Box sx={{ marginBottom: 4 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: "bold",
+              color: "#10b981",
+              marginBottom: 1,
+            }}
+          >
+            Historial Clínico
+          </Typography>
+          <Typography variant="body1" sx={{ color: "#64748b" }}>
+            Gestiona y consulta los historiales médicos de tus pacientes
           </Typography>
         </Box>
 
-        {/* Search box */}
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Buscar paciente por nombre..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{
-            mb: 3,
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 3,
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
-              transition: "box-shadow 0.3s ease-in-out",
-            },
-            "& .MuiOutlinedInput-root:hover": {
-              boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
-            },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
-          }}
-        />
+        {/* Barra de búsqueda */}
+        <Box sx={{ marginBottom: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Buscar por nombre..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: "#6b7280" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: "48px",
+                borderRadius: "8px",
+                backgroundColor: "#ffffff",
+                "& fieldset": {
+                  borderColor: "#cbd5e1",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#34d399",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#34d399",
+                },
+              },
+            }}
+          />
+        </Box>
 
-        {/* Contenido: loading o lista */}
-        {loading ? (
+        {/* Lista de pacientes */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {filteredPacientes.map((paciente, index) => (
+            <Paper
+              key={paciente.id}
+              elevation={1}
+              sx={{
+                padding: 3,
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                border: "1px solid #cbd5e1",
+                "&:hover": {
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                  borderColor: "#34d399",
+                },
+              }}
+              onClick={() => navigate(`/admin/detallehistorial/${paciente.id}`)} // Navigate with ID
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Avatar
+                    src={paciente.avatar || "/placeholder.svg?height=60&width=60"}
+                    alt={paciente.nombre}
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      border: "2px solid #cbd5e1",
+                      backgroundColor: getAvatarColor(index),
+                    }}
+                  />
+
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ marginBottom: 1 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "600",
+                          color: "#1e3a8a",
+                        }}
+                      >
+                        {paciente.nombre}
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Phone sx={{ fontSize: 16, color: "#f97316" }} />
+                        <Typography variant="body2" sx={{ color: "#f97316" }}>
+                          {paciente.telefono}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Phone sx={{ fontSize: 16, color: "#8b5cf6" }} />
+                        <Typography variant="body2" sx={{ color: "#8b5cf6" }}>
+                          {paciente.gmail}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <IconButton>
+                    <ChevronRight sx={{ color: "#34d399" }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
+
+        {filteredPacientes.length === 0 && (
           <Box
             sx={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              textAlign: "center",
+              paddingY: 6,
             }}
           >
-            <CircularProgress color="primary" size={60} />
+            <Box
+              sx={{
+                width: 96,
+                height: 96,
+                margin: "0 auto 16px",
+                backgroundColor: "#e0e7ff",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Person sx={{ fontSize: 48, color: "#1e3a8a" }} />
+            </Box>
+            <Typography variant="h6" sx={{ color: "#64748b", marginBottom: 1 }}>
+              No se encontraron pacientes
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#94a3b8" }}>
+              Intenta ajustar los filtros de búsqueda
+            </Typography>
           </Box>
-        ) : pacientesFiltrados.length === 0 ? (
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            align="center"
-            sx={{ mt: 6, flexGrow: 1 }}
-          >
-            No se encontraron pacientes que coincidan con la búsqueda.
-          </Typography>
-        ) : (
-          <List
-            sx={{
-              overflowY: "auto",
-              maxHeight: "calc(90vh - 160px)", // espacio para header y buscador
-            }}
-          >
-            {pacientesFiltrados.map((p) => {
-              const initials = `${p.nombre.charAt(0)}${p.apellidopa.charAt(0)}`.toUpperCase();
-              return (
-                <ListItemButton
-                  key={p.id}
-                  onClick={() => navigate(`/admin/detallehistorial/${p.id}`)}
-                  sx={{
-                    borderRadius: 2,
-                    mb: 1,
-                    boxShadow: "0 1px 5px rgba(0, 0, 0, 0.08)",
-                    transition: "background-color 0.25s ease",
-                    "&:hover": {
-                      bgcolor: "primary.main",
-                      color: "common.white",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                      "& .MuiAvatar-root": {
-                        bgcolor: "primary.dark",
-                        color: "common.white",
-                      },
-                    },
-                  }}
-                >
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{
-                        bgcolor: "primary.main",
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        width: 46,
-                        height: 46,
-                      }}
-                      aria-label="avatar-paciente"
-                    >
-                      {initials}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={`${p.nombre} ${p.apellidopa} ${p.apellidoma}`}
-                    secondary={`ID: ${p.id}`}
-                    primaryTypographyProps={{ fontWeight: "medium" }}
-                  />
-                </ListItemButton>
-              );
-            })}
-          </List>
         )}
-      </Paper>
+      </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default HistorialClinico;
+// Function to assign different colors to avatars based on index
+const getAvatarColor = (index) => {
+  const colors = ["#fef08a", "#fca5a5", "#c4b5fd", "#6ee7b7", "#93c5fd"];
+  return colors[index % colors.length]
+}
+
+export default HistorialClinicoListaUs
