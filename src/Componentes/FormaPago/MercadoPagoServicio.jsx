@@ -185,9 +185,11 @@ const normalizarHora = hora => {
 // Función para subir archivos a Cloudinary
 const subirArchivos = async (citaId, archivos, descripcion) => {
   try {
+    console.log('Iniciando subida de archivos:', { citaId, archivos: archivos.map(f => f.name), descripcion });
     const formData = new FormData();
     archivos.forEach((file, index) => {
       formData.append(`file_${index}`, file);
+      console.log(`Añadiendo archivo ${index}:`, file.name);
     });
     formData.append('cita_id', citaId);
     formData.append('descripcion', descripcion || '');
@@ -197,10 +199,14 @@ const subirArchivos = async (citaId, archivos, descripcion) => {
         'Content-Type': 'multipart/form-data',
       },
     });
-    console.log('Archivos subidos exitosamente:', response.data);
+    console.log('Respuesta de subida de archivos:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al subir archivos:', error);
+    console.error('Error al subir archivos:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
     throw new Error('No se pudieron subir los archivos asociados a la cita');
   }
 };
@@ -276,9 +282,22 @@ const MercadoPagoServicio = () => {
   const [processed, setProcessed] = useState(false);
 
   useEffect(() => {
-    console.log('Datos recibidos en MercadoPagoServicio:', location.state);
+    console.log('Datos recibidos en MercadoPagoServicio al montar:', {
+      id_usuario,
+      id_servicio,
+      nombre_servicio,
+      dia,
+      fecha,
+      hora,
+      horaFin,
+      precio,
+      horario,
+      archivos: archivos ? archivos.map(f => f.name) : null,
+      descripcionArchivos,
+    });
     if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !precio) {
       setError('Espera un momento... Estamos validando el pago');
+      console.log('Datos incompletos detectados:', { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, precio });
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, archivos, descripcionArchivos]);
 
@@ -287,8 +306,10 @@ const MercadoPagoServicio = () => {
     const status = query.get('status');
     const externalReference = query.get('external_reference');
 
+    console.log('Verificando estado de pago:', { status, externalReference });
+
     if (status && externalReference && !processed) {
-      console.log('Procesando resultado de pago:', { status, externalReference });
+      console.log('Procesando resultado de pago iniciado:', { status, externalReference });
       setProcessed(true);
 
       if (status === 'success' || status === 'approved') {
@@ -296,11 +317,11 @@ const MercadoPagoServicio = () => {
           let refData;
           try {
             refData = JSON.parse(decodeURIComponent(externalReference));
+            console.log('external_reference parseado:', refData);
           } catch (parseError) {
             console.error('Error al parsear external_reference:', parseError);
             throw new Error('Formato de external_reference inválido');
           }
-          console.log('Datos de external_reference:', refData);
 
           if (refData.tipo !== 'servicio') {
             console.error('Tipo de external_reference no es servicio:', refData.tipo);
@@ -317,12 +338,17 @@ const MercadoPagoServicio = () => {
 
           registrarCita(citaData, horarios, setHorarios)
             .then(async (response) => {
-              console.log('Cita registrada exitosamente:', response);
-              const citaId = response.cita_id; // Obtener el ID de la cita
+              console.log('Cita registrada exitosamente, response:', response);
+              const citaId = response.cita_id;
+              console.log('Cita ID obtenido:', citaId);
 
               // Subir archivos si existen
               if (archivos && archivos.length > 0) {
+                console.log('Intentando subir archivos:', { citaId, archivos: archivos.map(f => f.name), descripcionArchivos });
                 await subirArchivos(citaId, archivos, descripcionArchivos);
+                console.log('Subida de archivos completada para citaId:', citaId);
+              } else {
+                console.log('No hay archivos para subir.');
               }
 
               return generarPDF(
@@ -347,7 +373,11 @@ const MercadoPagoServicio = () => {
               });
             })
             .catch((error) => {
-              console.error('Error en el flujo de pago:', error);
+              console.error('Error en el flujo de pago:', {
+                message: error.message,
+                stack: error.stack,
+                response: error.response?.data,
+              });
               Swal.fire({
                 title: 'Error',
                 text: error.message || 'Ocurrió un error al confirmar la cita. Por favor, intenta nuevamente.',
@@ -360,7 +390,11 @@ const MercadoPagoServicio = () => {
               });
             });
         } catch (error) {
-          console.error('Error al procesar el resultado del pago:', error);
+          console.error('Error al procesar el resultado del pago:', {
+            message: error.message,
+            stack: error.stack,
+            response: error.response?.data,
+          });
           Swal.fire({
             title: 'Error',
             text: error.message || 'Error al procesar el pago.',
@@ -420,6 +454,7 @@ const MercadoPagoServicio = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('Iniciando pago con Mercado Pago:', { precio, archivos: archivos ? archivos.map(f => f.name) : null });
 
       if (precio <= 0) {
         throw new Error('El precio del servicio debe ser mayor a 0.');
@@ -452,8 +487,11 @@ const MercadoPagoServicio = () => {
 
       window.location.href = checkoutUrl;
     } catch (error) {
-      console.error('Error al iniciar el pago:', error);
-      console.error('Detalles del error:', error.response?.data);
+      console.error('Error al iniciar el pago:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       setError(error.message || 'Ocurrió un error al procesar el pago.');
       setLoading(false);
       Swal.fire({
