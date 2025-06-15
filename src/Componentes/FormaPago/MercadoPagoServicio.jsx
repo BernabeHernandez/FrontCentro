@@ -34,7 +34,7 @@ const generarQRComoImagen = async () => {
     document.body.appendChild(qrDiv);
     const root = ReactDOM.createRoot(qrDiv);
     root.render(<QRCodeCanvas value="https://centrorehabilitacion-sepia.vercel.app" size={128} />);
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
     const canvas = await html2canvas(qrDiv);
     document.body.removeChild(qrDiv);
     return canvas.toDataURL('image/png');
@@ -61,16 +61,16 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
 
     doc.addImage(logo, 'PNG', 80, 10, 50, 50);
     doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 128, 0);
-    doc.text('Centro de Rehabilitación Integral San Juan', 10, 75);
+    doc.text("Centro de Rehabilitación Integral San Juan", 10, 75);
     doc.setDrawColor(0, 128, 0);
     doc.setLineWidth(0.5);
     doc.line(10, 80, 200, 80);
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text('Comprobante de Cita', 70, 90);
+    doc.text("Comprobante de Cita", 70, 90);
 
     const convertirIconoAImagen = async (icono, color) => {
       const div = document.createElement('div');
@@ -79,7 +79,7 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
       document.body.appendChild(div);
       const root = ReactDOM.createRoot(div);
       root.render(<Icono icono={icono} color={color} />);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
       const canvas = await html2canvas(div);
       document.body.removeChild(div);
       return canvas.toDataURL('image/png');
@@ -102,7 +102,7 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
     doc.text(`Hora: ${hora}`, 25, 153);
 
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
     doc.text(`Servicio: ${nombreServicio}`, 25, 168);
 
@@ -111,9 +111,9 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
     doc.line(10, 175, 200, 175);
 
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 0, 0);
-    doc.text('Importante', 10, 185);
+    doc.text("Importante", 10, 185);
 
     const iconoUbicacionImg = await convertirIconoAImagen(FaMapMarkerAlt, 'red');
     doc.addImage(iconoUbicacionImg, 'PNG', 10, 195, 10, 10);
@@ -133,11 +133,11 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
     doc.line(10, 240, 200, 240);
 
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Aviso:', 10, 250);
+    doc.setFont("helvetica", "bold");
+    doc.text("Aviso:", 10, 250);
 
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont("helvetica", "normal");
     doc.text('- Por favor, preséntese 15 minutos antes de su cita.', 15, 260);
     doc.text('- En caso de cancelación, notificar con al menos 24 horas de anticipación.', 15, 270);
     doc.text('- No presentarse a la cita puede generar cargos adicionales.', 15, 280);
@@ -148,11 +148,11 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
     doc.text('Escanea este código QR para más información:', 150, 95);
 
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
     doc.text('Términos y condiciones aplican. Consulta más detalles en nuestra página web.', 10, 295);
 
-    doc.save('comprobante_cita.pdf');
+    doc.save("comprobante_cita.pdf");
     console.log('PDF generado exitosamente');
   } catch (error) {
     console.error('Error al generar el PDF:', error);
@@ -162,10 +162,10 @@ const generarPDF = async (usuario, usuarioId, fechaCita, hora, nombreServicio) =
 
 // Función para actualizar horarios localmente
 const actualizarHorariosLocalmente = (horarios, setHorarios, dia, horaInicio) => {
-  setHorarios((prevHorarios) =>
-    prevHorarios.map((horario) => ({
+  setHorarios(prevHorarios =>
+    prevHorarios.map(horario => ({
       ...horario,
-      franjas: horario.franjas.map((franja) =>
+      franjas: horario.franjas.map(franja =>
         franja.hora_inicio === horaInicio ? { ...franja, disponible: false } : franja
       ),
     }))
@@ -173,13 +173,36 @@ const actualizarHorariosLocalmente = (horarios, setHorarios, dia, horaInicio) =>
 };
 
 // Normalizar hora para comparación
-const normalizarHora = (hora) => {
+const normalizarHora = hora => {
   if (!hora) return '';
   const partes = hora.trim().split(':');
   if (partes.length >= 2) {
     return `${partes[0].padStart(2, '0')}:${partes[1].padStart(2, '0')}`;
   }
   return hora;
+};
+
+// Función para subir archivos a Cloudinary
+const subirArchivos = async (citaId, archivos, descripcion) => {
+  try {
+    const formData = new FormData();
+    archivos.forEach((file, index) => {
+      formData.append(`file_${index}`, file);
+    });
+    formData.append('cita_id', citaId);
+    formData.append('descripcion', descripcion || '');
+
+    const response = await axios.post('https://backendcentro.onrender.com/api/citasC/subir-archivos', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log('Archivos subidos exitosamente:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al subir archivos:', error);
+    throw new Error('No se pudieron subir los archivos asociados a la cita');
+  }
 };
 
 // Función para registrar la cita en la base de datos
@@ -198,13 +221,13 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
 
     if (!horaFinNormalizada) {
       console.log(`Consultando franjas para ${dia} debido a horaFin faltante`);
-      const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
+      const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
       const horariosData = responseHorarios.data;
       console.log('Respuesta de la API de franjas:', horariosData);
 
       const franjaSeleccionada = horariosData
-        .flatMap((horario) => horario.franjas)
-        .find((franja) => normalizarHora(franja.hora_inicio) === horaNormalizada);
+        .flatMap(horario => horario.franjas)
+        .find(franja => normalizarHora(franja.hora_inicio) === horaNormalizada);
 
       if (!franjaSeleccionada) {
         throw new Error(`Franja horaria ${horaNormalizada} no encontrada para el día ${dia}`);
@@ -214,7 +237,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       horaFinFinal = normalizarHora(franjaSeleccionada.hora_fin);
     }
 
-    const reservaResponse = await axios.put('http://localhost:3302/api/citasC/sacar-cita', {
+    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
       dia,
       horaInicio: horaNormalizada,
       horaFin: horaFinFinal,
@@ -231,31 +254,11 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
 
     actualizarHorariosLocalmente(horarios, setHorarios, dia, horaNormalizada);
 
-    return reservaResponse.data; // Devolver el objeto completo, que incluye citaId
+    return reservaResponse.data; // Devolver el objeto completo para obtener cita_id
   } catch (error) {
     console.error('Error al registrar la cita:', error);
     console.error('Detalles del error:', error.response?.data);
-    throw new Error(`No se pudo registrar la cita: ${error.response?.data?.error || error.message}`);
-  }
-};
-
-// Función para subir archivos al backend
-const subirArchivos = async (citaId, files, descriptions) => {
-  try {
-    const formData = new FormData();
-    files.forEach((file) => formData.append('archivos', file));
-    formData.append('descripciones', JSON.stringify(descriptions));
-
-    const response = await axios.post(`http://localhost:3302/api/citasC/subir-archivos-cita/${citaId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    console.log('Archivos subidos:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Error al subir archivos:', error);
-    throw new Error(`No se pudieron subir los archivos: ${error.response?.data?.error || error.message}`);
+    throw new Error(`No se pudo registrar la cita: ${error.response?.data?.message || error.message}`);
   }
 };
 
@@ -265,7 +268,7 @@ const MercadoPagoServicio = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, files, descriptions } = location.state || {};
+  const { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, archivos, descripcionArchivos } = location.state || {};
 
   const [error, setError] = useState(null);
   const [horarios, setHorarios] = useState([]);
@@ -277,7 +280,7 @@ const MercadoPagoServicio = () => {
     if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !precio) {
       setError('Espera un momento... Estamos validando el pago');
     }
-  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, files, descriptions]);
+  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, archivos, descripcionArchivos]);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -313,24 +316,28 @@ const MercadoPagoServicio = () => {
           }
 
           registrarCita(citaData, horarios, setHorarios)
-            .then(async (reservaResponse) => {
-              console.log('Cita registrada exitosamente:', reservaResponse);
-              const citaId = reservaResponse.citaId; // Obtener el ID de la cita
+            .then(async (response) => {
+              console.log('Cita registrada exitosamente:', response);
+              const citaId = response.cita_id; // Obtener el ID de la cita
 
               // Subir archivos si existen
-              if (files && files.length > 0) {
-                await subirArchivos(citaId, files, descriptions);
-                console.log('Archivos subidos exitosamente');
+              if (archivos && archivos.length > 0) {
+                await subirArchivos(citaId, archivos, descripcionArchivos);
               }
 
-              // Generar PDF
-              await generarPDF(localStorage.getItem('usuario') || 'Usuario', id_usuario, fecha, hora, nombre_servicio);
-
+              return generarPDF(
+                localStorage.getItem('usuario') || 'Usuario',
+                id_usuario,
+                fecha,
+                hora,
+                nombre_servicio
+              );
+            })
+            .then(() => {
+              console.log('PDF generado exitosamente');
               Swal.fire({
                 title: 'Pago Exitoso',
-                text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.${
-                  files && files.length > 0 ? ' Archivos subidos correctamente.' : ''
-                }`,
+                text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.`,
                 icon: 'success',
                 confirmButtonText: 'Aceptar',
               });
@@ -347,7 +354,7 @@ const MercadoPagoServicio = () => {
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
               });
-              navigate('/cliente/CitasCliente', {
+              navigate('/CitasCliente', {
                 state: { servicioId: id_servicio },
                 replace: true,
               });
@@ -360,7 +367,7 @@ const MercadoPagoServicio = () => {
             icon: 'error',
             confirmButtonText: 'Aceptar',
           });
-          navigate('/cliente/CitasCliente', {
+          navigate('/CitasCliente', {
             state: { servicioId: id_servicio },
             replace: true,
           });
@@ -373,13 +380,13 @@ const MercadoPagoServicio = () => {
           icon: 'error',
           confirmButtonText: 'Aceptar',
         });
-        navigate('/cliente/CitasCliente', {
+        navigate('/CitasCliente', {
           state: { servicioId: id_servicio },
           replace: true,
         });
       }
     }
-  }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed, files, descriptions]);
+  }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed, archivos, descripcionArchivos]);
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
@@ -427,12 +434,12 @@ const MercadoPagoServicio = () => {
         fecha,
         hora,
         horaFin,
-        tipo: 'servicio',
-        // No incluir files aquí, se manejarán después del pago
+        archivos: archivos ? archivos.map(file => file.name) : [], // Enviar nombres de archivos
+        descripcionArchivos,
       };
       console.log('Enviando datos a create_preference:', servicio);
 
-      const response = await axios.post('http://localhost:3302/api/mercadopago/pagar', {
+      const response = await axios.post('https://backendcentro.onrender.com/api/mercadopago/pagar', {
         servicio,
       });
 
@@ -455,7 +462,7 @@ const MercadoPagoServicio = () => {
         icon: 'error',
         confirmButtonText: 'Aceptar',
       });
-      navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio } });
+      navigate('/CitasCliente', { state: { servicioId: id_servicio } });
     }
   };
 
@@ -518,16 +525,16 @@ const MercadoPagoServicio = () => {
                   Notas: {horario}
                 </Typography>
               )}
-              {files && files.length > 0 && (
-                <Box sx={{ mt: 2 }}>
+              {archivos && archivos.length > 0 && (
+                <Box sx={{ mt: 1 }}>
                   <Typography variant="body2" fontWeight="medium">
-                    Archivos seleccionados:
+                    Archivos adjuntos:
                   </Typography>
-                  {files.map((file, index) => (
-                    <Typography key={index} variant="body2">
-                      {file.name} {descriptions[index] ? `- ${descriptions[index]}` : ''}
-                    </Typography>
-                  ))}
+                  <ul>
+                    {archivos.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
                 </Box>
               )}
             </Box>

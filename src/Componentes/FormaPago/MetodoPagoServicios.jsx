@@ -10,13 +10,9 @@ import {
   FormControlLabel,
   useTheme,
   useMediaQuery,
-  TextField,
-  Button,
-  Alert,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 import visaLogo from '../Imagenes/Visa_Logo.png';
 import masterCardLogo from '../Imagenes/Mastercard-logo.svg.png';
@@ -30,9 +26,6 @@ const MetodoPagoServicios = () => {
   const location = useLocation();
 
   const [selectedMethod, setSelectedMethod] = useState(null);
-  const [files, setFiles] = useState([]); // Estado para los archivos seleccionados
-  const [descriptions, setDescriptions] = useState([]); // Estado para las descripciones
-  const [error, setError] = useState(null);
 
   // Datos de la cita recibidos por navegación
   const {
@@ -45,6 +38,8 @@ const MetodoPagoServicios = () => {
     horaFin,
     precio,
     notas,
+    archivos,
+    descripcionArchivos,
   } = location.state || {};
 
   // Validar datos recibidos
@@ -66,54 +61,9 @@ const MetodoPagoServicios = () => {
         title: 'Datos incompletos',
         text: `Faltan los siguientes datos para procesar el pago: ${missingFields.join(', ')}. Por favor, regresa e intenta de nuevo.`,
         confirmButtonText: 'Entendido',
-      }).then(() =>
-        navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } })
-      );
+      }).then(() => navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate]);
-
-  // Manejar la selección de archivos
-  const handleFileChange = (event) => {
-    const selectedFiles = Array.from(event.target.files);
-    const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    const validFiles = selectedFiles.filter((file) => {
-      if (!validTypes.includes(file.type)) {
-        setError(`El archivo ${file.name} no es válido. Solo se aceptan imágenes (JPEG, PNG) o PDFs.`);
-        return false;
-      }
-      if (file.size > maxSize) {
-        setError(`El archivo ${file.name} excede el tamaño máximo de 5MB.`);
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length + files.length > 10) {
-      setError('No puedes subir más de 10 archivos.');
-      return;
-    }
-
-    setFiles([...files, ...validFiles]);
-    setDescriptions([...descriptions, ...Array(validFiles.length).fill('')]);
-    setError(null);
-  };
-
-  // Manejar cambios en las descripciones
-  const handleDescriptionChange = (index, value) => {
-    const newDescriptions = [...descriptions];
-    newDescriptions[index] = value;
-    setDescriptions(newDescriptions);
-  };
-
-  // Eliminar un archivo seleccionado
-  const handleRemoveFile = (index) => {
-    const newFiles = files.filter((_, i) => i !== index);
-    const newDescriptions = descriptions.filter((_, i) => i !== index);
-    setFiles(newFiles);
-    setDescriptions(newDescriptions);
-  };
 
   const paymentMethods = [
     {
@@ -156,8 +106,8 @@ const MetodoPagoServicios = () => {
           horaFin,
           precio,
           notas,
-          files, // Pasar los archivos
-          descriptions, // Pasar las descripciones
+          archivos,
+          descripcionArchivos,
         },
       });
     }
@@ -198,8 +148,7 @@ const MetodoPagoServicios = () => {
                       p: 2,
                       mb: 2,
                       border: '1px solid',
-                      borderColor:
-                        selectedMethod === method.id ? theme.palette.primary.main : theme.palette.grey[300],
+                      borderColor: selectedMethod === method.id ? theme.palette.primary.main : theme.palette.grey[300],
                       borderRadius: 2,
                       bgcolor: selectedMethod === method.id ? 'primary.light' : 'white',
                       transition: 'all 0.3s ease',
@@ -213,10 +162,7 @@ const MetodoPagoServicios = () => {
                       value={method.id}
                       control={<Radio />}
                       label={
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}
-                          aria-label={`Seleccionar ${method.name}`}
-                        >
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }} aria-label={`Seleccionar ${method.name}`}>
                           {method.id === 'stripe' ? (
                             <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                               {method.logos.map((logo, index) => (
@@ -252,75 +198,6 @@ const MetodoPagoServicios = () => {
                   </Box>
                 ))}
               </RadioGroup>
-
-              {/* Campo para subir archivos */}
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Subir archivos (opcional)
-                </Typography>
-                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                  Puedes subir hasta 10 archivos (imágenes JPEG/PNG o PDFs, máximo 5MB cada uno).
-                </Typography>
-                <Button
-                  variant="contained"
-                  component="label"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ mb: 2 }}
-                >
-                  Seleccionar archivos
-                  <input
-                    type="file"
-                    hidden
-                    multiple
-                    accept="image/jpeg,image/png,application/pdf"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-                {error && (
-                  <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
-                  </Alert>
-                )}
-                {files.length > 0 && (
-                  <Box>
-                    {files.map((file, index) => (
-                      <Box
-                        key={index}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          mb: 2,
-                          p: 1,
-                          border: '1px solid',
-                          borderColor: theme.palette.grey[300],
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="body2">{file.name}</Typography>
-                          <TextField
-                            label="Descripción (opcional)"
-                            variant="outlined"
-                            size="small"
-                            fullWidth
-                            value={descriptions[index]}
-                            onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                            sx={{ mt: 1 }}
-                          />
-                        </Box>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          onClick={() => handleRemoveFile(index)}
-                          sx={{ ml: 2 }}
-                        >
-                          Eliminar
-                        </Button>
-                      </Box>
-                    ))}
-                  </Box>
-                )}
-              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -350,6 +227,18 @@ const MetodoPagoServicios = () => {
                   <Typography variant="body2" color="textSecondary">
                     Notas: {notas}
                   </Typography>
+                )}
+                {archivos && archivos.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                      Archivos adjuntos:
+                    </Typography>
+                    <ul>
+                      {archivos.map((file, index) => (
+                        <li key={index}>{file.name}</li>
+                      ))}
+                    </ul>
+                  </Box>
                 )}
               </Box>
 

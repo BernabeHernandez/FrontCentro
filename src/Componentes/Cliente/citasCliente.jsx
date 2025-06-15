@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClock, faUpload } from '@fortawesome/free-solid-svg-icons';
 import {
   Container,
   Typography,
@@ -40,8 +40,8 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
-  const [files, setFiles] = useState([]); // Estado para los archivos
-  const [descripcionArchivos, setDescripcionArchivos] = useState(''); // Descripción de los archivos
+  const [archivos, setArchivos] = useState([]); // Estado para los archivos
+  const [descripcionArchivos, setDescripcionArchivos] = useState(''); // Descripción opcional
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
@@ -67,7 +67,7 @@ const CitasCliente = () => {
             setPrecioServicio(location.state.precio);
             setNombreServicio(location.state?.nombre_servicio || '');
           } else {
-            const response = await axios.get(`http://localhost:3302/api/servicios/${servicioId}`);
+            const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
           }
@@ -100,7 +100,7 @@ const CitasCliente = () => {
           }).then(() => navigate('/login'));
           return;
         }
-        const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+        const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
         if (response.data.existe) {
           setUsuarioRegistrado(true);
           if (response.data.usuario && response.data.usuario.id) {
@@ -135,7 +135,7 @@ const CitasCliente = () => {
     const getDiasDisponibles = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3302/api/citasC/dias-disponibles');
+        const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
         const diasConHorario = response.data;
         if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
           throw new Error('No se encontraron días disponibles');
@@ -192,7 +192,7 @@ const CitasCliente = () => {
     setSelectedDay(dia);
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
       setHorarios(response.data);
     } catch (error) {
       console.error('Error al obtener las franjas horarias:', error);
@@ -214,36 +214,30 @@ const CitasCliente = () => {
 
   // Manejar cambio de archivos
   const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const validFiles = selectedFiles.filter(file => {
-      const fileType = file.type;
-      const isImage = fileType.startsWith('image/');
-      const isPDF = fileType === 'application/pdf';
-      return isImage || isPDF;
+    const files = Array.from(e.target.files);
+    const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const validFiles = files.filter(file => {
+      if (!validTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Formato no válido',
+          text: `El archivo ${file.name} no es una imagen (JPEG/PNG) ni un PDF.`,
+        });
+        return false;
+      }
+      if (file.size > maxSize) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Archivo demasiado grande',
+          text: `El archivo ${file.name} excede el tamaño máximo de 5MB.`,
+        });
+        return false;
+      }
+      return true;
     });
 
-    if (validFiles.length !== selectedFiles.length) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Archivos no válidos',
-        text: 'Solo se permiten imágenes y PDFs.',
-        confirmButtonText: 'Entendido',
-      });
-    }
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    const oversizedFiles = validFiles.filter(file => file.size > maxSize);
-    if (oversizedFiles.length > 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Archivos demasiado grandes',
-        text: 'Los archivos no deben exceder los 5MB.',
-        confirmButtonText: 'Entendido',
-      });
-      return;
-    }
-
-    setFiles(validFiles);
+    setArchivos(validFiles);
   };
 
   // Verificar si la franja ha pasado
@@ -270,7 +264,7 @@ const CitasCliente = () => {
     }
 
     try {
-      const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -298,7 +292,7 @@ const CitasCliente = () => {
 
         // Validar disponibilidad de la franja
         try {
-          const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${selectedDay}`);
+          const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${selectedDay}`);
           const horariosData = responseHorarios.data;
           const franjaValida = horariosData
             .flatMap(horario => horario.franjas)
@@ -361,8 +355,8 @@ const CitasCliente = () => {
               hora: selectedTime,
               horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
-              files, // Pasar los archivos
-              descripcionArchivos, // Pasar la descripción
+              notas: descripcionArchivos || null,
+              archivos, // Pasar los archivos
             },
           });
         }
@@ -495,31 +489,35 @@ const CitasCliente = () => {
             </Box>
           )}
 
+          {/* Sección para cargar archivos */}
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              Subir archivos (opcional)
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FontAwesomeIcon icon={faUpload} /> Subir archivos (estudios, consultas, etc.)
             </Typography>
             <TextField
               type="file"
-              inputProps={{ multiple: true, accept: 'image/*,application/pdf' }}
+              inputProps={{ multiple: true, accept: 'image/jpeg,image/png,application/pdf' }}
               onChange={handleFileChange}
               fullWidth
-              variant="outlined"
               sx={{ mb: 2 }}
             />
             <TextField
-              label="Descripción de los archivos"
+              label="Descripción de los archivos (opcional)"
+              multiline
+              rows={3}
               value={descripcionArchivos}
               onChange={(e) => setDescripcionArchivos(e.target.value)}
               fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
             />
-            {files.length > 0 && (
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                Archivos seleccionados: {files.map(file => file.name).join(', ')}
-              </Typography>
+            {archivos.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2">Archivos seleccionados:</Typography>
+                <ul>
+                  {archivos.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                  ))}
+                </ul>
+              </Box>
             )}
           </Box>
 
