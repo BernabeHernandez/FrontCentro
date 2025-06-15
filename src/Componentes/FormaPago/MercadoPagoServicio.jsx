@@ -192,7 +192,7 @@ const subirArchivos = async (citaId, archivos, descripcion) => {
     formData.append('cita_id', citaId);
     formData.append('descripcion', descripcion || '');
 
-    const response = await axios.post('https://backendcentro.onrender.com/api/citasC/subir-archivos', formData, {
+    const response = await axios.post('http://localhost:3302/api/citasC/subir-archivos', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -221,7 +221,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
 
     if (!horaFinNormalizada) {
       console.log(`Consultando franjas para ${dia} debido a horaFin faltante`);
-      const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
+      const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
       const horariosData = responseHorarios.data;
       console.log('Respuesta de la API de franjas:', horariosData);
 
@@ -237,7 +237,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       horaFinFinal = normalizarHora(franjaSeleccionada.hora_fin);
     }
 
-    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
+    const reservaResponse = await axios.put('http://localhost:3302/api/citasC/sacar-cita', {
       dia,
       horaInicio: horaNormalizada,
       horaFin: horaFinFinal,
@@ -439,7 +439,7 @@ const MercadoPagoServicio = () => {
       };
       console.log('Enviando datos a create_preference:', servicio);
 
-      const response = await axios.post('https://backendcentro.onrender.com/api/mercadopago/pagar', {
+      const response = await axios.post('http://localhost:3302/api/mercadopago/pagar', {
         servicio,
       });
 
