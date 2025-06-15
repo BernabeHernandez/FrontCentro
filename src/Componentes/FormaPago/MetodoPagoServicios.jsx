@@ -120,6 +120,34 @@ const MetodoPagoServicios = () => {
     const selectedRoute = paymentMethods.find((m) => m.id === methodId)?.route;
 
     if (selectedRoute) {
+      // Guardar datos en sessionStorage antes de la navegación
+      console.log('Guardando datos en sessionStorage:', {
+        id_usuario,
+        id_servicio,
+        nombre_servicio,
+        dia,
+        fecha,
+        hora,
+        horaFin,
+        precio,
+        notas,
+        archivos: archivos ? archivos.map(f => f.name) : null,
+        descripcionArchivos,
+      });
+      sessionStorage.setItem('citaData', JSON.stringify({
+        id_usuario,
+        id_servicio,
+        nombre_servicio,
+        dia,
+        fecha,
+        hora,
+        horaFin,
+        precio,
+        notas,
+        archivos: archivos ? Array.from(archivos) : null, // Convertir FileList a Array para persistencia
+        descripcionArchivos,
+      }));
+
       console.log('Datos enviados a la ruta seleccionada:', {
         id_usuario,
         id_servicio,

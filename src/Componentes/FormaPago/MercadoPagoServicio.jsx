@@ -185,12 +185,14 @@ const normalizarHora = hora => {
 // Función para subir archivos a Cloudinary
 const subirArchivos = async (citaId, archivos, descripcion) => {
   try {
-    console.log('Iniciando subida de archivos:', { citaId, archivos: archivos.map(f => f.name), descripcion });
+    console.log('Iniciando subida de archivos:', { citaId, archivos: archivos ? archivos.map(f => f.name) : null, descripcion });
     const formData = new FormData();
-    archivos.forEach((file, index) => {
-      formData.append(`file_${index}`, file);
-      console.log(`Añadiendo archivo ${index}:`, file.name);
-    });
+    if (archivos && archivos.length > 0) {
+      archivos.forEach((file, index) => {
+        formData.append(`file_${index}`, file);
+        console.log(`Añadiendo archivo ${index}:`, file.name);
+      });
+    }
     formData.append('cita_id', citaId);
     formData.append('descripcion', descripcion || '');
 
@@ -274,12 +276,29 @@ const MercadoPagoServicio = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, archivos, descripcionArchivos } = location.state || {};
-
   const [error, setError] = useState(null);
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processed, setProcessed] = useState(false);
+
+  // Recuperar datos iniciales desde location.state o sessionStorage
+  const initialState = location.state || {};
+  const storedData = sessionStorage.getItem('citaData');
+  const citaData = storedData ? JSON.parse(storedData) : initialState;
+
+  const {
+    id_usuario,
+    id_servicio,
+    nombre_servicio,
+    dia,
+    fecha,
+    hora,
+    horaFin,
+    precio,
+    horario,
+    archivos,
+    descripcionArchivos,
+  } = citaData;
 
   useEffect(() => {
     console.log('Datos recibidos en MercadoPagoServicio al montar:', {
@@ -306,11 +325,14 @@ const MercadoPagoServicio = () => {
     const status = query.get('status');
     const externalReference = query.get('external_reference');
 
-    console.log('Verificando estado de pago:', { status, externalReference });
+    console.log('Verificando estado de pago al montar:', { status, externalReference, locationState: location.state, storedData: storedData ? JSON.parse(storedData) : null });
 
     if (status && externalReference && !processed) {
       console.log('Procesando resultado de pago iniciado:', { status, externalReference });
       setProcessed(true);
+
+      // Usar citaData ya recuperado de sessionStorage
+      console.log('Datos utilizados para procesar el pago:', citaData);
 
       if (status === 'success' || status === 'approved') {
         try {
@@ -328,27 +350,27 @@ const MercadoPagoServicio = () => {
             throw new Error('Tipo de pago inválido');
           }
 
-          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = refData;
-          const citaData = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
-          console.log('Validando citaData:', citaData);
+          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = citaData || refData;
+          const citaDataToUse = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
+          console.log('Validando citaData:', citaDataToUse);
 
           if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio) {
             throw new Error('Faltan datos en external_reference para registrar la cita');
           }
 
-          registrarCita(citaData, horarios, setHorarios)
+          registrarCita(citaDataToUse, horarios, setHorarios)
             .then(async (response) => {
               console.log('Cita registrada exitosamente, response:', response);
               const citaId = response.cita_id;
               console.log('Cita ID obtenido:', citaId);
 
               // Subir archivos si existen
-              if (archivos && archivos.length > 0) {
-                console.log('Intentando subir archivos:', { citaId, archivos: archivos.map(f => f.name), descripcionArchivos });
-                await subirArchivos(citaId, archivos, descripcionArchivos);
+              if (citaData?.archivos && citaData.archivos.length > 0) {
+                console.log('Intentando subir archivos:', { citaId, archivos: citaData.archivos.map(f => f.name), descripcionArchivos: citaData.descripcionArchivos });
+                await subirArchivos(citaId, citaData.archivos, citaData.descripcionArchivos);
                 console.log('Subida de archivos completada para citaId:', citaId);
               } else {
-                console.log('No hay archivos para subir.');
+                console.log('No hay archivos para subir o datos no recuperados:', { archivos: citaData?.archivos });
               }
 
               return generarPDF(
@@ -361,6 +383,8 @@ const MercadoPagoServicio = () => {
             })
             .then(() => {
               console.log('PDF generado exitosamente');
+              // Limpiar sessionStorage tras éxito
+              sessionStorage.removeItem('citaData');
               Swal.fire({
                 title: 'Pago Exitoso',
                 text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.`,
@@ -420,7 +444,7 @@ const MercadoPagoServicio = () => {
         });
       }
     }
-  }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed, archivos, descripcionArchivos]);
+  }, [location, navigate, horarios, processed, citaData]);
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
