@@ -44,7 +44,19 @@ const MetodoPagoServicios = () => {
 
   // Validar datos recibidos
   useEffect(() => {
-    console.log('Datos recibidos en MetodoPagoServicios:', location.state);
+    console.log('Datos recibidos en MetodoPagoServicios al montar:', {
+      id_usuario,
+      id_servicio,
+      nombre_servicio,
+      dia,
+      fecha,
+      hora,
+      horaFin,
+      precio,
+      notas,
+      archivos: archivos ? archivos.map(f => f.name) : null,
+      descripcionArchivos,
+    });
     const missingFields = [];
     if (!id_usuario) missingFields.push('ID de usuario');
     if (!id_servicio) missingFields.push('ID del servicio');
@@ -56,12 +68,24 @@ const MetodoPagoServicios = () => {
     if (!precio) missingFields.push('Precio');
 
     if (missingFields.length > 0) {
+      console.error('Campos faltantes detectados:', missingFields);
       Swal.fire({
         icon: 'error',
         title: 'Datos incompletos',
         text: `Faltan los siguientes datos para procesar el pago: ${missingFields.join(', ')}. Por favor, regresa e intenta de nuevo.`,
         confirmButtonText: 'Entendido',
       }).then(() => navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
+    } else {
+      console.log('Todos los campos requeridos están presentes:', {
+        id_usuario,
+        id_servicio,
+        nombre_servicio,
+        dia,
+        fecha,
+        hora,
+        horaFin,
+        precio,
+      });
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate]);
 
@@ -91,10 +115,24 @@ const MetodoPagoServicios = () => {
 
   const handleSelectMethod = (event) => {
     const methodId = event.target.value;
+    console.log('Método de pago seleccionado:', { methodId, selectedRoute: paymentMethods.find(m => m.id === methodId)?.route });
     setSelectedMethod(methodId);
     const selectedRoute = paymentMethods.find((m) => m.id === methodId)?.route;
 
     if (selectedRoute) {
+      console.log('Datos enviados a la ruta seleccionada:', {
+        id_usuario,
+        id_servicio,
+        nombre_servicio,
+        dia,
+        fecha,
+        hora,
+        horaFin,
+        precio,
+        notas,
+        archivos: archivos ? archivos.map(f => f.name) : null,
+        descripcionArchivos,
+      });
       navigate(selectedRoute, {
         state: {
           id_usuario,
@@ -110,6 +148,8 @@ const MetodoPagoServicios = () => {
           descripcionArchivos,
         },
       });
+    } else {
+      console.error('Ruta no encontrada para el método seleccionado:', methodId);
     }
   };
 
