@@ -48,6 +48,7 @@ const CitasCliente = () => {
 
   // Validar servicioId
   useEffect(() => {
+    console.log('Validando servicioId:', { servicioId, locationState: location.state });
     if (!servicioId) {
       Swal.fire({
         icon: 'warning',
@@ -63,6 +64,7 @@ const CitasCliente = () => {
     const fetchServicioData = async () => {
       if (servicioId) {
         try {
+          console.log('Intentando cargar datos del servicio:', { servicioId, precio: location.state?.precio });
           if (location.state?.precio !== undefined) {
             setPrecioServicio(location.state.precio);
             setNombreServicio(location.state?.nombre_servicio || '');
@@ -71,6 +73,7 @@ const CitasCliente = () => {
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
           }
+          console.log('Datos del servicio cargados:', { nombreServicio, precioServicio });
         } catch (error) {
           console.error('Error al obtener los datos del servicio:', error);
           Swal.fire({
@@ -90,6 +93,7 @@ const CitasCliente = () => {
     const verificarUsuarioRegistrado = async () => {
       try {
         const usuario = localStorage.getItem('usuario');
+        console.log('Verificando usuario registrado:', { usuario });
         if (!usuario) {
           setUsuarioRegistrado(false);
           Swal.fire({
@@ -106,6 +110,7 @@ const CitasCliente = () => {
           if (response.data.usuario && response.data.usuario.id) {
             setUsuarioId(response.data.usuario.id);
             localStorage.setItem('usuario_id', response.data.usuario.id);
+            console.log('Usuario verificado y ID asignado:', { usuarioId: response.data.usuario.id });
           }
         } else {
           setUsuarioRegistrado(false);
@@ -135,6 +140,7 @@ const CitasCliente = () => {
     const getDiasDisponibles = async () => {
       setLoading(true);
       try {
+        console.log('Obteniendo días disponibles para usuario registrado:', { usuarioRegistrado });
         const response = await axios.get('http://localhost:3302/api/citasC/dias-disponibles');
         const diasConHorario = response.data;
         if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
@@ -171,6 +177,7 @@ const CitasCliente = () => {
         });
 
         setDiasDisponibles(diasConFechas);
+        console.log('Días disponibles cargados:', diasConFechas.map(d => d.nombre));
       } catch (error) {
         console.error('Error al obtener los días disponibles:', error);
         Swal.fire({
@@ -192,8 +199,10 @@ const CitasCliente = () => {
     setSelectedDay(dia);
     setLoading(true);
     try {
+      console.log('Seleccionando día:', { dia, fecha, disponible });
       const response = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
       setHorarios(response.data);
+      console.log('Horarios cargados para el día:', { dia, horarios: response.data });
     } catch (error) {
       console.error('Error al obtener las franjas horarias:', error);
       Swal.fire({
@@ -209,12 +218,16 @@ const CitasCliente = () => {
 
   // Seleccionar hora
   const handleSelectTime = (time, disponible) => {
-    if (disponible) setSelectedTime(time);
+    if (disponible) {
+      console.log('Seleccionando hora:', { time, disponible });
+      setSelectedTime(time);
+    }
   };
 
   // Manejar cambio de archivos
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
+    console.log('Archivos seleccionados desde input:', files.map(f => f.name));
     const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     const maxSize = 5 * 1024 * 1024; // 5MB
     const validFiles = files.filter(file => {
@@ -237,6 +250,7 @@ const CitasCliente = () => {
       return true;
     });
 
+    console.log('Archivos válidos después de filtrado:', validFiles.map(f => f.name));
     setArchivos(validFiles);
   };
 
@@ -253,6 +267,7 @@ const CitasCliente = () => {
   // Manejar la acción de sacar cita
   const handleSacarCita = async () => {
     const usuario = localStorage.getItem('usuario');
+    console.log('Iniciando handleSacarCita:', { usuario, usuarioId, selectedDay, selectedTime, precioServicio, archivos: archivos.map(f => f.name) });
     if (!usuario || !usuarioId) {
       Swal.fire({
         icon: 'warning',
@@ -265,6 +280,7 @@ const CitasCliente = () => {
 
     try {
       const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+      console.log('Respuesta de verificación de usuario:', response.data);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -345,6 +361,18 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
+          console.log('Confirmación recibida, navegando con datos:', {
+            id_usuario: usuarioId,
+            id_servicio: servicioId,
+            nombre_servicio: nombreServicio,
+            dia: selectedDay,
+            fecha: fechaCita,
+            hora: selectedTime,
+            horaFin: franjaSeleccionada.hora_fin,
+            precio: precioServicio,
+            notas: descripcionArchivos || null,
+            archivos: archivos.map(f => f.name), // Log de nombres de archivos
+          });
           navigate('/cliente/metodoServicios', {
             state: {
               id_usuario: usuarioId,
