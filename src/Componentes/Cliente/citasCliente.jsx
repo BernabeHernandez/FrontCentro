@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClock, faUpload } from '@fortawesome/free-solid-svg-icons';
 import {
   Container,
   Typography,
@@ -17,7 +17,11 @@ import {
   Paper,
   Divider,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Input,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -39,6 +43,7 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
+  const [archivos, setArchivos] = useState([]); // Estado para los archivos subidos
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
@@ -60,12 +65,10 @@ const CitasCliente = () => {
     const fetchServicioData = async () => {
       if (servicioId) {
         try {
-          // Priorizar el precio recibido desde location.state si existe
           if (location.state?.precio !== undefined) {
             setPrecioServicio(location.state.precio);
-            setNombreServicio(location.state?.nombre_servicio || ''); // Usar nombre del state si existe
+            setNombreServicio(location.state?.nombre_servicio || '');
           } else {
-            // Si no hay precio en state, consultar al backend
             const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
@@ -221,6 +224,34 @@ const CitasCliente = () => {
     return (horaActual > horaFranja || (horaActual === horaFranja && minutosActuales >= minutosFranja));
   };
 
+  // Manejar la selección de archivos
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    setArchivos([...archivos, ...files]);
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+
+    const validFiles = files.filter(file => validImageTypes.includes(file.type));
+    const invalidFiles = files.filter(file => !validImageTypes.includes(file.type));
+
+    if (invalidFiles.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Archivos no válidos',
+        text: 'Solo se permiten imágenes (JPEG, PNG, GIF, BMP, WebP). Los archivos no válidos serán ignorados.',
+        confirmButtonText: 'Entendido',
+      });
+    }
+
+    if (validFiles.length > 0) {
+      setArchivos([...archivos, ...validFiles]);
+    }
+  };
+
+  // Eliminar un archivo de la lista
+  const handleRemoveFile = (index) => {
+    setArchivos(archivos.filter((_, i) => i !== index));
+  };
+
   // Manejar la acción de sacar cita
   const handleSacarCita = async () => {
     const usuario = localStorage.getItem('usuario');
@@ -240,7 +271,7 @@ const CitasCliente = () => {
         Swal.fire({
           icon: 'warning',
           title: 'Usuario no registrado',
-          text: 'El usuario no está registrado. Por favor, regístrate.',
+          text: 'El usuario no está взрослых. Por favor, regístrate.',
           confirmButtonText: 'Entendido',
         }).then(() => navigate('/login'));
         return;
@@ -294,7 +325,6 @@ const CitasCliente = () => {
         const diaSeleccionado = diasDisponibles.find(dia => dia.nombre === selectedDay);
         const fechaCita = format(diaSeleccionado.fecha, 'yyyy-MM-dd');
 
-        // Verificar que nombreServicio no esté vacío
         if (!nombreServicio || nombreServicio.trim() === '') {
           Swal.fire({
             icon: 'warning',
@@ -308,7 +338,7 @@ const CitasCliente = () => {
         const confirmacion = await Swal.fire({
           icon: 'question',
           title: 'Confirmar cita',
-          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}?`,
+          text: `¿Deseas reservar la cita para ${nombreServicio} el ${format(diaSeleccionado.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${selectedTime}?${archivos.length > 0 ? ` Se subirán ${archivos.length} archivo(s).` : ''}`,
           showCancelButton: true,
           confirmButtonText: 'Sí, reservar',
           cancelButtonText: 'No, cancelar',
@@ -317,6 +347,32 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
+          // Subir archivos si los hay
+          if (archivos.length > 0) {
+            try {
+              const formData = new FormData();
+              archivos.forEach((file) => {
+                formData.append('archivos', file);
+              });
+              formData.append('usuario_id', usuarioId);
+              formData.append('descripcion', 'Archivos subidos para cita');
+
+              await axios.post('http://localhost:3302/api/citasC/guardar-archivos', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+              });
+            } catch (error) {
+              console.error('Error al subir archivos:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron subir los archivos. Por favor, intenta nuevamente.',
+                confirmButtonText: 'Entendido',
+              });
+              return;
+            }
+          }
+
+          // Proceder con la navegación original
           navigate('/cliente/metodoServicios', {
             state: {
               id_usuario: usuarioId,
@@ -459,6 +515,37 @@ const CitasCliente = () => {
               )}
             </Box>
           )}
+
+          {/* Sección para subir archivos */}
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'red', fontStyle: 'italic' }}>
+              <FontAwesomeIcon icon={faUpload} /> Subir imágenes (opcional). Si cuenta con resultados de estudios o radiografías, súbalos aquí; si no, no es necesario. (Solo Imágenes, Fotos, o Capturas de pantalla)
+            </Typography>
+            <Input
+              type="file"
+              inputProps={{ accept: 'image/*', multiple: true }}
+              onChange={handleFileChange}
+              sx={{ mb: 2 }}
+            />
+            {archivos.length > 0 && (
+              <Paper elevation={1} sx={{ p: 2 }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Archivos seleccionados:
+                </Typography>
+                <List>
+                  {archivos.map((file, index) => (
+                    <ListItem key={index} secondaryAction={
+                      <Button color="error" onClick={() => handleRemoveFile(index)}>
+                        Eliminar
+                      </Button>
+                    }>
+                      <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(2)} KB`} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Paper>
+            )}
+          </Box>
 
           <Divider sx={{ my: 4 }} />
 
