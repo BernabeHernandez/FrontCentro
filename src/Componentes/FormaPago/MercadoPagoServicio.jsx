@@ -182,36 +182,6 @@ const normalizarHora = hora => {
   return hora;
 };
 
-// Función para subir archivos a Cloudinary (pre-pago)
-const subirArchivosPrePago = async (archivos, descripcion) => {
-  try {
-    console.log('Iniciando subida pre-pago de archivos:', { archivos: archivos ? archivos.map(f => f.name) : null, descripcion });
-    const formData = new FormData();
-    if (archivos && archivos.length > 0) {
-      archivos.forEach((file, index) => {
-        formData.append(`file_${index}`, file);
-        console.log(`Añadiendo archivo ${index}:`, file.name);
-      });
-    }
-    formData.append('descripcion', descripcion || '');
-
-    const response = await axios.post('http://localhost:3302/api/citasC/subir-archivos-pre-pago', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    console.log('Respuesta de subida pre-pago de archivos:', response.data);
-    return response.data; // Devuelve las URLs o IDs de los archivos subidos
-  } catch (error) {
-    console.error('Error al subir archivos pre-pago:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    throw new Error('No se pudieron subir los archivos antes del pago');
-  }
-};
-
 // Función para registrar la cita en la base de datos
 const registrarCita = async (citaData, horarios, setHorarios) => {
   try {
@@ -228,7 +198,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
 
     if (!horaFinNormalizada) {
       console.log(`Consultando franjas para ${dia} debido a horaFin faltante`);
-      const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
+      const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
       const horariosData = responseHorarios.data;
       console.log('Respuesta de la API de franjas:', horariosData);
 
@@ -244,7 +214,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       horaFinFinal = normalizarHora(franjaSeleccionada.hora_fin);
     }
 
-    const reservaResponse = await axios.put('http://localhost:3302/api/citasC/sacar-cita', {
+    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
       dia,
       horaInicio: horaNormalizada,
       horaFin: horaFinFinal,
@@ -261,7 +231,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
 
     actualizarHorariosLocalmente(horarios, setHorarios, dia, horaNormalizada);
 
-    return reservaResponse.data; // Devolver el objeto completo para obtener cita_id
+    return reservaResponse.data.message;
   } catch (error) {
     console.error('Error al registrar la cita:', error);
     console.error('Detalles del error:', error.response?.data);
@@ -275,113 +245,56 @@ const MercadoPagoServicio = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario } = location.state || {};
+
   const [error, setError] = useState(null);
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processed, setProcessed] = useState(false);
-  const [fileUrls, setFileUrls] = useState([]); // Para almacenar URLs de archivos subidos
-
-  // Recuperar datos iniciales desde location.state o sessionStorage
-  const initialState = location.state || {};
-  const storedData = sessionStorage.getItem('citaData');
-  const citaData = storedData ? JSON.parse(storedData) : initialState;
-
-  const {
-    id_usuario,
-    id_servicio,
-    nombre_servicio,
-    dia,
-    fecha,
-    hora,
-    horaFin,
-    precio,
-    horario,
-    archivos: initialArchivos,
-    descripcionArchivos,
-  } = citaData;
 
   useEffect(() => {
-    console.log('Datos recibidos en MercadoPagoServicio al montar:', {
-      id_usuario,
-      id_servicio,
-      nombre_servicio,
-      dia,
-      fecha,
-      hora,
-      horaFin,
-      precio,
-      horario,
-      archivos: initialArchivos ? initialArchivos.map(f => f.name || f) : null,
-      descripcionArchivos,
-    });
+    console.log('Datos recibidos en MercadoPagoServicio:', location.state);
     if (!id_usuario || !id_servicio || !nombre_servicio || !dia || !fecha || !hora || !precio) {
       setError('Espera un momento... Estamos validando el pago');
-      console.log('Datos incompletos detectados:', { id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, precio });
     }
-  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario, initialArchivos, descripcionArchivos]);
+  }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, horario]);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const status = query.get('status');
     const externalReference = query.get('external_reference');
 
-    console.log('Verificando estado de pago al montar:', { status, externalReference, locationState: location.state, storedData: storedData ? JSON.parse(storedData) : null });
-
     if (status && externalReference && !processed) {
-      console.log('Procesando resultado de pago iniciado:', { status, externalReference });
+      console.log('Procesando resultado de pago:', { status, externalReference });
       setProcessed(true);
-
-      // Usar citaData ya recuperado de sessionStorage
-      console.log('Datos utilizados para procesar el pago:', citaData);
 
       if (status === 'success' || status === 'approved') {
         try {
           let refData;
           try {
             refData = JSON.parse(decodeURIComponent(externalReference));
-            console.log('external_reference parseado:', refData);
           } catch (parseError) {
             console.error('Error al parsear external_reference:', parseError);
             throw new Error('Formato de external_reference inválido');
           }
+          console.log('Datos de external_reference:', refData);
 
           if (refData.tipo !== 'servicio') {
             console.error('Tipo de external_reference no es servicio:', refData.tipo);
             throw new Error('Tipo de pago inválido');
           }
 
-          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = citaData || refData;
-          const citaDataToUse = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
-          console.log('Validando citaData:', citaDataToUse);
+          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = refData;
+          const citaData = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
+          console.log('Validando citaData:', citaData);
 
           if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio) {
             throw new Error('Faltan datos en external_reference para registrar la cita');
           }
 
-          registrarCita(citaDataToUse, horarios, setHorarios)
-            .then(async (response) => {
-              console.log('Cita registrada exitosamente, response:', response);
-              const citaId = response.cita_id;
-              console.log('Cita ID obtenido:', citaId);
-
-              // Subir archivos si existen y se subieron pre-pago
-              if (fileUrls.length > 0) {
-                console.log('Asociando archivos pre-subidos:', { citaId, fileUrls, descripcionArchivos: citaData.descripcionArchivos });
-                const formData = new FormData();
-                formData.append('cita_id', citaId);
-                fileUrls.forEach((url, index) => formData.append(`file_urls_${index}`, url));
-                formData.append('descripcion', citaData.descripcionArchivos || '');
-
-                const response = await axios.post('http://localhost:3302/api/citasC/asociar-archivos', formData, {
-                  headers: {
-                    'Content-Type': 'multipart/form-data',
-                  },
-                });
-                console.log('Respuesta de asociación de archivos:', response.data);
-              } else {
-                console.log('No hay archivos pre-subidos para asociar:', { fileUrls });
-              }
-
+          registrarCita(citaData, horarios, setHorarios)
+            .then(() => {
+              console.log('Cita registrada exitosamente');
               return generarPDF(
                 localStorage.getItem('usuario') || 'Usuario',
                 id_usuario,
@@ -392,8 +305,6 @@ const MercadoPagoServicio = () => {
             })
             .then(() => {
               console.log('PDF generado exitosamente');
-              // Limpiar sessionStorage tras éxito
-              sessionStorage.removeItem('citaData');
               Swal.fire({
                 title: 'Pago Exitoso',
                 text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.`,
@@ -406,11 +317,7 @@ const MercadoPagoServicio = () => {
               });
             })
             .catch((error) => {
-              console.error('Error en el flujo de pago:', {
-                message: error.message,
-                stack: error.stack,
-                response: error.response?.data,
-              });
+              console.error('Error en el flujo de pago:', error);
               Swal.fire({
                 title: 'Error',
                 text: error.message || 'Ocurrió un error al confirmar la cita. Por favor, intenta nuevamente.',
@@ -423,11 +330,7 @@ const MercadoPagoServicio = () => {
               });
             });
         } catch (error) {
-          console.error('Error al procesar el resultado del pago:', {
-            message: error.message,
-            stack: error.stack,
-            response: error.response?.data,
-          });
+          console.error('Error al procesar el resultado del pago:', error);
           Swal.fire({
             title: 'Error',
             text: error.message || 'Error al procesar el pago.',
@@ -453,7 +356,7 @@ const MercadoPagoServicio = () => {
         });
       }
     }
-  }, [location, navigate, horarios, processed, citaData, fileUrls]);
+  }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed]);
 
   const containerStyles = {
     maxWidth: isMobile ? '100%' : '650px',
@@ -487,29 +390,10 @@ const MercadoPagoServicio = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Iniciando pago con Mercado Pago:', { precio, archivos: initialArchivos ? initialArchivos.map(f => f.name || f) : null });
 
       if (precio <= 0) {
         throw new Error('El precio del servicio debe ser mayor a 0.');
       }
-
-      // Subir archivos antes del pago si existen
-      let fileUrlsToStore = [];
-      if (initialArchivos && initialArchivos.length > 0) {
-        console.log('Subiendo archivos antes del pago:', { archivos: initialArchivos.map(f => f.name) });
-        const uploadResponse = await subirArchivosPrePago(initialArchivos, descripcionArchivos);
-        fileUrlsToStore = uploadResponse.fileUrls || []; // Ajusta según la respuesta del servidor
-        console.log('Archivos subidos con URLs:', fileUrlsToStore);
-      }
-
-      setFileUrls(fileUrlsToStore);
-
-      // Actualizar citaData en sessionStorage con las URLs de los archivos
-      const updatedCitaData = {
-        ...citaData,
-        archivos: fileUrlsToStore, // Reemplazar archivos con URLs
-      };
-      sessionStorage.setItem('citaData', JSON.stringify(updatedCitaData));
 
       const servicio = {
         id_usuario,
@@ -520,12 +404,10 @@ const MercadoPagoServicio = () => {
         fecha,
         hora,
         horaFin,
-        archivos: fileUrlsToStore, // Enviar URLs de archivos
-        descripcionArchivos,
       };
       console.log('Enviando datos a create_preference:', servicio);
 
-      const response = await axios.post('http://localhost:3302/api/mercadopago/pagar', {
+      const response = await axios.post('https://backendcentro.onrender.com/api/mercadopago/pagar', {
         servicio,
       });
 
@@ -538,11 +420,8 @@ const MercadoPagoServicio = () => {
 
       window.location.href = checkoutUrl;
     } catch (error) {
-      console.error('Error al iniciar el pago:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
+      console.error('Error al iniciar el pago:', error);
+      console.error('Detalles del error:', error.response?.data);
       setError(error.message || 'Ocurrió un error al procesar el pago.');
       setLoading(false);
       Swal.fire({
@@ -613,18 +492,6 @@ const MercadoPagoServicio = () => {
                 <Typography variant="body2">
                   Notas: {horario}
                 </Typography>
-              )}
-              {initialArchivos && initialArchivos.length > 0 && (
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" fontWeight="medium">
-                    Archivos adjuntos:
-                  </Typography>
-                  <ul>
-                    {initialArchivos.map((file, index) => (
-                      <li key={index}>{typeof file === 'string' ? file : file.name}</li>
-                    ))}
-                  </ul>
-                </Box>
               )}
             </Box>
           </Box>

@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faClock, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 import {
   Container,
   Typography,
@@ -17,8 +17,7 @@ import {
   Paper,
   Divider,
   Chip,
-  CircularProgress,
-  TextField,
+  CircularProgress
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -40,15 +39,12 @@ const CitasCliente = () => {
   const [loading, setLoading] = useState(false);
   const [nombreServicio, setNombreServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState(null);
-  const [archivos, setArchivos] = useState([]); // Estado para los archivos
-  const [descripcionArchivos, setDescripcionArchivos] = useState(''); // Descripción opcional
   const navigate = useNavigate();
   const location = useLocation();
   const servicioId = location.state?.servicioId;
 
   // Validar servicioId
   useEffect(() => {
-    console.log('Validando servicioId:', { servicioId, locationState: location.state });
     if (!servicioId) {
       Swal.fire({
         icon: 'warning',
@@ -64,16 +60,16 @@ const CitasCliente = () => {
     const fetchServicioData = async () => {
       if (servicioId) {
         try {
-          console.log('Intentando cargar datos del servicio:', { servicioId, precio: location.state?.precio });
+          // Priorizar el precio recibido desde location.state si existe
           if (location.state?.precio !== undefined) {
             setPrecioServicio(location.state.precio);
-            setNombreServicio(location.state?.nombre_servicio || '');
+            setNombreServicio(location.state?.nombre_servicio || ''); // Usar nombre del state si existe
           } else {
-            const response = await axios.get(`http://localhost:3302/api/servicios/${servicioId}`);
+            // Si no hay precio en state, consultar al backend
+            const response = await axios.get(`https://backendcentro.onrender.com/api/servicios/${servicioId}`);
             setNombreServicio(response.data.nombre);
             setPrecioServicio(response.data.precio || 0);
           }
-          console.log('Datos del servicio cargados:', { nombreServicio, precioServicio });
         } catch (error) {
           console.error('Error al obtener los datos del servicio:', error);
           Swal.fire({
@@ -93,7 +89,6 @@ const CitasCliente = () => {
     const verificarUsuarioRegistrado = async () => {
       try {
         const usuario = localStorage.getItem('usuario');
-        console.log('Verificando usuario registrado:', { usuario });
         if (!usuario) {
           setUsuarioRegistrado(false);
           Swal.fire({
@@ -104,13 +99,12 @@ const CitasCliente = () => {
           }).then(() => navigate('/login'));
           return;
         }
-        const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
+        const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
         if (response.data.existe) {
           setUsuarioRegistrado(true);
           if (response.data.usuario && response.data.usuario.id) {
             setUsuarioId(response.data.usuario.id);
             localStorage.setItem('usuario_id', response.data.usuario.id);
-            console.log('Usuario verificado y ID asignado:', { usuarioId: response.data.usuario.id });
           }
         } else {
           setUsuarioRegistrado(false);
@@ -140,8 +134,7 @@ const CitasCliente = () => {
     const getDiasDisponibles = async () => {
       setLoading(true);
       try {
-        console.log('Obteniendo días disponibles para usuario registrado:', { usuarioRegistrado });
-        const response = await axios.get('http://localhost:3302/api/citasC/dias-disponibles');
+        const response = await axios.get('https://backendcentro.onrender.com/api/citasC/dias-disponibles');
         const diasConHorario = response.data;
         if (!Array.isArray(diasConHorario) || diasConHorario.length === 0) {
           throw new Error('No se encontraron días disponibles');
@@ -177,7 +170,6 @@ const CitasCliente = () => {
         });
 
         setDiasDisponibles(diasConFechas);
-        console.log('Días disponibles cargados:', diasConFechas.map(d => d.nombre));
       } catch (error) {
         console.error('Error al obtener los días disponibles:', error);
         Swal.fire({
@@ -199,10 +191,8 @@ const CitasCliente = () => {
     setSelectedDay(dia);
     setLoading(true);
     try {
-      console.log('Seleccionando día:', { dia, fecha, disponible });
-      const response = await axios.get(`http://localhost:3302/api/citasC/franjas/${dia}`);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${dia}`);
       setHorarios(response.data);
-      console.log('Horarios cargados para el día:', { dia, horarios: response.data });
     } catch (error) {
       console.error('Error al obtener las franjas horarias:', error);
       Swal.fire({
@@ -218,40 +208,7 @@ const CitasCliente = () => {
 
   // Seleccionar hora
   const handleSelectTime = (time, disponible) => {
-    if (disponible) {
-      console.log('Seleccionando hora:', { time, disponible });
-      setSelectedTime(time);
-    }
-  };
-
-  // Manejar cambio de archivos
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    console.log('Archivos seleccionados desde input:', files.map(f => f.name));
-    const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    const validFiles = files.filter(file => {
-      if (!validTypes.includes(file.type)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Formato no válido',
-          text: `El archivo ${file.name} no es una imagen (JPEG/PNG) ni un PDF.`,
-        });
-        return false;
-      }
-      if (file.size > maxSize) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Archivo demasiado grande',
-          text: `El archivo ${file.name} excede el tamaño máximo de 5MB.`,
-        });
-        return false;
-      }
-      return true;
-    });
-
-    console.log('Archivos válidos después de filtrado:', validFiles.map(f => f.name));
-    setArchivos(validFiles);
+    if (disponible) setSelectedTime(time);
   };
 
   // Verificar si la franja ha pasado
@@ -267,7 +224,6 @@ const CitasCliente = () => {
   // Manejar la acción de sacar cita
   const handleSacarCita = async () => {
     const usuario = localStorage.getItem('usuario');
-    console.log('Iniciando handleSacarCita:', { usuario, usuarioId, selectedDay, selectedTime, precioServicio, archivos: archivos.map(f => f.name) });
     if (!usuario || !usuarioId) {
       Swal.fire({
         icon: 'warning',
@@ -279,8 +235,7 @@ const CitasCliente = () => {
     }
 
     try {
-      const response = await axios.get(`http://localhost:3302/api/login/verificar-usuario/${usuario}`);
-      console.log('Respuesta de verificación de usuario:', response.data);
+      const response = await axios.get(`https://backendcentro.onrender.com/api/login/verificar-usuario/${usuario}`);
       if (!response.data.existe) {
         Swal.fire({
           icon: 'warning',
@@ -308,7 +263,7 @@ const CitasCliente = () => {
 
         // Validar disponibilidad de la franja
         try {
-          const responseHorarios = await axios.get(`http://localhost:3302/api/citasC/franjas/${selectedDay}`);
+          const responseHorarios = await axios.get(`https://backendcentro.onrender.com/api/citasC/franjas/${selectedDay}`);
           const horariosData = responseHorarios.data;
           const franjaValida = horariosData
             .flatMap(horario => horario.franjas)
@@ -339,6 +294,7 @@ const CitasCliente = () => {
         const diaSeleccionado = diasDisponibles.find(dia => dia.nombre === selectedDay);
         const fechaCita = format(diaSeleccionado.fecha, 'yyyy-MM-dd');
 
+        // Verificar que nombreServicio no esté vacío
         if (!nombreServicio || nombreServicio.trim() === '') {
           Swal.fire({
             icon: 'warning',
@@ -361,18 +317,6 @@ const CitasCliente = () => {
         });
 
         if (confirmacion.isConfirmed) {
-          console.log('Confirmación recibida, navegando con datos:', {
-            id_usuario: usuarioId,
-            id_servicio: servicioId,
-            nombre_servicio: nombreServicio,
-            dia: selectedDay,
-            fecha: fechaCita,
-            hora: selectedTime,
-            horaFin: franjaSeleccionada.hora_fin,
-            precio: precioServicio,
-            notas: descripcionArchivos || null,
-            archivos: archivos.map(f => f.name), // Log de nombres de archivos
-          });
           navigate('/cliente/metodoServicios', {
             state: {
               id_usuario: usuarioId,
@@ -383,8 +327,7 @@ const CitasCliente = () => {
               hora: selectedTime,
               horaFin: franjaSeleccionada.hora_fin,
               precio: precioServicio,
-              notas: descripcionArchivos || null,
-              archivos, // Pasar los archivos
+              notas: null,
             },
           });
         }
@@ -516,38 +459,6 @@ const CitasCliente = () => {
               )}
             </Box>
           )}
-
-          {/* Sección para cargar archivos */}
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FontAwesomeIcon icon={faUpload} /> Subir archivos (estudios, consultas, etc.)
-            </Typography>
-            <TextField
-              type="file"
-              inputProps={{ multiple: true, accept: 'image/jpeg,image/png,application/pdf' }}
-              onChange={handleFileChange}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Descripción de los archivos (opcional)"
-              multiline
-              rows={3}
-              value={descripcionArchivos}
-              onChange={(e) => setDescripcionArchivos(e.target.value)}
-              fullWidth
-            />
-            {archivos.length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2">Archivos seleccionados:</Typography>
-                <ul>
-                  {archivos.map((file, index) => (
-                    <li key={index}>{file.name}</li>
-                  ))}
-                </ul>
-              </Box>
-            )}
-          </Box>
 
           <Divider sx={{ my: 4 }} />
 

@@ -38,25 +38,11 @@ const MetodoPagoServicios = () => {
     horaFin,
     precio,
     notas,
-    archivos,
-    descripcionArchivos,
   } = location.state || {};
 
   // Validar datos recibidos
   useEffect(() => {
-    console.log('Datos recibidos en MetodoPagoServicios al montar:', {
-      id_usuario,
-      id_servicio,
-      nombre_servicio,
-      dia,
-      fecha,
-      hora,
-      horaFin,
-      precio,
-      notas,
-      archivos: archivos ? archivos.map(f => f.name) : null,
-      descripcionArchivos,
-    });
+    console.log('Datos recibidos en MetodoPagoServicios:', location.state);
     const missingFields = [];
     if (!id_usuario) missingFields.push('ID de usuario');
     if (!id_servicio) missingFields.push('ID del servicio');
@@ -68,24 +54,12 @@ const MetodoPagoServicios = () => {
     if (!precio) missingFields.push('Precio');
 
     if (missingFields.length > 0) {
-      console.error('Campos faltantes detectados:', missingFields);
       Swal.fire({
         icon: 'error',
         title: 'Datos incompletos',
         text: `Faltan los siguientes datos para procesar el pago: ${missingFields.join(', ')}. Por favor, regresa e intenta de nuevo.`,
         confirmButtonText: 'Entendido',
       }).then(() => navigate('/cliente/CitasCliente', { state: { servicioId: id_servicio || location.state?.servicioId } }));
-    } else {
-      console.log('Todos los campos requeridos están presentes:', {
-        id_usuario,
-        id_servicio,
-        nombre_servicio,
-        dia,
-        fecha,
-        hora,
-        horaFin,
-        precio,
-      });
     }
   }, [id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, precio, navigate]);
 
@@ -115,52 +89,10 @@ const MetodoPagoServicios = () => {
 
   const handleSelectMethod = (event) => {
     const methodId = event.target.value;
-    console.log('Método de pago seleccionado:', { methodId, selectedRoute: paymentMethods.find(m => m.id === methodId)?.route });
     setSelectedMethod(methodId);
     const selectedRoute = paymentMethods.find((m) => m.id === methodId)?.route;
 
     if (selectedRoute) {
-      // Guardar datos en sessionStorage antes de la navegación
-      console.log('Guardando datos en sessionStorage:', {
-        id_usuario,
-        id_servicio,
-        nombre_servicio,
-        dia,
-        fecha,
-        hora,
-        horaFin,
-        precio,
-        notas,
-        archivos: archivos ? archivos.map(f => f.name) : null,
-        descripcionArchivos,
-      });
-      sessionStorage.setItem('citaData', JSON.stringify({
-        id_usuario,
-        id_servicio,
-        nombre_servicio,
-        dia,
-        fecha,
-        hora,
-        horaFin,
-        precio,
-        notas,
-        archivos: archivos ? Array.from(archivos) : null, // Convertir FileList a Array para persistencia
-        descripcionArchivos,
-      }));
-
-      console.log('Datos enviados a la ruta seleccionada:', {
-        id_usuario,
-        id_servicio,
-        nombre_servicio,
-        dia,
-        fecha,
-        hora,
-        horaFin,
-        precio,
-        notas,
-        archivos: archivos ? archivos.map(f => f.name) : null,
-        descripcionArchivos,
-      });
       navigate(selectedRoute, {
         state: {
           id_usuario,
@@ -172,12 +104,8 @@ const MetodoPagoServicios = () => {
           horaFin,
           precio,
           notas,
-          archivos,
-          descripcionArchivos,
         },
       });
-    } else {
-      console.error('Ruta no encontrada para el método seleccionado:', methodId);
     }
   };
 
@@ -295,18 +223,6 @@ const MetodoPagoServicios = () => {
                   <Typography variant="body2" color="textSecondary">
                     Notas: {notas}
                   </Typography>
-                )}
-                {archivos && archivos.length > 0 && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      Archivos adjuntos:
-                    </Typography>
-                    <ul>
-                      {archivos.map((file, index) => (
-                        <li key={index}>{file.name}</li>
-                      ))}
-                    </ul>
-                  </Box>
                 )}
               </Box>
 
