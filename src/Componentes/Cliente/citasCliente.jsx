@@ -357,7 +357,7 @@ const CitasCliente = () => {
               formData.append('usuario_id', usuarioId);
               formData.append('descripcion', 'Archivos subidos para cita');
 
-              await axios.post('http://localhost:3302/api/citasC/guardar-archivos', formData, {
+              await axios.post('https://backendcentro.onrender.com/api/citasC/guardar-archivos', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
               });
             } catch (error) {
