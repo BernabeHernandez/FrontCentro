@@ -263,77 +263,99 @@ const MercadoPagoServicio = () => {
     const query = new URLSearchParams(location.search);
     const status = query.get('status');
     const externalReference = query.get('external_reference');
+    const paymentId = query.get('payment_id'); // Obtener el payment_id del retorno de Mercado Pago
 
     if (status && externalReference && !processed) {
-      console.log('Procesando resultado de pago:', { status, externalReference });
+      console.log('Procesando resultado de pago:', { status, externalReference, paymentId });
       setProcessed(true);
 
-      if (status === 'success' || status === 'approved') {
-        try {
-          let refData;
+      const handlePaymentResult = async () => {
+        if (status === 'success' || status === 'approved') {
           try {
-            refData = JSON.parse(decodeURIComponent(externalReference));
-          } catch (parseError) {
-            console.error('Error al parsear external_reference:', parseError);
-            throw new Error('Formato de external_reference inválido');
-          }
-          console.log('Datos de external_reference:', refData);
+            let refData;
+            try {
+              refData = JSON.parse(decodeURIComponent(externalReference));
+            } catch (parseError) {
+              console.error('Error al parsear external_reference:', parseError);
+              throw new Error('Formato de external_reference inválido');
+            }
+            console.log('Datos de external_reference:', refData);
 
-          if (refData.tipo !== 'servicio') {
-            console.error('Tipo de external_reference no es servicio:', refData.tipo);
-            throw new Error('Tipo de pago inválido');
-          }
+            if (refData.tipo !== 'servicio') {
+              console.error('Tipo de external_reference no es servicio:', refData.tipo);
+              throw new Error('Tipo de pago inválido');
+            }
 
-          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = refData;
-          const citaData = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
-          console.log('Validando citaData:', citaData);
+            const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = refData;
+            const citaData = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
+            console.log('Validando citaData:', citaData);
 
-          if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio) {
-            throw new Error('Faltan datos en external_reference para registrar la cita');
-          }
+            if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio) {
+              throw new Error('Faltan datos en external_reference para registrar la cita');
+            }
 
-          registrarCita(citaData, horarios, setHorarios)
-            .then(() => {
-              console.log('Cita registrada exitosamente');
-              return generarPDF(
-                localStorage.getItem('usuario') || 'Usuario',
-                id_usuario,
-                fecha,
-                hora,
-                nombre_servicio
-              );
-            })
-            .then(() => {
-              console.log('PDF generado exitosamente');
-              Swal.fire({
-                title: 'Pago Exitoso',
-                text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.`,
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-              });
-              navigate('/cliente/CitasCliente', {
-                state: { servicioId: id_servicio },
-                replace: true,
-              });
-            })
-            .catch((error) => {
-              console.error('Error en el flujo de pago:', error);
-              Swal.fire({
-                title: 'Error',
-                text: error.message || 'Ocurrió un error al confirmar la cita. Por favor, intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-              });
-              navigate('/CitasCliente', {
-                state: { servicioId: id_servicio },
-                replace: true,
-              });
+            // Confirmar el pago en el backend con id_pago y metodo_pago
+            await axios.put('https://backendcentro.onrender.com/api/citasC/confirmar-cita-pago', {
+              citaId: refData.citaId || id_servicio, // Ajusta según cómo generes el citaId
+              paymentId: paymentId,
+              metodoPago: 'Mercado Pago',
             });
-        } catch (error) {
-          console.error('Error al procesar el resultado del pago:', error);
+
+            registrarCita(citaData, horarios, setHorarios)
+              .then(() => {
+                console.log('Cita registrada exitosamente');
+                return generarPDF(
+                  localStorage.getItem('usuario') || 'Usuario',
+                  id_usuario,
+                  fecha,
+                  hora,
+                  nombre_servicio
+                );
+              })
+              .then(() => {
+                console.log('PDF generado exitosamente');
+                Swal.fire({
+                  title: 'Pago Exitoso',
+                  text: `Cita confirmada para ${nombre_servicio}. Comprobante generado.`,
+                  icon: 'success',
+                  confirmButtonText: 'Aceptar',
+                });
+                navigate('/cliente/CitasCliente', {
+                  state: { servicioId: id_servicio },
+                  replace: true,
+                });
+              })
+              .catch((error) => {
+                console.error('Error en el flujo de pago:', error);
+                Swal.fire({
+                  title: 'Error',
+                  text: error.message || 'Ocurrió un error al confirmar la cita. Por favor, intenta nuevamente.',
+                  icon: 'error',
+                  confirmButtonText: 'Aceptar',
+                });
+                navigate('/CitasCliente', {
+                  state: { servicioId: id_servicio },
+                  replace: true,
+                });
+              });
+          } catch (error) {
+            console.error('Error al procesar el resultado del pago:', error);
+            Swal.fire({
+              title: 'Error',
+              text: error.message || 'Error al procesar el pago.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar',
+            });
+            navigate('/CitasCliente', {
+              state: { servicioId: id_servicio },
+              replace: true,
+            });
+          }
+        } else {
+          console.error('Estado del pago no es success:', status);
           Swal.fire({
             title: 'Error',
-            text: error.message || 'Error al procesar el pago.',
+            text: `El pago no se completó correctamente (estado: ${status}).`,
             icon: 'error',
             confirmButtonText: 'Aceptar',
           });
@@ -342,19 +364,9 @@ const MercadoPagoServicio = () => {
             replace: true,
           });
         }
-      } else {
-        console.error('Estado del pago no es success:', status);
-        Swal.fire({
-          title: 'Error',
-          text: `El pago no se completó correctamente (estado: ${status}).`,
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-        navigate('/CitasCliente', {
-          state: { servicioId: id_servicio },
-          replace: true,
-        });
-      }
+      };
+
+      handlePaymentResult();
     }
   }, [location, navigate, id_usuario, id_servicio, nombre_servicio, dia, fecha, hora, horaFin, horarios, processed]);
 
