@@ -62,8 +62,8 @@ const DeslindeF = () => {
             {deslinde.contenido}
           </Typography>
 
-          {deslinde.subtitulos && deslinde.subtitulos.length > 0 ? (
-            deslinde.subtitulos.map((section, index) => (
+          {deslinde.secciones && deslinde.secciones.length > 0 ? (
+            deslinde.secciones.map((section, index) => (
               <Box key={index} sx={{ mt: 4 }}>
                 <Typography variant="h5" component="h3" sx={{ color: '#007bff', mb: 2 }}>
                   {section.titulo}
