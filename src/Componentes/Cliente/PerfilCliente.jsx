@@ -191,7 +191,7 @@ const PerfilCliente = () => {
   const cancelarCita = (citaId) => {
     Swal.fire({
       title: "¿Cancelar esta cita?",
-      text: "Esta acción no se puede deshacer.",
+      text: "Esta acción no se puede deshacer. No se realizará reembolso. Para más información, consulta Atención al cliente en el Centro de Rehabilitación Integral SanJuan.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -200,7 +200,7 @@ const PerfilCliente = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .put(`https://backendcentro.onrender.com/api/citascompletaspendientes/cancelar/${citaId}`)
+          .put(`http://localhost:3302/api/citascompletaspendientes/cancelar/${citaId}`)
           .then(() => {
             Swal.fire("Cancelada", "Tu cita ha sido cancelada.", "success");
             setCitasPendientes((prev) => prev.filter((c) => c.id !== citaId));
