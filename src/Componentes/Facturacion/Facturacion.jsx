@@ -73,7 +73,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 const CompanyInfo = () => (
   <Box sx={{ mb: 4, p: 3, backgroundColor: "#f1f5f9", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
     <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1e293b", mb: 2, fontSize: "1.25rem" }}>
-      Centro de Rehabilitación Sepia
+      Centro de Rehabilitación Integral SanJuan
     </Typography>
     <Typography variant="body2" sx={{ color: "#475569", mb: 1, fontSize: "0.9rem" }}>
       Calle Clavel, Col. Valle del Encinal, Huejutla, Mexico
