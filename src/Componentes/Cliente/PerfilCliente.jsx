@@ -200,7 +200,7 @@ const PerfilCliente = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .put(`http://localhost:3302/api/citascompletaspendientes/cancelar/${citaId}`)
+          .put(`https://backendcentro.onrender.com/api/citascompletaspendientes/cancelar/${citaId}`)
           .then(() => {
             Swal.fire("Cancelada", "Tu cita ha sido cancelada.", "success");
             setCitasPendientes((prev) => prev.filter((c) => c.id !== citaId));
