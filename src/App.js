@@ -81,6 +81,7 @@ import PayPalServicio from './Componentes/FormaPago/PayPalServicio';
 import MercadoPagoServicio from './Componentes/FormaPago/MercadoPagoServicio';
 import HistorialClinico from './Componentes/Administrativo/HistorialClinico/HistorialClinico';
 import DetalleHistorial from './Componentes/Administrativo/HistorialClinico/DetalleHistorial';
+import Facturacion from './Componentes/Facturacion/Facturacion';
 
 const App = () => {
   return (
@@ -154,6 +155,7 @@ const App = () => {
 
             <Route path="/cliente/pago-servicio/paypal" element={<ProtectedRoute allowedRoles={['Cliente']}><PayPalServicio /></ProtectedRoute>} />  
             <Route path="/cliente/pago-servicio/mercadopago" element={<ProtectedRoute allowedRoles={['Cliente']}><MercadoPagoServicio /></ProtectedRoute>} />   
+            <Route path="/cliente/facturacion/:id" element={<ProtectedRoute allowedRoles={['Cliente']}><Facturacion /></ProtectedRoute>} />  
 
             {/* Rutas públicas */}
             <Route path="/verificar_correo" element={<SolicitarCodigo />} />

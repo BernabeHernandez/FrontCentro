@@ -127,7 +127,7 @@ const Ventas = () => {
               </TableCell>
               <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Payment sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> ID Pago
+                  <Payment sx={{ mr: 1, color: '#388e3c', fontSize: '1.2rem' }} /> Método de Pago
                 </Box>
               </TableCell>
               <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>
@@ -166,7 +166,7 @@ const Ventas = () => {
                   }}
                 >
                   <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.id}</TableCell>
-                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.id_pago}</TableCell>
+                  <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>{venta.metodo_pago}</TableCell>
                   <TableCell sx={{ borderBottom: '1px solid #e0e0e0' }}>
                     {new Date(venta.fecha_venta).toLocaleDateString()}
                   </TableCell>

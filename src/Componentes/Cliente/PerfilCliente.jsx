@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import {
@@ -28,6 +29,7 @@ import {
   Edit,
   Save,
   Cancel,
+  Receipt as ReceiptIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 
@@ -121,6 +123,7 @@ const PerfilCliente = () => {
   const [loading, setLoading] = useState(true);
   const [citasPendientes, setCitasPendientes] = useState([]);
   const [citasCompletadas, setCitasCompletadas] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!usuarioId) {
@@ -578,6 +581,19 @@ const PerfilCliente = () => {
             )}
           </CardContent>
         </StyledCard>
+
+        {/* Botón de Facturación */}
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ReceiptIcon />}
+            onClick={() => navigate(`/cliente/facturacion/${usuarioId}`)}
+            sx={{ borderRadius: 20, px: 4, textTransform: "none" }}
+          >
+            Ver Facturación
+          </Button>
+        </Box>
       </Container>
     </Fade>
   );
