@@ -185,7 +185,7 @@ const normalizarHora = hora => {
 // Función para registrar la cita en la base de datos
 const registrarCita = async (citaData, horarios, setHorarios) => {
   try {
-    const { id_usuario, id_servicio, dia, fecha, hora, horaFin, id_pago, metodo_pago } = citaData;
+    const { id_usuario, id_servicio, dia, fecha, hora, horaFin } = citaData;
     console.log('Datos enviados a registrarCita:', citaData);
 
     const horaNormalizada = normalizarHora(hora);
@@ -221,8 +221,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       usuario_id: id_usuario,
       fecha_cita: fecha,
       servicio_id: id_servicio,
-      id_pago,
-      metodo_pago,
+      estado: 'confirmada',
     }, {
       headers: {
         'Content-Type': 'application/json',
@@ -264,10 +263,9 @@ const MercadoPagoServicio = () => {
     const query = new URLSearchParams(location.search);
     const status = query.get('status');
     const externalReference = query.get('external_reference');
-    const paymentId = query.get('payment_id'); // Capturamos el payment_id de MercadoPago
 
-    if (status && externalReference && paymentId && !processed) {
-      console.log('Procesando resultado de pago:', { status, externalReference, paymentId });
+    if (status && externalReference && !processed) {
+      console.log('Procesando resultado de pago:', { status, externalReference });
       setProcessed(true);
 
       if (status === 'success' || status === 'approved') {
@@ -286,21 +284,12 @@ const MercadoPagoServicio = () => {
             throw new Error('Tipo de pago inválido');
           }
 
-          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio, metodo_pago } = refData;
-          const citaData = { 
-            id_usuario, 
-            id_servicio, 
-            dia, 
-            fecha, 
-            hora, 
-            horaFin,
-            id_pago: paymentId, // Incluimos el payment_id como id_pago
-            metodo_pago: metodo_pago || 'mercadopago' // Usamos el metodo_pago del external_reference o 'mercadopago' por defecto
-          };
+          const { id_usuario, id_servicio, dia, fecha, hora, horaFin, nombre_servicio } = refData;
+          const citaData = { id_usuario, id_servicio, dia, fecha, hora, horaFin };
           console.log('Validando citaData:', citaData);
 
-          if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio || !paymentId) {
-            throw new Error('Faltan datos en external_reference o payment_id para registrar la cita');
+          if (!id_usuario || !id_servicio || !dia || !fecha || !hora || !nombre_servicio) {
+            throw new Error('Faltan datos en external_reference para registrar la cita');
           }
 
           registrarCita(citaData, horarios, setHorarios)
