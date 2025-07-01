@@ -5,8 +5,8 @@ import {
   Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, Collapse, Toolbar, AppBar
 } from '@mui/material';
 import {
-  Home as HomeIcon, Logout as LogoutIcon, Description as FileTextIcon, Group as TeamIcon, Menu as MenuIcon, ExpandMore, ExpandLess,
-  Apps as AppsIcon, LocalShipping as DeliveryIcon
+  Home as HomeIcon, Logout as LogoutIcon, Description as FileTextIcon, AdminPanelSettings  as TeamIcon, Menu as MenuIcon, ExpandMore, ExpandLess,
+  ManageAccounts as AppsIcon, LocalShipping as DeliveryIcon,   SupervisorAccount as PatientAssistIcon, Security as AuditIcon, BarChart    as SalesReportIcon
 } from '@mui/icons-material';
 
 const EncabezadoAdministrativo = () => {
@@ -64,6 +64,7 @@ const EncabezadoAdministrativo = () => {
       case "detalleventas": navigate('/admin/detalleventas'); break;
       case "detallecitas": navigate('/admin/detallecitas'); break;
       case "entregaproductos": navigate('/admin/entregaproductos'); break;
+      case "asistenciapaciente": navigate('/admin/asistenciaPaciente'); break;
       case "cerrarSesion": handleLogout(); break;
       default: console.log("No se reconoce la acción del menú");
     }
@@ -121,7 +122,7 @@ const EncabezadoAdministrativo = () => {
     {
       key: 'actividades',
       label: 'Registro de Actividades',
-      icon: <AppsIcon sx={{ color: '#00CED1', fontSize: 20 }} />,
+      icon: <AuditIcon sx={{ color: '#00CED1', fontSize: 20 }} />,
       subItems: [
         { key: 'activity-log', label: 'Registro de Logeos' },
         { key: 'registro-password', label: 'Registro de Contraseña' },
@@ -131,7 +132,7 @@ const EncabezadoAdministrativo = () => {
     {
       key: 'ventasa',
       label: 'Reporte de Ventas',
-      icon: <AppsIcon sx={{ color: '#FF69B4', fontSize: 20 }} />,
+      icon: <SalesReportIcon sx={{ color: '#FF69B4', fontSize: 20 }} />,
       subItems: [
         { key: 'ventas', label: 'Ventas' },
         { key: 'detalleventas', label: 'Detalle de las Ventas' },
@@ -140,6 +141,7 @@ const EncabezadoAdministrativo = () => {
     },
     { key: 'roles', label: 'Roles', icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 20 }} /> },
     { key: 'entregaproductos', label: 'Entrega de Productos', icon: <DeliveryIcon sx={{ color: '#3CB371', fontSize: 20 }} /> },
+    { key: 'asistenciapaciente', label: 'Asistencia de Pacientes', icon: <PatientAssistIcon sx={{ color: '#DC143C', fontSize: 20 }} /> },
     { key: 'cerrarSesion', label: 'Cerrar Sesión', icon: <LogoutIcon sx={{ color: '#FF4500', fontSize: 20 }} /> },
   
   ];
