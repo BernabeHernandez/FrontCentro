@@ -29,7 +29,7 @@ import {
   Edit,
   Save,
   Cancel,
-  Receipt as ReceiptIcon,
+  Receipt as ReceiptIcon, ShoppingBag as ShoppingBagIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 
@@ -587,13 +587,24 @@ const PerfilCliente = () => {
           <Button
             variant="contained"
             color="primary"
-            startIcon={<ReceiptIcon />}
+            startIcon={<ReceiptIcon sx={{ color: "#ffeb3b" }} />} // Amarillo
             onClick={() => navigate(`/cliente/facturacion/${usuarioId}`)}
             sx={{ borderRadius: 20, px: 4, textTransform: "none" }}
           >
             Ver Facturación
           </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ShoppingBagIcon sx={{ color: "#ff9800" }} />}
+            onClick={() => navigate(`/cliente/misCompras/${usuarioId}`)}
+            sx={{ borderRadius: 20, px: 4, textTransform: "none", ml: 2 }}
+          >
+            Ver mis compras
+          </Button>
         </Box>
+
       </Container>
     </Fade>
   );

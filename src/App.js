@@ -84,6 +84,7 @@ import DetalleHistorial from './Componentes/Administrativo/HistorialClinico/Deta
 import Facturacion from './Componentes/Facturacion/Facturacion';
 import AsistenciaPaciente from './Componentes/Administrativo/AsistenciaPaciente/AsistenciaPaciente';
 import EntregaProductos from './Componentes/Administrativo/EntregaProductos/EntregaProductos';
+import MisCompras from './Componentes/Cliente/Compras/MisCompras';
 
 const App = () => {
   return (
@@ -161,6 +162,7 @@ const App = () => {
             <Route path="/cliente/pago-servicio/paypal" element={<ProtectedRoute allowedRoles={['Cliente']}><PayPalServicio /></ProtectedRoute>} />  
             <Route path="/cliente/pago-servicio/mercadopago" element={<ProtectedRoute allowedRoles={['Cliente']}><MercadoPagoServicio /></ProtectedRoute>} />   
             <Route path="/cliente/facturacion/:id" element={<ProtectedRoute allowedRoles={['Cliente']}><Facturacion /></ProtectedRoute>} />  
+            <Route path="/cliente/misCompras/:idUsuario" element={<ProtectedRoute allowedRoles={['Cliente']}><MisCompras /></ProtectedRoute>} />  
 
             {/* Rutas públicas */}
             <Route path="/verificar_correo" element={<SolicitarCodigo />} />
