@@ -83,6 +83,7 @@ import HistorialClinico from './Componentes/Administrativo/HistorialClinico/Hist
 import DetalleHistorial from './Componentes/Administrativo/HistorialClinico/DetalleHistorial';
 import Facturacion from './Componentes/Facturacion/Facturacion';
 import AsistenciaPaciente from './Componentes/Administrativo/AsistenciaPaciente/AsistenciaPaciente';
+import EntregaProductos from './Componentes/Administrativo/EntregaProductos/EntregaProductos';
 
 const App = () => {
   return (
@@ -126,7 +127,9 @@ const App = () => {
            <Route path="/admin/detallecitas" element={<ProtectedRoute allowedRoles={['Administrador']}><DetalleCitas /></ProtectedRoute>} />
            <Route path="/admin/historial" element={<ProtectedRoute allowedRoles={['Administrador']}><HistorialClinico /></ProtectedRoute>} />
            <Route path="/admin/detallehistorial/:id" element={<ProtectedRoute allowedRoles={['Administrador']}><DetalleHistorial /></ProtectedRoute>} />
-            <Route path="/admin/asistenciaPaciente" element={<ProtectedRoute allowedRoles={['Administrador']}><AsistenciaPaciente /></ProtectedRoute>} />
+           <Route path="/admin/asistenciaPaciente" element={<ProtectedRoute allowedRoles={['Administrador']}><AsistenciaPaciente /></ProtectedRoute>} />
+           <Route path="/admin/entregaproductos" element={<ProtectedRoute allowedRoles={['Administrador']}><EntregaProductos /></ProtectedRoute>} />
+
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
             <Route path="/cliente/terminos-condiciones" element={<ProtectedRoute allowedRoles={['Cliente']}><TerminosF /></ProtectedRoute>} />
