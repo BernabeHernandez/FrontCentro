@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
   Home as HomeIcon, Logout as LogoutIcon, Description as FileTextIcon, Group as TeamIcon, Menu as MenuIcon, ExpandMore, ExpandLess,
-  Apps as AppsIcon
+  Apps as AppsIcon, LocalShipping as DeliveryIcon
 } from '@mui/icons-material';
 
 const EncabezadoAdministrativo = () => {
@@ -63,6 +63,7 @@ const EncabezadoAdministrativo = () => {
       case "ventas": navigate('/admin/ventas'); break;
       case "detalleventas": navigate('/admin/detalleventas'); break;
       case "detallecitas": navigate('/admin/detallecitas'); break;
+      case "entregaproductos": navigate('/admin/entregaproductos'); break;
       case "cerrarSesion": handleLogout(); break;
       default: console.log("No se reconoce la acción del menú");
     }
@@ -138,7 +139,9 @@ const EncabezadoAdministrativo = () => {
       ]
     },
     { key: 'roles', label: 'Roles', icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 20 }} /> },
+    { key: 'entregaproductos', label: 'Entrega de Productos', icon: <DeliveryIcon sx={{ color: '#3CB371', fontSize: 20 }} /> },
     { key: 'cerrarSesion', label: 'Cerrar Sesión', icon: <LogoutIcon sx={{ color: '#FF4500', fontSize: 20 }} /> },
+  
   ];
 
   const drawerContent = (

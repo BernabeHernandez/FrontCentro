@@ -82,6 +82,7 @@ import MercadoPagoServicio from './Componentes/FormaPago/MercadoPagoServicio';
 import HistorialClinico from './Componentes/Administrativo/HistorialClinico/HistorialClinico';
 import DetalleHistorial from './Componentes/Administrativo/HistorialClinico/DetalleHistorial';
 import Facturacion from './Componentes/Facturacion/Facturacion';
+import AsistenciaPaciente from './Componentes/Administrativo/AsistenciaPaciente/AsistenciaPaciente';
 
 const App = () => {
   return (
@@ -125,6 +126,7 @@ const App = () => {
            <Route path="/admin/detallecitas" element={<ProtectedRoute allowedRoles={['Administrador']}><DetalleCitas /></ProtectedRoute>} />
            <Route path="/admin/historial" element={<ProtectedRoute allowedRoles={['Administrador']}><HistorialClinico /></ProtectedRoute>} />
            <Route path="/admin/detallehistorial/:id" element={<ProtectedRoute allowedRoles={['Administrador']}><DetalleHistorial /></ProtectedRoute>} />
+            <Route path="/admin/entregaproductos" element={<ProtectedRoute allowedRoles={['Administrador']}><AsistenciaPaciente /></ProtectedRoute>} />
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />
             <Route path="/cliente/terminos-condiciones" element={<ProtectedRoute allowedRoles={['Cliente']}><TerminosF /></ProtectedRoute>} />
