@@ -152,26 +152,28 @@ function Login() {
         captchaToken,
       });
 
-      const { tipo, qrCodeUrl, message, id_usuario } = response.data;
+      const { tipo, id_usuario } = response.data;
 
-      if (qrCodeUrl) {
-        navigate("/codigo-mfa", {
-          state: {
-            qrCodeUrl,
-            user: username,
-            tipo,
-            id: id_usuario,
-          },
-        });
-        return;
-      }
-
+      // Guardar datos en localStorage
       localStorage.setItem("usuario", username);
       localStorage.setItem("usuario_id", id_usuario);
+      localStorage.setItem("rol", tipo);
 
+      // Llamar a la función de login del contexto de autenticación
       login({ user: username, id: id_usuario, tipo });
 
-      navigate("/citas");
+      // Redirigir según el rol
+      const ruta = tipo === "Administrador" ? "/admin" : "/cliente";
+
+      MySwal.fire({
+        position: "center",
+        icon: "success",
+        title: "Has iniciado sesión correctamente.",
+        showConfirmButton: false,
+        timer: 2000,
+      }).then(() => {
+        navigate(ruta);
+      });
     } catch (error) {
       if (error.response) {
         const { lockTimeLeft, attemptsLeft, error: serverError } = error.response.data;
