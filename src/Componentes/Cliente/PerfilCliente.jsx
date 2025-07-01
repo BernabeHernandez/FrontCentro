@@ -213,15 +213,47 @@ const PerfilCliente = () => {
     });
   };
 
-  const formatearFecha = (fechaISO) => {
-    const fecha = new Date(fechaISO);
-    return fecha.toLocaleDateString("es-ES", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+const formatearFecha = (fechaISO) => {
+  // Verificar si fechaISO es válida
+  if (!fechaISO || typeof fechaISO !== "string") {
+    console.warn("Fecha inválida recibida:", fechaISO);
+    return "Fecha no disponible";
+  }
+
+  let fecha;
+  if (fechaISO.includes("T")) {
+    // Formato ISO completo, como 2025-07-05T00:00:00Z
+    // Extraer solo la parte de la fecha (yyyy-MM-dd)
+    const [datePart] = fechaISO.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    if (!year || !month || !day) {
+      console.warn("Formato de fecha inválido:", fechaISO);
+      return "Fecha no válida";
+    }
+    fecha = new Date(year, month - 1, day); // Crear fecha local
+  } else {
+    // Formato yyyy-MM-dd
+    const [year, month, day] = fechaISO.split("-").map(Number);
+    if (!year || !month || !day) {
+      console.warn("Formato de fecha inválido:", fechaISO);
+      return "Fecha no válida";
+    }
+    fecha = new Date(year, month - 1, day); // Crear fecha local
+  }
+
+  // Verificar si la fecha es válida
+  if (isNaN(fecha.getTime())) {
+    console.warn("No se pudo parsear la fecha:", fechaISO);
+    return "Fecha no válida";
+  }
+
+  return fecha.toLocaleDateString("es-ES", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
   const getInitials = (name) => {
     const parts = name.split(" ").filter(part => part.length > 0);
