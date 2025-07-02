@@ -292,10 +292,6 @@ const EncabezadoPublico = () => {
               <ShoppingCart style={{ color: '#9C27B0' }} />
               Carrito
             </li>
-            <li className={active === 'ayuda' ? 'active' : ''} onClick={() => { handleClick('ayuda'); handleMenuClick('ayuda'); }}>
-              <HelpOutline style={{ color: '#00BCD4' }} />
-              Ayuda
-            </li>
             <li className={active === 'login' ? 'active' : ''} onClick={() => { handleClick('login'); handleMenuClick('login'); }}>
               <Login style={{ color: '#F44336' }} />
               Iniciar sesión

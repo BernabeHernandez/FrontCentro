@@ -16,6 +16,9 @@ import {
   Star,
   ShoppingBag,
 } from "@mui/icons-material"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../Componentes/Autenticacion/AuthContext"
+import Swal from "sweetalert2"
 
 // Importación de imágenes
 import product1 from "../Componentes/Imagenes/Image2.png"
@@ -144,115 +147,172 @@ const ResponsiveImage = styled("img")({
 })
 
 function PaginaPrincipalCliente() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [mision, setMision] = useState("")
   const [vision, setVision] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [usuarioRegistrado, setUsuarioRegistrado] = useState(false)
+useEffect(() => {
+  const verificarUsuario = async () => {
+    console.log('Usuario desde contexto:', user)
+    console.log('localStorage:', {
+      usuario: localStorage.getItem('usuario'),
+      usuario_id: localStorage.getItem('usuario_id'),
+      rol: localStorage.getItem('rol'),
+      user: localStorage.getItem('user')
+    })
+
+    if (!user || !user.user) {
+      console.warn('No hay usuario o user.user en el contexto')
+      setUsuarioRegistrado(false)
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acceso restringido',
+        text: 'Necesitas iniciar sesión para acceder a esta página.',
+        confirmButtonText: 'Entendido',
+      }).then(() => navigate('/login'))
+      return
+    }
+
+    try {
+      console.log('Verificando usuario en backend:', user.user)
+      const response = await axios.get(
+        `https://backendcentro.onrender.com/api/login/verificar-usuario/${user.user}`
+      )
+      console.log('Respuesta del backend:', response.data)
+      if (response.data.existe) { // Cambiar "success" por "existe"
+        localStorage.setItem('usuario_id', response.data.usuario.id)
+        setUsuarioRegistrado(true)
+      } else {
+        console.error('Verificación fallida:', response.data)
+        setUsuarioRegistrado(false)
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo verificar el usuario.',
+          confirmButtonText: 'Entendido',
+        }).then(() => navigate('/login'))
+      }
+    } catch (error) {
+      console.error('Error al verificar usuario:', error.response?.data || error.message)
+      setUsuarioRegistrado(false)
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al verificar el usuario. Por favor, intenta de nuevo.',
+        confirmButtonText: 'Entendido',
+      }).then(() => navigate('/login'))
+    }
+  }
+
+  verificarUsuario()
+}, [user, navigate])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        const misionResponse = await axios.get("https://backendcentro.onrender.com/api/misionA/mision");
-        const visionResponse = await axios.get("https://backendcentro.onrender.com/api/visionA/vision");
-  
+        setLoading(true)
+        const misionResponse = await axios.get("https://backendcentro.onrender.com/api/misionA/mision")
+        const visionResponse = await axios.get("https://backendcentro.onrender.com/api/visionA/vision")
+
         // Extraer los datos
-        const misionData = misionResponse.data;
-        const visionData = visionResponse.data;
-  
+        const misionData = misionResponse.data
+        const visionData = visionResponse.data
+
         // Asegurar que los datos sean arrays y extraer el contenido
         if (Array.isArray(misionData) && misionData.length > 0) {
-          setMision(misionData[0].contenido); // Acceder al primer objeto y obtener "contenido"
+          setMision(misionData[0].contenido)
         } else {
-          setMision("Información no disponible"); // Manejo de error si el array está vacío
+          setMision("Información no disponible")
         }
-  
+
         if (Array.isArray(visionData) && visionData.length > 0) {
-          setVision(visionData[0].contenido);
+          setVision(visionData[0].contenido)
         } else {
-          setVision("Información no disponible");
+          setVision("Información no disponible")
         }
-  
-        setLoading(false);
+
+        setLoading(false)
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Error al cargar los datos. Por favor, intente nuevamente más tarde.");
-        setLoading(false);
+        console.error("Error fetching data:", err)
+        setError("Error al cargar los datos. Por favor, intente nuevamente más tarde.")
+        setLoading(false)
       }
-    };
-  
-    fetchData();
-  }, []);
-  
+    }
+
+    if (usuarioRegistrado) {
+      fetchData()
+    }
+  }, [usuarioRegistrado])
+
+  if (!usuarioRegistrado) {
+    return null
+  }
 
   return (
     <Box component="main" sx={{ display: "flex", flexDirection: "column" }}>
       {/* Hero Section */}
       <Box sx={{ position: "relative", height: { xs: "500px", md: "600px" }, overflow: "hidden" }}>
-  {/* Capa de superposición para mejorar la legibilidad del texto */}
-  <Box
-    sx={{
-      position: "absolute",
-      inset: 0,
-      background: "linear-gradient(to right, rgba(27, 28, 28, 0.8), rgba(30, 30, 30, 0.7))",
-      zIndex: 10,
-    }}
-  />
-  
-  {/* Imagen de fondo */}
-  {imageForBlackBackground3 && (
-    <Box sx={{ position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }}>
-      <img
-        src={imageForBlackBackground3}
-        alt="Centro de Rehabilitación"
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-        }}
-      />
-    </Box>
-  )}
-
-  {/* Contenido encima de la imagen */}
-  <Container
-    sx={{
-      position: "relative",
-      zIndex: 20,
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      px: { xs: 2, sm: 4 },
-      textAlign: "center",
-    }}
-  >
-    <Typography
-      variant="h1"
-      sx={{
-        fontSize: { xs: "2.25rem", md: "3rem", lg: "3.75rem" },
-        fontWeight: 700,
-        color: "white",
-        mb: 2,
-      }}
-    >
-      Centro de Rehabilitación Integral San Juan
-    </Typography>
-    <Typography
-      variant="h5"
-      sx={{
-        fontSize: { xs: "1.25rem", md: "1.5rem" },
-        color: "rgba(255, 255, 255, 0.9)",
-        maxWidth: "32rem",
-        mb: 4,
-        mx: "auto",
-      }}
-    >
-      Especialistas en rehabilitación física y tratamientos terapéuticos para mejorar tu calidad de vida.
-    </Typography>
-  </Container>
-</Box>
-
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to right, rgba(27, 28, 28, 0.8), rgba(30, 30, 30, 0.7))",
+            zIndex: 10,
+          }}
+        />
+        {imageForBlackBackground3 && (
+          <Box sx={{ position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }}>
+            <img
+              src={imageForBlackBackground3}
+              alt="Centro de Rehabilitación"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </Box>
+        )}
+        <Container
+          sx={{
+            position: "relative",
+            zIndex: 20,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: { xs: 2, sm: 4 },
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            variant="h1"
+            sx={{
+              fontSize: { xs: "2.25rem", md: "3rem", lg: "3.75rem" },
+              fontWeight: 700,
+              color: "white",
+              mb: 2,
+            }}
+          >
+            Centro de Rehabilitación Integral San Juan
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontSize: { xs: "1.25rem", md: "1.5rem" },
+              color: "rgba(255, 255, 255, 0.9)",
+              maxWidth: "32rem",
+              mb: 4,
+              mx: "auto",
+            }}
+          >
+            Especialistas en rehabilitación física y tratamientos terapéuticos para mejorar tu calidad de vida.
+          </Typography>
+        </Container>
+      </Box>
 
       {/* Services Section */}
       <GradientBox from="#f0f9ff" to="white">
@@ -728,7 +788,7 @@ function PaginaPrincipalCliente() {
                     Nuestra Ubicación
                   </Typography>
                   <Typography variant="body1" sx={{ color: "#0369a1", mb: 2 }}>
-                  Clavel, Aviación Civil, 43000 Huejutla de Reyes, Hgo.
+                    Clavel, Aviación Civil, 43000 Huejutla de Reyes, Hgo.
                   </Typography>
                   <Box
                     sx={{
@@ -831,4 +891,3 @@ function PaginaPrincipalCliente() {
 }
 
 export default PaginaPrincipalCliente
-
