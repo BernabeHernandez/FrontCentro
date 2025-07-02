@@ -16,6 +16,7 @@ const EncabezadoPublico = () => {
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const contactoRef = useRef(null);
+  
 
   const handleClick = (option) => {
     setActive(option);
@@ -62,6 +63,7 @@ const EncabezadoPublico = () => {
       setIsMobileMenuOpen(false);
     }
   };
+
 
   useEffect(() => {
     const fetchPerfil = async () => {
