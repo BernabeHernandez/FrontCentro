@@ -17,6 +17,9 @@ import {
   Container,
   Paper,
   IconButton,
+  Breadcrumbs,
+  Link,
+  Stack,
 } from "@mui/material";
 import {
   ShoppingCart,
@@ -24,38 +27,111 @@ import {
   Add,
   Remove,
   Inventory,
+  Favorite,
+  FavoriteBorder,
+  Share,
+  NavigateNext,
+  Home,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Carousel from "react-material-ui-carousel";
 import Swal from "sweetalert2";
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: 10,
-  overflow: "hidden",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-  "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: theme.shadows[6],
-  },
+const MainContainer = styled(Container)(({ theme }) => ({
+  backgroundColor: "#fffffff",
+  minHeight: "100vh",
+  padding: theme.spacing(2, 0),
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: 12,
-  boxShadow: `0 4px 20px rgba(0, 0, 0, 0.05)`,
-  background: "linear-gradient(145deg, #ffffff 0%, #f5f7fa 100%)",
-  border: "1px solid #e0e4e8",
-}));
-
-const StyledStockChip = styled(Chip)(({ theme, available }) => ({
-  borderRadius: 16,
-  fontWeight: "bold",
+const ProductCard = styled(Card)(({ theme }) => ({
+  borderRadius: 8,
+  boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+  border: "1px solid #e6e6e6",
   backgroundColor: "white",
-  border: `2px solid ${available ? theme.palette.success.main : theme.palette.error.main}`,
-  color: available ? theme.palette.success.main : theme.palette.error.main,
-  "& .MuiChip-icon": {
-    color: available ? theme.palette.success.main : theme.palette.error.main,
+  marginBottom: theme.spacing(2),
+}));
+
+const ImageContainer = styled(Box)(({ theme }) => ({
+  position: "relative",
+  backgroundColor: "white",
+  borderRadius: 8,
+  padding: theme.spacing(3),
+  border: "1px solid #e6e6e6",
+  marginBottom: theme.spacing(2),
+}));
+
+const ProductImage = styled("img")({
+  width: "100%",
+  height: "250px",
+  objectFit: "contain",
+  borderRadius: 4,
+});
+
+const PurchaseContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: "white",
+  padding: theme.spacing(3),
+  borderRadius: 8,
+  border: "1px solid #e6e6e6",
+  position: "sticky",
+  top: theme.spacing(2),
+}));
+
+const InfoContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: "white",
+  padding: theme.spacing(3),
+  borderRadius: 8,
+  border: "1px solid #e6e6e6",
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  borderRadius: 6,
+  textTransform: "none",
+  fontSize: "16px",
+  fontWeight: 600,
+  padding: theme.spacing(1.5, 3),
+  "&.primary": {
+    backgroundColor: "#25ae57ff",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#218e49ff",
+    },
   },
+  "&.secondary": {
+    backgroundColor: "#e6f7ff",
+    color: "#25ae57ff",
+    border: "1px solid #218e49ff",
+    "&:hover": {
+      backgroundColor: "#181f23ff",
+    },
+  },
+}));
+
+const StockChip = styled(Chip)(({ theme, available }) => ({
+  backgroundColor: available ? "#e8f5e8" : "#ffebee",
+  color: available ? "#2e7d32" : "#c62828",
+  border: `1px solid ${available ? "#4caf50" : "#f44336"}`,
+  fontWeight: 500,
+  fontSize: "12px",
+  height: 28,
+}));
+
+const RecommendationCard = styled(Card)(({ theme }) => ({
+  borderRadius: 8,
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  border: "1px solid #e6e6e6",
+  "&:hover": {
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    transform: "translateY(-2px)",
+  },
+}));
+
+const QuantitySelector = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  border: "1px solid #e6e6e6",
+  borderRadius: 6,
+  backgroundColor: "white",
 }));
 
 const DetalleProductoC = () => {
@@ -63,6 +139,7 @@ const DetalleProductoC = () => {
   const [producto, setProducto] = useState(null);
   const [productosRelacionados, setProductosRelacionados] = useState([]);
   const [cantidad, setCantidad] = useState(1);
+  const [favorito, setFavorito] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -119,7 +196,7 @@ const DetalleProductoC = () => {
               <div>
                 <p style="font-weight: bold; font-size: 16px;">${producto.nombre}</p>
                 <p style="font-size: 14px;">Cantidad: ${cantidad}</p>
-                <p style="color: #1976d2; font-weight: bold;">$${(producto.precio * cantidad).toFixed(2)}</p>
+                <p style="color: #3483fa; font-weight: bold;">$${(producto.precio * cantidad).toFixed(2)}</p>
               </div>
             </div>
           `,
@@ -135,35 +212,39 @@ const DetalleProductoC = () => {
             const confirmButton = document.querySelector(".custom-swal-confirm");
             const cancelButton = document.querySelector(".custom-swal-cancel");
 
-            confirmButton.style.backgroundColor = "#1976d2";
-            confirmButton.style.color = "white";
-            confirmButton.style.padding = "8px 20px";
-            confirmButton.style.borderRadius = "8px";
-            confirmButton.style.border = "none";
-            confirmButton.style.fontSize = "16px";
-            confirmButton.style.cursor = "pointer";
-            confirmButton.style.transition = "background-color 0.3s";
-            confirmButton.style.marginRight = "10px";
-            confirmButton.onmouseover = () => (confirmButton.style.backgroundColor = "#1565c0");
-            confirmButton.onmouseout = () => (confirmButton.style.backgroundColor = "#1976d2");
+            if (confirmButton) {
+              confirmButton.style.backgroundColor = "#3483fa";
+              confirmButton.style.color = "white";
+              confirmButton.style.padding = "8px 20px";
+              confirmButton.style.borderRadius = "8px";
+              confirmButton.style.border = "none";
+              confirmButton.style.fontSize = "16px";
+              confirmButton.style.cursor = "pointer";
+              confirmButton.style.transition = "background-color 0.3s";
+              confirmButton.style.marginRight = "10px";
+              confirmButton.onmouseover = () => (confirmButton.style.backgroundColor = "#2968c8");
+              confirmButton.onmouseout = () => (confirmButton.style.backgroundColor = "#3483fa");
+            }
 
-            cancelButton.style.backgroundColor = "transparent";
-            cancelButton.style.color = "#1976d2";
-            cancelButton.style.padding = "8px 20px";
-            cancelButton.style.borderRadius = "8px";
-            cancelButton.style.border = "2px solid #1976d2";
-            cancelButton.style.fontSize = "16px";
-            cancelButton.style.cursor = "pointer";
-            cancelButton.style.transition = "all 0.3s";
-            cancelButton.style.marginLeft = "10px";
-            cancelButton.onmouseover = () => {
-              cancelButton.style.backgroundColor = "#e3f2fd";
-              cancelButton.style.borderColor = "#1565c0";
-            };
-            cancelButton.onmouseout = () => {
+            if (cancelButton) {
               cancelButton.style.backgroundColor = "transparent";
-              cancelButton.style.borderColor = "#1976d2";
-            };
+              cancelButton.style.color = "#3483fa";
+              cancelButton.style.padding = "8px 20px";
+              cancelButton.style.borderRadius = "8px";
+              cancelButton.style.border = "2px solid #3483fa";
+              cancelButton.style.fontSize = "16px";
+              cancelButton.style.cursor = "pointer";
+              cancelButton.style.transition = "all 0.3s";
+              cancelButton.style.marginLeft = "10px";
+              cancelButton.onmouseover = () => {
+                cancelButton.style.backgroundColor = "#e6f7ff";
+                cancelButton.style.borderColor = "#2968c8";
+              };
+              cancelButton.onmouseout = () => {
+                cancelButton.style.backgroundColor = "transparent";
+                cancelButton.style.borderColor = "#3483fa";
+              };
+            }
           },
         }).then((result) => {
           if (result.isConfirmed) navigate("/cliente/carrito");
@@ -183,16 +264,18 @@ const DetalleProductoC = () => {
         buttonsStyling: false,
         didOpen: () => {
           const confirmButton = document.querySelector(".custom-swal-confirm");
-          confirmButton.style.backgroundColor = "#1976d2";
-          confirmButton.style.color = "white";
-          confirmButton.style.padding = "8px 20px";
-          confirmButton.style.borderRadius = "8px";
-          confirmButton.style.border = "none";
-          confirmButton.style.fontSize = "16px";
-          confirmButton.style.cursor = "pointer";
-          confirmButton.style.transition = "background-color 0.3s";
-          confirmButton.onmouseover = () => (confirmButton.style.backgroundColor = "#1565c0");
-          confirmButton.onmouseout = () => (confirmButton.style.backgroundColor = "#1976d2");
+          if (confirmButton) {
+            confirmButton.style.backgroundColor = "#3483fa";
+            confirmButton.style.color = "white";
+            confirmButton.style.padding = "8px 20px";
+            confirmButton.style.borderRadius = "8px";
+            confirmButton.style.border = "none";
+            confirmButton.style.fontSize = "16px";
+            confirmButton.style.cursor = "pointer";
+            confirmButton.style.transition = "background-color 0.3s";
+            confirmButton.onmouseover = () => (confirmButton.style.backgroundColor = "#2968c8");
+            confirmButton.onmouseout = () => (confirmButton.style.backgroundColor = "#3483fa");
+          }
         },
       });
     }
@@ -200,215 +283,255 @@ const DetalleProductoC = () => {
 
   if (!producto) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 3 }} />
+      <MainContainer maxWidth="lg">
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={8}>
+            <Skeleton variant="rectangular" height={450} sx={{ borderRadius: 2, mb: 2 }} />
+            <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Skeleton variant="text" width="60%" sx={{ mb: 2 }} />
-            <Skeleton variant="text" width="30%" sx={{ mb: 2 }} />
-            <Skeleton variant="text" width="80%" height={80} />
+          <Grid item xs={12} md={4}>
+            <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
           </Grid>
         </Grid>
-      </Container>
+      </MainContainer>
     );
   }
 
   return (
-    <Fade in={true} timeout={700}>
-      <Container maxWidth="lg" sx={{ py: 5 }}>
-        <StyledPaper elevation={0}>
-          <Grid container spacing={3} alignItems="center">
-            {/* Imagen */}
-            <Grid item xs={12} md={5}>
-              <StyledCard>
-                <CardMedia
-                  component="img"
-                  image={producto.imagen}
-                  alt={producto.nombre}
-                  sx={{
-                    height: { xs: 250, md: 350 },
-                    objectFit: "contain",
-                    p: 3,
-                    bgcolor: "grey.100",
-                    borderRadius: 2,
-                  }}
-                />
-              </StyledCard>
-            </Grid>
+    <Fade in={true} timeout={600}>
+      <MainContainer sx={{ maxWidth: "1200px !important", width: "100%" }}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          separator={<NavigateNext fontSize="small" />}
+          sx={{ mb: 3, color: "#666" }}
+        >
+          <Link
+            underline="hover"
+            sx={{ display: "flex", alignItems: "center", cursor: "pointer", color: "#3483fa" }}
+            onClick={() => navigate("/cliente")}
+          >
+            <Home sx={{ mr: 0.5, fontSize: 16 }} />
+            Inicio
+          </Link>
+          <Link
+            underline="hover"
+            sx={{ cursor: "pointer", color: "#3483fa" }}
+            onClick={() => navigate("/cliente/productos")}
+          >
+            Productos
+          </Link>
+          <Typography color="text.primary" fontSize="14px">
+            {producto.nombre}
+          </Typography>
+        </Breadcrumbs>
 
-            {/* Detalles */}
-            <Grid item xs={12} md={7}>
-              <Typography variant="h5" fontWeight="bold" color="text.primary" gutterBottom>
-                {producto.nombre}
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                <Rating value={4.5} precision={0.5} readOnly size="small" />
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                  (4.5/5 - 128 reseñas)
-                </Typography>
-              </Box>
-              <Typography variant="h6" color="primary" fontWeight="bold" sx={{ mt: 2 }}>
-                ${producto.precio.toFixed(2)}
+        <Grid container spacing={3}>
+          {/* Columna izquierda - Imagen y descripción */}
+          <Grid item xs={12} md={8}>
+            {/* Imagen principal */}
+            <ImageContainer>
+              <ProductImage src={producto.imagen} alt={producto.nombre} />
+            </ImageContainer>
+
+            {/* Descripción del producto */}
+            <InfoContainer>
+              <Typography variant="h6" fontWeight="600" gutterBottom>
+                Descripción
               </Typography>
               <Typography
-                variant="body2"
+                variant="body1"
                 color="text.secondary"
-                sx={{ mt: 2, lineHeight: 1.7, maxWidth: "90%" }}
+                sx={{ lineHeight: 1.6 }}
               >
                 {producto.descripcion}
               </Typography>
-              <Box sx={{ mt: 2 }}>
-                <StyledStockChip
-                  icon={<Inventory />}
-                  label={`Stock: ${producto.cantidad}`}
-                  available={producto.cantidad > 0}
-                  size="small"
-                />
+            </InfoContainer>
+          </Grid>
+
+          {/* Columna derecha - Precio y compra */}
+          <Grid item xs={12} md={4}>
+            <PurchaseContainer>
+              {/* Stock */}
+              <StockChip
+                icon={<Inventory />}
+                label={producto.cantidad > 0 ? `Stock: ${producto.cantidad} unidades` : "Sin stock"}
+                available={producto.cantidad > 0}
+                sx={{ mb: 3 }}
+              />
+
+              {/* Título del producto */}
+              <Typography
+                variant="h5"
+                fontWeight="400"
+                color="text.primary"
+                sx={{ mb: 2, lineHeight: 1.3 }}
+              >
+                {producto.nombre}
+              </Typography>
+
+              {/* Rating */}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                <Rating value={4.5} precision={0.5} readOnly size="small" />
+                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                  (4.5)
+                </Typography>
               </Box>
 
-              {/* Cantidad y Botón */}
-              <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    border: "1px solid #e0e4e8",
-                    borderRadius: 1,
-                    bgcolor: "white",
-                  }}
+              {/* Precio */}
+              <Typography
+                variant="h4"
+                fontWeight="300"
+                color="text.primary"
+                sx={{ mb: 1 }}
+              >
+                ${producto.precio.toFixed(2)}
+              </Typography>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Cantidad */}
+              <Typography variant="body2" fontWeight="600" sx={{ mb: 2 }}>
+                Cantidad:
+              </Typography>
+
+              <QuantitySelector sx={{ mb: 3, width: "fit-content" }}>
+                <IconButton
+                  onClick={() => handleCantidadChange(-1)}
+                  disabled={cantidad <= 1}
+                  size="small"
+                  sx={{ borderRadius: "6px 0 0 6px" }}
                 >
-                  <IconButton
-                    onClick={() => handleCantidadChange(-1)}
-                    disabled={cantidad <= 1}
-                    size="small"
-                  >
-                    <Remove fontSize="small" />
-                  </IconButton>
-                  <TextField
-                    value={cantidad}
-                    inputProps={{ readOnly: true, style: { textAlign: "center" } }}
-                    sx={{ width: 50, "& .MuiInputBase-input": { p: 1 } }}
-                    variant="standard"
-                    InputProps={{ disableUnderline: true }}
-                  />
-                  <IconButton
-                    onClick={() => handleCantidadChange(1)}
-                    disabled={cantidad >= producto.cantidad}
-                    size="small"
-                  >
-                    <Add fontSize="small" />
-                  </IconButton>
-                </Box>
-                <Button
+                  <Remove fontSize="small" />
+                </IconButton>
+                <TextField
+                  value={cantidad}
+                  inputProps={{
+                    readOnly: true,
+                    style: {
+                      textAlign: "center",
+                      padding: "8px 16px",
+                      border: "none",
+                      minWidth: "50px"
+                    }
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": { border: "none" },
+                      borderRadius: 0,
+                    },
+                  }}
+                  size="small"
+                />
+                <IconButton
+                  onClick={() => handleCantidadChange(1)}
+                  disabled={cantidad >= producto.cantidad}
+                  size="small"
+                  sx={{ borderRadius: "0 6px 6px 0" }}
+                >
+                  <Add fontSize="small" />
+                </IconButton>
+              </QuantitySelector>
+
+              {/* Total */}
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                Total: <strong>${(producto.precio * cantidad).toFixed(2)}</strong>
+              </Typography>
+
+              {/* Botones de acción */}
+              <Stack spacing={2}>
+                <ActionButton
                   variant="contained"
-                  color="primary"
+                  className="primary"
                   startIcon={<ShoppingCart />}
                   onClick={handleAgregarAlCarrito}
                   disabled={producto.cantidad === 0}
-                  sx={{
-                    py: 1,
-                    px: 3,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontSize: "1rem",
-                    boxShadow: "0 2px 10px rgba(25, 118, 210, 0.3)",
-                  }}
+                  fullWidth
                 >
                   Agregar al carrito
-                </Button>
-              </Box>
-            </Grid>
+                </ActionButton>
+              </Stack>
+            </PurchaseContainer>
           </Grid>
-        </StyledPaper>
+        </Grid>
 
-        {/* Recomendaciones */}
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h6" fontWeight="bold" align="center" color="text.primary">
-            Recomendaciones para ti
-          </Typography>
-          <Divider
-            sx={{
-              my: 2,
-              maxWidth: 150,
-              mx: "auto",
-              borderColor: "primary.main",
-              borderWidth: 2,
-            }}
-          />
-          {productosRelacionados.length > 0 ? (
-            <Carousel
-              autoPlay={false}
-              navButtonsAlwaysVisible
-              animation="slide"
-              indicators={true}
-              navButtonsProps={{
-                style: { backgroundColor: "rgba(0, 0, 0, 0.6)", borderRadius: 50 },
-              }}
-              sx={{ mt: 3 }}
-            >
-              {productosRelacionados
-                .reduce((acc, prod, idx) => {
-                  if (idx % 3 === 0) acc.push([]);
-                  acc[acc.length - 1].push(prod);
-                  return acc;
-                }, [])
-                .map((group, index) => (
-                  <Grid container spacing={2} key={index} sx={{ px: 2 }}>
-                    {group.map((prod) => (
-                      <Grid item xs={12} sm={4} key={prod.id}>
-                        <StyledCard onClick={() => navigate(`/cliente/detalles/${prod.id}`)}>
-                          <CardMedia
-                            component="img"
-                            image={prod.imagen}
-                            alt={prod.nombre}
-                            sx={{
-                              height: 150,
-                              objectFit: "contain",
-                              p: 2,
-                              bgcolor: "grey.100",
-                            }}
-                          />
-                          <CardContent sx={{ textAlign: "center", py: 1 }}>
-                            <Typography variant="body2" fontWeight="bold" noWrap>
-                              {prod.nombre}
-                            </Typography>
-                            <Typography variant="body1" color="primary" fontWeight="bold">
-                              ${prod.precio.toFixed(2)}
-                            </Typography>
-                          </CardContent>
-                        </StyledCard>
-                      </Grid>
-                    ))}
-                  </Grid>
-                ))}
-            </Carousel>
-          ) : (
-            <Typography variant="body1" color="text.secondary" align="center" sx={{ mt: 3 }}>
-              No hay recomendaciones disponibles.
+        {/* Productos relacionados */}
+        {productosRelacionados.length > 0 && (
+          <Box sx={{ mt: 5 }}>
+            <Typography variant="h6" fontWeight="600" color="green" sx={{ mb: 3 }}>
+              También podría interesarte
             </Typography>
-          )}
-          <Box sx={{ textAlign: "center", mt: 3 }}>
-            <Button
-              variant="outlined"
-              color="primary"
-              endIcon={<ArrowForwardIos />}
-              onClick={() => navigate("/cliente/productos")}
-              sx={{
-                px: 3,
-                py: 1,
-                fontSize: "0.9rem",
-                borderRadius: 2,
-                borderWidth: 2,
-                "&:hover": { borderWidth: 2 },
-              }}
-            >
-              Ver más productos
-            </Button>
+
+
+            <Grid container spacing={2}>
+              {productosRelacionados.slice(0, 4).map((prod) => (
+                <Grid item xs={6} sm={4} md={3} key={prod.id}>
+                  <RecommendationCard
+                    onClick={() => navigate(`/cliente/detalles/${prod.id}`)}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={prod.imagen}
+                      alt={prod.nombre}
+                      sx={{
+                        height: 150,
+                        objectFit: "contain",
+                        p: 2,
+                        bgcolor: "white",
+                      }}
+                    />
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: "14px",
+                          lineHeight: 1.3,
+                          height: "2.6em",
+                          overflow: "hidden",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          mb: 1
+                        }}
+                      >
+                        {prod.nombre}
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        color="text.primary"
+                        fontWeight="300"
+                        sx={{ fontSize: "18px" }}
+                      >
+                        ${prod.precio.toFixed(2)}
+                      </Typography>
+                    </CardContent>
+                  </RecommendationCard>
+                </Grid>
+              ))}
+            </Grid>
+
+            <Box sx={{ textAlign: "center", mt: 3 }}>
+              <Button
+                variant="outlined"
+                endIcon={<ArrowForwardIos />}
+                onClick={() => navigate("/cliente/productos")}
+                sx={{
+                  borderColor: "#3483fa",
+                  color: "#3483fa",
+                  textTransform: "none",
+                  borderRadius: 2,
+                  px: 3,
+                  "&:hover": {
+                    borderColor: "#2968c8",
+                    backgroundColor: "#f0f7ff",
+                  },
+                }}
+              >
+                Ver más productos
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </Container>
+        )}
+      </MainContainer>
     </Fade>
   );
 };

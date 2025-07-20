@@ -17,21 +17,25 @@ import {
 import { styled } from "@mui/material/styles";
 import { ArrowForwardIos, ShoppingCart } from "@mui/icons-material";
 
+// Enhanced styling for the Card component
 const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: 12,
+  borderRadius: 16,
   overflow: "hidden",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
-    transform: "translateY(-5px)",
-    boxShadow: theme.shadows[8],
+    transform: "scale(1.03)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
   },
   cursor: "pointer",
   backgroundColor: "#fff",
+  border: "1px solid #e5e7eb",
 }));
 
+// Enhanced pagination styling
 const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .MuiPaginationItem-root": {
     borderRadius: "8px",
+    fontWeight: 500,
     transition: "all 0.3s ease",
     "&:hover": {
       backgroundColor: theme.palette.primary.light,
@@ -41,15 +45,16 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .Mui-selected": {
     backgroundColor: theme.palette.primary.main,
     color: "#fff",
+    fontWeight: 600,
     "&:hover": {
       backgroundColor: theme.palette.primary.dark,
     },
   },
   "& .MuiPaginationItem-previousNext": {
-    backgroundColor: theme.palette.grey[200],
+    backgroundColor: "#f3f4f6",
     color: theme.palette.grey[800],
     "&:hover": {
-      backgroundColor: theme.palette.grey[400],
+      backgroundColor: "#e5e7eb",
     },
   },
 }));
@@ -57,7 +62,7 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 const Productos = () => {
   const [productos, setProductos] = useState([]);
   const [page, setPage] = useState(1);
-  const productosPorPagina = 10; // Ajustado para 5 por fila en 2 filas por página
+  const productosPorPagina = 15;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,10 +88,9 @@ const Productos = () => {
 
   const handlePageChange = (event, value) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Desplaza al inicio de la página
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Calcular productos a mostrar en la página actual
   const productosPaginados = productos.slice(
     (page - 1) * productosPorPagina,
     page * productosPorPagina
@@ -94,11 +98,20 @@ const Productos = () => {
 
   return (
     <Fade in={true} timeout={700}>
-      <Box sx={{ bgcolor: "#fafafa", minHeight: "100vh", py: 5 }}>
+      <Box sx={{ bgcolor: "#ffffff", minHeight: "100vh", py: 6 }}>
         <Container maxWidth="xl">
           {/* Breadcrumbs */}
-          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 4 }}>
-            <Typography color="text.primary" variant="h6" fontWeight="bold">
+          <Breadcrumbs
+            aria-label="breadcrumb"
+            separator={<ArrowForwardIos fontSize="small" />}
+            sx={{ mb: 4 }}
+          >
+            <Typography
+              color="text.primary"
+              variant="h5"
+              fontWeight="600"
+              sx={{ color: "#1f2937" }}
+            >
               Productos
             </Typography>
           </Breadcrumbs>
@@ -108,9 +121,9 @@ const Productos = () => {
             <Grid container spacing={3}>
               {[...Array(productosPorPagina)].map((_, index) => (
                 <Grid item key={index} xs={12} sm={6} md={4} lg={2.4}>
-                  <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 3 }} />
-                  <Skeleton variant="text" width="60%" sx={{ mt: 1 }} />
-                  <Skeleton variant="text" width="40%" />
+                  <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 4 }} />
+                  <Skeleton variant="text" width="60%" sx={{ mt: 2, mx: "auto" }} />
+                  <Skeleton variant="text" width="40%" sx={{ mx: "auto" }} />
                 </Grid>
               ))}
             </Grid>
@@ -122,25 +135,41 @@ const Productos = () => {
                     <StyledCard onClick={() => handleProductoClick(producto.id)}>
                       <CardMedia
                         component="img"
-                        height="200"
+                        height="220"
                         image={producto.imagen}
                         alt={producto.nombre}
                         sx={{
                           objectFit: "contain",
-                          bgcolor: "#f5f7fa",
-                          p: 2,
+                          bgcolor: "#ffffff", // White background for images
+                          p: 3,
+                          transition: "transform 0.3s ease",
+                          "&:hover": {
+                            transform: "scale(1.05)",
+                          },
                         }}
                       />
-                      <CardContent sx={{ py: 2 }}>
+                      <CardContent sx={{ py: 3, px: 2 }}>
                         <Typography
                           variant="subtitle1"
-                          fontWeight="bold"
+                          fontWeight="600"
                           color="text.primary"
-                          sx={{ height: 50, overflow: "hidden", textOverflow: "ellipsis" }}
+                          sx={{
+                            height: 48,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            color: "#1f2937",
+                          }}
                         >
                           {producto.nombre}
                         </Typography>
-                        <Typography variant="h6" color="primary" fontWeight="bold" sx={{ mt: 1 }}>
+                        <Typography
+                          variant="h6"
+                          fontWeight="700"
+                          sx={{ mt: 1.5, color: "#22c55e" }} // Green price
+                        >
                           ${producto.precio.toFixed(2)}
                         </Typography>
                         <Button
@@ -150,7 +179,7 @@ const Productos = () => {
                           startIcon={<ShoppingCart />}
                           sx={{ mt: 2, borderRadius: 2, textTransform: "none" }}
                           onClick={(e) => {
-                            e.stopPropagation(); // Evita que el click en el botón active el Card
+                            e.stopPropagation();
                             handleProductoClick(producto.id);
                           }}
                         >
@@ -164,13 +193,14 @@ const Productos = () => {
 
               {/* Paginación */}
               {productos.length > productosPorPagina && (
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 5, pb: 3 }}>
                   <StyledPagination
                     count={Math.ceil(productos.length / productosPorPagina)}
                     page={page}
                     onChange={handlePageChange}
                     color="primary"
                     size="large"
+                    sx={{ "& .MuiPagination-ul": { gap: "4px" } }}
                   />
                 </Box>
               )}
