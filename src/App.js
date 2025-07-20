@@ -85,6 +85,8 @@ import Facturacion from './Componentes/Facturacion/Facturacion';
 import AsistenciaPaciente from './Componentes/Administrativo/AsistenciaPaciente/AsistenciaPaciente';
 import EntregaProductos from './Componentes/Administrativo/EntregaProductos/EntregaProductos';
 import MisCompras from './Componentes/Cliente/Compras/MisCompras';
+import PrediccionClasificacion from './Models/PrediccionClasificacion';
+
 
 const App = () => {
   return (
@@ -130,6 +132,7 @@ const App = () => {
            <Route path="/admin/detallehistorial/:id" element={<ProtectedRoute allowedRoles={['Administrador']}><DetalleHistorial /></ProtectedRoute>} />
            <Route path="/admin/asistenciaPaciente" element={<ProtectedRoute allowedRoles={['Administrador']}><AsistenciaPaciente /></ProtectedRoute>} />
            <Route path="/admin/entregaproductos" element={<ProtectedRoute allowedRoles={['Administrador']}><EntregaProductos /></ProtectedRoute>} />
+            <Route path="/admin/prediccion-clasificacion" element={<ProtectedRoute allowedRoles={['Administrador']}><PrediccionClasificacion /></ProtectedRoute>} />
 
             {/* Rutas protegidas para clientes */}
             <Route path="/cliente" element={<ProtectedRoute allowedRoles={['Cliente']}><PaginaPrincipalCliente /></ProtectedRoute>} />

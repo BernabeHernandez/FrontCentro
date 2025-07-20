@@ -73,13 +73,8 @@ const DetalleProductoC = () => {
         );
         if (!response.ok) throw new Error("Error al obtener el producto");
         const data = await response.json();
-        setProducto(data);
-
-        const responseProductos = await fetch(
-          `https://backendcentro.onrender.com/api/productos?categoriaId=${data.id_categoria}`
-        );
-        const productosRelacionadosData = await responseProductos.json();
-        setProductosRelacionados(productosRelacionadosData);
+        setProducto(data.producto);
+        setProductosRelacionados(data.productosRelacionados || []);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -135,13 +130,12 @@ const DetalleProductoC = () => {
             confirmButton: "custom-swal-confirm",
             cancelButton: "custom-swal-cancel",
           },
-          buttonsStyling: false, // Desactiva el estilo por defecto de SweetAlert2
+          buttonsStyling: false,
           didOpen: () => {
-            // Estilos personalizados para los botones con separación
             const confirmButton = document.querySelector(".custom-swal-confirm");
             const cancelButton = document.querySelector(".custom-swal-cancel");
 
-            confirmButton.style.backgroundColor = "#1976d2"; // Azul primario
+            confirmButton.style.backgroundColor = "#1976d2";
             confirmButton.style.color = "white";
             confirmButton.style.padding = "8px 20px";
             confirmButton.style.borderRadius = "8px";
@@ -149,7 +143,7 @@ const DetalleProductoC = () => {
             confirmButton.style.fontSize = "16px";
             confirmButton.style.cursor = "pointer";
             confirmButton.style.transition = "background-color 0.3s";
-            confirmButton.style.marginRight = "10px"; // Separación a la derecha
+            confirmButton.style.marginRight = "10px";
             confirmButton.onmouseover = () => (confirmButton.style.backgroundColor = "#1565c0");
             confirmButton.onmouseout = () => (confirmButton.style.backgroundColor = "#1976d2");
 
@@ -161,7 +155,7 @@ const DetalleProductoC = () => {
             cancelButton.style.fontSize = "16px";
             cancelButton.style.cursor = "pointer";
             cancelButton.style.transition = "all 0.3s";
-            cancelButton.style.marginLeft = "10px"; // Separación a la izquierda
+            cancelButton.style.marginLeft = "10px";
             cancelButton.onmouseover = () => {
               cancelButton.style.backgroundColor = "#e3f2fd";
               cancelButton.style.borderColor = "#1565c0";
@@ -329,10 +323,10 @@ const DetalleProductoC = () => {
           </Grid>
         </StyledPaper>
 
-        {/* Productos Relacionados */}
+        {/* Recomendaciones */}
         <Box sx={{ mt: 6 }}>
           <Typography variant="h6" fontWeight="bold" align="center" color="text.primary">
-            Explora Productos Relacionados
+            Recomendaciones para ti
           </Typography>
           <Divider
             sx={{
@@ -343,52 +337,58 @@ const DetalleProductoC = () => {
               borderWidth: 2,
             }}
           />
-          <Carousel
-            autoPlay={false}
-            navButtonsAlwaysVisible
-            animation="slide"
-            indicators={true}
-            navButtonsProps={{
-              style: { backgroundColor: "rgba(0, 0, 0, 0.6)", borderRadius: 50 },
-            }}
-            sx={{ mt: 3 }}
-          >
-            {productosRelacionados
-              .reduce((acc, prod, idx) => {
-                if (idx % 3 === 0) acc.push([]);
-                acc[acc.length - 1].push(prod);
-                return acc;
-              }, [])
-              .map((group, index) => (
-                <Grid container spacing={2} key={index} sx={{ px: 2 }}>
-                  {group.map((prod) => (
-                    <Grid item xs={12} sm={4} key={prod.id}>
-                      <StyledCard onClick={() => navigate(`/cliente/detalles/${prod.id}`)}>
-                        <CardMedia
-                          component="img"
-                          image={prod.imagen}
-                          alt={prod.nombre}
-                          sx={{
-                            height: 150,
-                            objectFit: "contain",
-                            p: 2,
-                            bgcolor: "grey.100",
-                          }}
-                        />
-                        <CardContent sx={{ textAlign: "center", py: 1 }}>
-                          <Typography variant="body2" fontWeight="bold" noWrap>
-                            {prod.nombre}
-                          </Typography>
-                          <Typography variant="body1" color="primary" fontWeight="bold">
-                            ${prod.precio.toFixed(2)}
-                          </Typography>
-                        </CardContent>
-                      </StyledCard>
-                    </Grid>
-                  ))}
-                </Grid>
-              ))}
-          </Carousel>
+          {productosRelacionados.length > 0 ? (
+            <Carousel
+              autoPlay={false}
+              navButtonsAlwaysVisible
+              animation="slide"
+              indicators={true}
+              navButtonsProps={{
+                style: { backgroundColor: "rgba(0, 0, 0, 0.6)", borderRadius: 50 },
+              }}
+              sx={{ mt: 3 }}
+            >
+              {productosRelacionados
+                .reduce((acc, prod, idx) => {
+                  if (idx % 3 === 0) acc.push([]);
+                  acc[acc.length - 1].push(prod);
+                  return acc;
+                }, [])
+                .map((group, index) => (
+                  <Grid container spacing={2} key={index} sx={{ px: 2 }}>
+                    {group.map((prod) => (
+                      <Grid item xs={12} sm={4} key={prod.id}>
+                        <StyledCard onClick={() => navigate(`/cliente/detalles/${prod.id}`)}>
+                          <CardMedia
+                            component="img"
+                            image={prod.imagen}
+                            alt={prod.nombre}
+                            sx={{
+                              height: 150,
+                              objectFit: "contain",
+                              p: 2,
+                              bgcolor: "grey.100",
+                            }}
+                          />
+                          <CardContent sx={{ textAlign: "center", py: 1 }}>
+                            <Typography variant="body2" fontWeight="bold" noWrap>
+                              {prod.nombre}
+                            </Typography>
+                            <Typography variant="body1" color="primary" fontWeight="bold">
+                              ${prod.precio.toFixed(2)}
+                            </Typography>
+                          </CardContent>
+                        </StyledCard>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ))}
+            </Carousel>
+          ) : (
+            <Typography variant="body1" color="text.secondary" align="center" sx={{ mt: 3 }}>
+              No hay recomendaciones disponibles.
+            </Typography>
+          )}
           <Box sx={{ textAlign: "center", mt: 3 }}>
             <Button
               variant="outlined"

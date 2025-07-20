@@ -65,6 +65,7 @@ const EncabezadoAdministrativo = () => {
       case "detallecitas": navigate('/admin/detallecitas'); break;
       case "entregaproductos": navigate('/admin/entregaproductos'); break;
       case "asistenciapaciente": navigate('/admin/asistenciaPaciente'); break;
+      case "prediccion-clasificacion": navigate('/admin/prediccion-clasificacion'); break;
       case "cerrarSesion": handleLogout(); break;
       default: console.log("No se reconoce la acción del menú");
     }
@@ -127,6 +128,14 @@ const EncabezadoAdministrativo = () => {
         { key: 'activity-log', label: 'Registro de Logeos' },
         { key: 'registro-password', label: 'Registro de Contraseña' },
         { key: 'registro-sospechosos', label: 'Lista Negra' },
+      ]
+    },
+     {
+      key: 'modelos',
+      label: 'Modelos de Predicción',
+      icon: <AuditIcon sx={{ color: '#00CED1', fontSize: 20 }} />,
+      subItems: [
+        { key: 'prediccion-clasificacion', label: 'Predicción de Clasificación' },
       ]
     },
     {
