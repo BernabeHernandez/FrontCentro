@@ -62,7 +62,7 @@ const ImageContainer = styled(Box)(({ theme }) => ({
 
 const ProductImage = styled("img")({
   width: "100%",
-  height: "450px",
+  height: "250px",
   objectFit: "contain",
   borderRadius: 4,
 });
