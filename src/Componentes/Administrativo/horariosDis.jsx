@@ -31,7 +31,9 @@ import {
   Event,
   Search,
   Build,
+  Info, // Añadido para corregir el error de 'Info' is not defined
 } from "@mui/icons-material";
+import { styled } from '@mui/system';
 
 const HorariosDis = () => {
   const [diasDisponibles, setDiasDisponibles] = useState([]);
@@ -88,7 +90,20 @@ const HorariosDis = () => {
     getDiasDisponibles();
   }, []);
 
-  const handleSelectDay = async (dia, fecha) => {
+   // Estilo para la celda de predicción
+  const PredictionCell = styled(TableCell)(({ theme, prediction }) => ({
+    fontWeight: 'medium',
+    color:
+      prediction === 'El usuario va a asistir'
+        ? '#2e7d32' // Verde para asistir
+        : prediction === 'El usuario va a cancelar'
+        ? '#d32f2f' // Rojo para cancelar
+        : '#f57c00', // Naranja para pendiente
+  }));
+
+  
+
+ const handleSelectDay = async (dia, fecha) => {
     setSelectedDay(dia);
     setLoading(true);
 
@@ -98,15 +113,53 @@ const HorariosDis = () => {
 
       const fechaFormateada = format(fecha, "yyyy-MM-dd");
       const citasResponse = await axios.get(`https://backendcentro.onrender.com/api/citasC/citas-del-dia/${fechaFormateada}`);
-      setCitasDelDia(citasResponse.data);
+      
+      // Obtener predicciones para cada cita
+      const citasConPredicciones = await Promise.all(
+        citasResponse.data.map(async (cita) => {
+          try {
+            const predictResponse = await axios.post(
+              'https://backendmodelos.onrender.com/predict',
+              {
+                hora_inicio: cita.hora_inicio,
+                nombre_x: cita.nombre,
+                apellidopa: cita.apellidopa,
+                apellidoma: cita.apellidoma,
+                nombre_y: cita.nombre_y,
+              },
+              {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                transformRequest: [(data) => {
+                  const params = new URLSearchParams();
+                  for (const key in data) {
+                    params.append(key, data[key]);
+                  }
+                  return params;
+                }],
+              }
+            );
+            return { ...cita, prediccion: predictResponse.data.prediction };
+          } catch (err) {
+            return { ...cita, prediccion: 'Error al predecir' };
+          }
+        })
+      );
+      
+      setCitasDelDia(citasConPredicciones);
     } catch (error) {
-      console.error("Error al obtener las franjas horarias:", error);
+      console.error("Error al obtener las franjas horarias o citas:", error);
       setHorarios([]);
       setCitasDelDia([]);
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredCitas = citasDelDia.filter((cita) =>
+    cita.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cita.apellidopa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cita.apellidoma.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -116,12 +169,6 @@ const HorariosDis = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  const filteredCitas = citasDelDia.filter((cita) =>
-    cita.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cita.apellidopa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cita.apellidoma.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <Box sx={{ padding: 3, maxWidth: 1200, margin: "0 auto" }}>
@@ -248,87 +295,101 @@ const HorariosDis = () => {
             />
           </Box>
           <TableContainer sx={{ borderRadius: "12px", overflow: "hidden" }}>
-            <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem" } }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "rgba(189, 189, 189, 0.2)" }}>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Person sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Nombre
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Person sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Apellido Paterno
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Person sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Apellido Materno
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Email sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Email
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Phone sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Teléfono
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Event sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Fecha
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <AccessTime sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Inicio
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <AccessTime sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Fin
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredCitas.length > 0 ? (
-                  filteredCitas.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((cita) => (
-                    <TableRow key={cita.id} sx={{ "&:hover": { backgroundColor: "#f5f5f5" }, height: "36px" }}>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre}</TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidopa}</TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidoma}</TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.gmail}</TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.telefono}</TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>
-                        {cita.fecha_cita ? format(parseISO(cita.fecha_cita), "dd/MM/yyyy") : "Fecha no disponible"}
-                      </TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
-                      <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_fin}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
-                      No hay citas para este día.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 20]}
-              component="div"
-              count={filteredCitas.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{ backgroundColor: "rgba(189, 189, 189, 0.1)", fontSize: "0.875rem", padding: "4px" }}
-            />
-          </TableContainer>
+      <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem" } }}>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: "rgba(189, 189, 189, 0.2)" }}>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Person sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Nombre
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Person sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Apellido Paterno
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Person sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Apellido Materno
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Email sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Email
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Phone sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Teléfono
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Event sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Fecha
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <AccessTime sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Inicio
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <AccessTime sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Fin
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Build sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Servicio
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Info sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Predicción
+              </Box>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {filteredCitas.length > 0 ? (
+            filteredCitas.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((cita) => (
+              <TableRow key={cita.id} sx={{ "&:hover": { backgroundColor: "#f5f5f5" }, height: "36px" }}>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidopa}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidoma}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.gmail}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.telefono}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>
+                  {cita.fecha_cita ? format(parseISO(cita.fecha_cita), "dd/MM/yyyy") : "Fecha no disponible"}
+                </TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_fin}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre_y}</TableCell>
+                <PredictionCell prediction={cita.prediccion} sx={{ borderBottom: "1px solid #e0e0e0" }}>
+                  {cita.prediccion}
+                </PredictionCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={10} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
+                No hay citas para este día.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 20]}
+        component="div"
+        count={filteredCitas.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{ backgroundColor: "rgba(189, 189, 189, 0.1)", fontSize: "0.875rem", padding: "4px" }}
+      />
+    </TableContainer>
         </Paper>
       )}
     </Box>
