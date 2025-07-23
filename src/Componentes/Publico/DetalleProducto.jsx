@@ -458,7 +458,7 @@ const DetalleProducto = () => {
         {productosRelacionados.length > 0 && (
           <Box sx={{ mt: 5 }}>
             <Typography variant="h6" fontWeight="600" color="green" sx={{ mb: 3 }}>
-              También podría interesarte
+              Quienes compraron este producto también compraron
             </Typography>
 
 
