@@ -1,6 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Box,
+  Breadcrumbs,
+  Container,
+  Skeleton,
+  Fade,
+  Pagination,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { ArrowForwardIos } from '@mui/icons-material';
+
+// Styled Card similar a ProductosC.jsx
+const StyledCard = styled(Card)(({ theme }) => ({
+  borderRadius: 16,
+  overflow: 'hidden',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.03)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+  },
+  cursor: 'pointer',
+  backgroundColor: '#fff',
+  border: '1px solid #e5e7eb',
+}));
+
+const StyledPagination = styled(Pagination)(({ theme }) => ({
+  '& .MuiPaginationItem-root': {
+    borderRadius: '8px',
+    fontWeight: 500,
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      backgroundColor: theme.palette.primary.light,
+      color: '#fff',
+    },
+  },
+  '& .Mui-selected': {
+    backgroundColor: theme.palette.primary.main,
+    color: '#fff',
+    fontWeight: 600,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  },
+  '& .MuiPaginationItem-previousNext': {
+    backgroundColor: '#f3f4f6',
+    color: theme.palette.grey[800],
+    '&:hover': {
+      backgroundColor: '#e5e7eb',
+    },
+  },
+}));
 
 const ResultadosBusqueda = () => {
   const [resultados, setResultados] = useState([]);
@@ -8,6 +69,8 @@ const ResultadosBusqueda = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
+  const [page, setPage] = useState(1);
+  const resultadosPorPagina = 15;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -22,28 +85,26 @@ const ResultadosBusqueda = () => {
         setError('Error al cargar las categorías.');
       }
     };
-
     fetchCategorias();
   }, []);
 
   useEffect(() => {
     if (query) {
-      setCategoriaSeleccionada(''); 
-      fetchResultados(); 
+      setCategoriaSeleccionada('');
+      fetchResultados();
     } else {
-      setResultados([]); 
+      setResultados([]);
     }
+    // eslint-disable-next-line
   }, [query]);
 
   const fetchResultados = async () => {
     try {
       setLoading(true);
       let url = `https://backendcentro.onrender.com/api/buscar/search?query=${encodeURIComponent(query)}`;
-      
       if (categoriaSeleccionada) {
         url += `&id_categoria=${categoriaSeleccionada}`;
       }
-
       const response = await axios.get(url);
       setResultados(response.data);
     } catch (err) {
@@ -57,136 +118,171 @@ const ResultadosBusqueda = () => {
     if (query) {
       fetchResultados();
     }
+    // eslint-disable-next-line
   }, [categoriaSeleccionada]);
 
   const handleCardClick = (tipo, id) => {
     if (tipo === 'producto') {
-      navigate(`/detalles/${id}`); 
+      navigate(`/detalles/${id}`);
     } else {
       navigate(`/detalle/${id}`);
     }
   };
 
-  const styles = {
-    container: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '16px',
-      padding: '2rem',
-      justifyContent: 'center',
-    },
-    card: {
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      padding: '8px',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      cursor: 'pointer',
-      alignItems: 'center',
-      transition: 'transform 0.2s ease-in-out',
-      maxHeight: '400px', // Aumentado para que haya más espacio
-      overflow: 'hidden',
-    },
-    imagen: {
-      width: '100%', // Imagen toma el 100% del ancho de la tarjeta
-      height: '200px', // Limitar la altura para mantener consistencia
-      objectFit: 'contain', // Ajuste para que la imagen se vea bien sin recorte
-      borderRadius: '4px',
-      marginBottom: '8px',
-    },
-    titulo: {
-      fontSize: '14px',
-      fontWeight: 'bold',
-      margin: '8px 0',
-      lineHeight: '1.2',
-      height: '50px',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      textAlign: 'center',
-    },
-    precioActual: {
-      color: '#d32f2f',
-      fontSize: '16px',
-      fontWeight: 'bold',
-      marginTop: '8px',
-    },
-    resultadosHeader: {
-      textAlign: 'center',
-      marginBottom: '20px',
-      fontSize: '1.5rem',
-      fontWeight: 'bold',
-      color: '#333',
-    },
-    filtroContainer: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      marginBottom: '20px',
-      alignItems: 'center',
-      backgroundColor: '#f4f4f4',
-      padding: '10px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    },
-    filtroSelect: {
-      padding: '12px 20px',
-      fontSize: '1rem',
-      borderRadius: '8px',
-      border: '1px solid #ddd',
-      backgroundColor: '#fff',
-      fontWeight: 'bold',
-      cursor: 'pointer',
-      transition: 'border 0.3s ease, box-shadow 0.3s ease',
-    },
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) return <p>Cargando resultados...</p>;
-  if (error) return <p>{error}</p>;
+  // Paginación de resultados
+  const resultadosPaginados = resultados.slice(
+    (page - 1) * resultadosPorPagina,
+    page * resultadosPorPagina
+  );
 
   return (
-    <div>
-      <h2 style={styles.resultadosHeader}>Resultados para "{query}"</h2>
-
-      <div style={styles.filtroContainer}>
-        <label htmlFor="categoria" style={{ marginRight: '10px', fontWeight: 'bold' }}>Buscar por Categorías:</label>
-        <select
-          id="categoria"
-          style={styles.filtroSelect}
-          value={categoriaSeleccionada}
-          onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-        >
-          <option value="">Todas las categorías</option>
-          {categorias.map((categoria) => (
-            <option key={categoria.id} value={categoria.id}>
-              {categoria.nombre}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div style={styles.container}>
-        {resultados.length > 0 ? (
-          resultados.map((item) => (
-            <div
-              key={`${item.tipo}-${item.id}`}
-              style={styles.card}
-              onClick={() => handleCardClick(item.tipo, item.id)}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+    <Fade in={true} timeout={700}>
+      <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh', py: 6 }}>
+        <Container maxWidth="xl">
+          {/* Breadcrumbs */}
+          <Breadcrumbs
+            aria-label="breadcrumb"
+            separator={<ArrowForwardIos fontSize="small" />}
+            sx={{ mb: 0.5 }}
+          >
+            <Typography
+              color="text.primary"
+              variant="h5"
+              fontWeight="600"
+              sx={{ color: '#1f2937' }}
             >
-              {item.imagen && <img src={item.imagen} alt={item.nombre} style={styles.imagen} />}
-              <div style={styles.titulo}>{item.nombre}</div>
-              <div style={styles.precioActual}>${item.precio}</div>
-            </div>
-          ))
-        ) : (
-          <p>No se encontraron resultados para "{query}" con la categoría seleccionada.</p>
-        )}
-      </div>
-    </div>
+              Resultados para "{query}"
+            </Typography>
+          </Breadcrumbs>
+
+          {/* Filtro de categorías */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
+            <FormControl sx={{ minWidth: 240 }} size="medium">
+              <InputLabel id="categoria-label">Buscar por Categoría</InputLabel>
+              <Select
+                labelId="categoria-label"
+                id="categoria"
+                value={categoriaSeleccionada}
+                label="Buscar por Categoría"
+                onChange={(e) => {
+                  setCategoriaSeleccionada(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <MenuItem value="">Todas las categorías</MenuItem>
+                {categorias.map((categoria) => (
+                  <MenuItem key={categoria.id} value={categoria.id}>
+                    {categoria.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* Grid de resultados */}
+          {loading ? (
+            <Grid container spacing={3}>
+              {[...Array(resultadosPorPagina)].map((_, index) => (
+                <Grid item key={index} xs={12} sm={6} md={4} lg={2.4}>
+                  <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 4 }} />
+                  <Skeleton variant="text" width="60%" sx={{ mt: 2, mx: 'auto' }} />
+                  <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
+                </Grid>
+              ))}
+            </Grid>
+          ) : error ? (
+            <Typography color="error" align="center" sx={{ mt: 4 }}>{error}</Typography>
+          ) : resultados.length > 0 ? (
+            <>
+              <Grid container spacing={3}>
+                {resultadosPaginados.map((item) => (
+                  <Grid item key={`${item.tipo}-${item.id}`} xs={12} sm={6} md={4} lg={2.4}>
+                    <StyledCard onClick={() => handleCardClick(item.tipo, item.id)}>
+                      <CardMedia
+                        component="img"
+                        height="220"
+                        image={item.imagen}
+                        alt={item.nombre}
+                        sx={{
+                          objectFit: 'contain',
+                          bgcolor: '#ffffff',
+                          p: 3,
+                          transition: 'transform 0.3s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                          },
+                        }}
+                      />
+                      <CardContent sx={{ py: 3, px: 2 }}>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="600"
+                          color="text.primary"
+                          sx={{
+                            height: 48,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            color: '#1f2937',
+                          }}
+                        >
+                          {item.nombre}
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          fontWeight="700"
+                          sx={{ mt: 1.5, color: '#22c55e' }}
+                        >
+                          ${item.precio?.toFixed ? item.precio.toFixed(2) : item.precio}
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          sx={{ mt: 2, borderRadius: 2, textTransform: 'none' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCardClick(item.tipo, item.id);
+                          }}
+                        >
+                          Ver detalles
+                        </Button>
+                      </CardContent>
+                    </StyledCard>
+                  </Grid>
+                ))}
+              </Grid>
+              {/* Paginación */}
+              {resultados.length > resultadosPorPagina && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, pb: 3 }}>
+                  <StyledPagination
+                    count={Math.ceil(resultados.length / resultadosPorPagina)}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                    size="large"
+                    sx={{ '& .MuiPagination-ul': { gap: '4px' } }}
+                  />
+                </Box>
+              )}
+            </>
+          ) : (
+            <Typography align="center" sx={{ mt: 4 }}>
+              No se encontraron resultados para "{query}" con la categoría seleccionada.
+            </Typography>
+          )}
+        </Container>
+      </Box>
+    </Fade>
   );
 };
 
 export default ResultadosBusqueda;
+

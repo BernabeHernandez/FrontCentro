@@ -293,8 +293,14 @@ useEffect(() => {
             sx={{
               fontSize: { xs: "2.25rem", md: "3rem", lg: "3.75rem" },
               fontWeight: 700,
-              color: "white",
+              color: "#0d9488",
               mb: 2,
+              minHeight: { xs: "2.5em", md: "3.5em" },
+              letterSpacing: 1,
+              display: "inline-block",
+              whiteSpace: "pre-line",
+              fontFamily: 'Montserrat, Roboto, Arial, sans-serif',
+              animation: 'floatTitle 3s ease-in-out infinite',
             }}
           >
             Centro de Rehabilitación Integral San Juan
@@ -303,14 +309,27 @@ useEffect(() => {
             variant="h5"
             sx={{
               fontSize: { xs: "1.25rem", md: "1.5rem" },
-              color: "rgba(255, 255, 255, 0.9)",
+              color: "#f59e0b",
               maxWidth: "32rem",
               mb: 4,
               mx: "auto",
+              fontFamily: 'Montserrat, Roboto, Arial, sans-serif',
+              fontWeight: 700,
+              animation: 'floatSubtitle 3.2s ease-in-out infinite',
             }}
           >
-            Especialistas en rehabilitación física y tratamientos terapéuticos para mejorar tu calidad de vida.
+            Tu bienestar y recuperación, nuestra prioridad. Atención profesional y humana para cada etapa de tu rehabilitación.
           </Typography>
+          <style>{`
+            @keyframes floatTitle {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-16px); }
+            }
+            @keyframes floatSubtitle {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          `}</style>
         </Container>
       </Box>
 
@@ -876,7 +895,7 @@ useEffect(() => {
                     <Typography variant="body2" sx={{ color: "#0369a1", mb: 2 }}>
                       Puedes agendar tu cita directamente desde nuestra aplicación en los dias disponibles.
                     </Typography>
-                    <StyledButton variant="contained" color="primary" fullWidth>
+                    <StyledButton variant="contained" color="primary" fullWidth onClick={() => navigate('/cliente/servicios')}>
                       Agendar Cita
                     </StyledButton>
                   </Box>

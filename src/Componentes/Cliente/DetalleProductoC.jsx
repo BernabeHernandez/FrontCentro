@@ -341,7 +341,7 @@ const DetalleProductoC = () => {
               <Typography
                 variant="body1"
                 color="text.secondary"
-                sx={{ lineHeight: 1.6 }}
+                sx={{ lineHeight: 1.6, whiteSpace: 'pre-line' }}
               >
                 {producto.descripcion}
               </Typography>

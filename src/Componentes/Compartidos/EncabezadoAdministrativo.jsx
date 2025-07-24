@@ -130,14 +130,6 @@ const EncabezadoAdministrativo = () => {
         { key: 'registro-sospechosos', label: 'Lista Negra' },
       ]
     },
-     {
-      key: 'modelos',
-      label: 'Modelos de Predicción',
-      icon: <AuditIcon sx={{ color: '#00CED1', fontSize: 20 }} />,
-      subItems: [
-        { key: 'prediccion-clasificacion', label: 'Predicción de Clasificación' },
-      ]
-    },
     {
       key: 'ventasa',
       label: 'Reporte de Ventas',

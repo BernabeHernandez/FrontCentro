@@ -90,17 +90,6 @@ const HorariosDis = () => {
     getDiasDisponibles();
   }, []);
 
-   // Estilo para la celda de predicción
-  const PredictionCell = styled(TableCell)(({ theme, prediction }) => ({
-    fontWeight: 'medium',
-    color:
-      prediction === 'El usuario va a asistir'
-        ? '#2e7d32' // Verde para asistir
-        : prediction === 'El usuario va a cancelar'
-        ? '#d32f2f' // Rojo para cancelar
-        : '#f57c00', // Naranja para pendiente
-  }));
-
   
 
  const handleSelectDay = async (dia, fecha) => {
@@ -114,38 +103,7 @@ const HorariosDis = () => {
       const fechaFormateada = format(fecha, "yyyy-MM-dd");
       const citasResponse = await axios.get(`https://backendcentro.onrender.com/api/citasC/citas-del-dia/${fechaFormateada}`);
       
-      // Obtener predicciones para cada cita
-      const citasConPredicciones = await Promise.all(
-        citasResponse.data.map(async (cita) => {
-          try {
-            const predictResponse = await axios.post(
-              'https://backendmodelos.onrender.com/predict',
-              {
-                hora_inicio: cita.hora_inicio,
-                nombre_x: cita.nombre,
-                apellidopa: cita.apellidopa,
-                apellidoma: cita.apellidoma,
-                nombre_y: cita.nombre_y,
-              },
-              {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                transformRequest: [(data) => {
-                  const params = new URLSearchParams();
-                  for (const key in data) {
-                    params.append(key, data[key]);
-                  }
-                  return params;
-                }],
-              }
-            );
-            return { ...cita, prediccion: predictResponse.data.prediction };
-          } catch (err) {
-            return { ...cita, prediccion: 'Error al predecir' };
-          }
-        })
-      );
-      
-      setCitasDelDia(citasConPredicciones);
+      setCitasDelDia(citasResponse.data);
     } catch (error) {
       console.error("Error al obtener las franjas horarias o citas:", error);
       setHorarios([]);
@@ -343,11 +301,6 @@ const HorariosDis = () => {
                 <Build sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Servicio
               </Box>
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Info sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Predicción
-              </Box>
-            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -365,9 +318,6 @@ const HorariosDis = () => {
                 <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
                 <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_fin}</TableCell>
                 <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre_y}</TableCell>
-                <PredictionCell prediction={cita.prediccion} sx={{ borderBottom: "1px solid #e0e0e0" }}>
-                  {cita.prediccion}
-                </PredictionCell>
               </TableRow>
             ))
           ) : (

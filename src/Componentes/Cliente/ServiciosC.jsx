@@ -19,16 +19,19 @@ import { CalendarToday } from "@mui/icons-material";
 import Breadcrumbs from "../Navegacion/BreadcrumbsServicios";
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: 12,
+  borderRadius: 16,
   overflow: "hidden",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
-    transform: "translateY(-5px)",
-    boxShadow: theme.shadows[8],
+    transform: "scale(1.03)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
   },
   cursor: "pointer",
   backgroundColor: "#fff",
-  minHeight: "460px",
+  minHeight: "370px",
+  maxWidth: 320,
+  border: "2px solid #e0e7ef",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
   display: "flex",
   flexDirection: "column",
 }));
@@ -124,13 +127,15 @@ const ServiciosC = () => {
                     <StyledCard onClick={() => handleServicioClick(servicio.id)}>
                       <CardMedia
                         component="img"
-                        height="200"
+                        height="160"
                         image={servicio.imagen}
                         alt={servicio.nombre}
                         sx={{
                           objectFit: "cover",
+                          width: "100%",
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
                           bgcolor: "#f5f7fa",
-                          p: 2,
                         }}
                       />
                       <CardContent sx={{ py: 2 }}>
@@ -138,7 +143,13 @@ const ServiciosC = () => {
                           variant="h6"
                           fontWeight="bold"
                           color="text.primary"
-                          sx={{ height: 50, overflow: "hidden", textOverflow: "ellipsis" }}
+                          sx={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis"
+                          }}
                         >
                           {servicio.nombre}
                         </Typography>
