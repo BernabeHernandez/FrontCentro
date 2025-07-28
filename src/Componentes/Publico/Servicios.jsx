@@ -19,26 +19,21 @@ import { CalendarToday } from "@mui/icons-material";
 import Breadcrumbs from "../Navegacion/BreadcrumbsServicios";
 
 const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: 28,
+  borderRadius: 16,
   overflow: "hidden",
-  transition: "transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s cubic-bezier(.4,2,.3,1)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
-    transform: "scale(1.025)",
-    boxShadow: "0 12px 32px 0 rgba(13, 148, 136, 0.13)",
+    transform: "scale(1.03)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
   },
   cursor: "pointer",
-  background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-  minHeight: "320px",
-  boxShadow: "0 4px 24px 0 rgba(13, 148, 136, 0.07)",
-  border: "1.5px solid #e0e7ef",
+  backgroundColor: "#fff",
+  minHeight: "370px",
+  maxWidth: 320,
+  border: "2px solid #e0e7ef",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
   display: "flex",
   flexDirection: "column",
-  width: "100%",
-  [theme.breakpoints.up('md')]: {
-    maxWidth: 340,
-  },
-  margin: '0 auto',
-  padding: '0 0 12px 0',
 }));
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
@@ -128,24 +123,22 @@ const Servicios = () => {
             <>
               <Grid container spacing={3}>
                 {serviciosPaginados.map((servicio) => (
-                  <Grid item key={servicio.id} xs={12} sm={6} md={4} lg={2.4} sx={{ mb: { xs: 4, sm: 4, md: 0 } }}>
+                  <Grid item key={servicio.id} xs={12} sm={6} md={4} lg={2.4}>
                     <StyledCard onClick={() => handleServicioClick(servicio.id)}>
                       <CardMedia
                         component="img"
+                        height="160"
+                        image={servicio.imagen}
+                        alt={servicio.nombre}
                         sx={{
                           objectFit: "cover",
                           width: "100%",
-                          borderTopLeftRadius: 28,
-                          borderTopRightRadius: 28,
-                          boxShadow: "0 8px 24px 0 rgba(13, 148, 136, 0.10)",
-                          position: 'relative',
-                          zIndex: 2,
-                          height: { xs: 280, sm: 240, md: 260 },
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
+                          bgcolor: "#f5f7fa",
                         }}
-                        image={servicio.imagen}
-                        alt={servicio.nombre}
                       />
-                      <CardContent sx={{ py: 1.5, px: 2 }}>
+                      <CardContent sx={{ py: 2 }}>
                         <Typography
                           variant="h6"
                           fontWeight="bold"

@@ -301,6 +301,41 @@ const HorariosDis = () => {
                 <Build sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Servicio
               </Box>
             </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Info sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Edad
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Event sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Mes
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Event sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Día
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Info sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Total Citas
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Cancel sx={{ mr: 1, color: "#d32f2f", fontSize: "1.2rem" }} /> Canceladas
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <CheckCircle sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Completadas
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#424242" }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Info sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Pendientes
+              </Box>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -317,12 +352,19 @@ const HorariosDis = () => {
                 </TableCell>
                 <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
                 <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_fin}</TableCell>
-                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre_y}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.servicio}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.edad}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.mes}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.dia}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_citas}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_canceladas}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_completadas}</TableCell>
+                <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_pendientes}</TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={10} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
+              <TableCell colSpan={17} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
                 No hay citas para este día.
               </TableCell>
             </TableRow>
