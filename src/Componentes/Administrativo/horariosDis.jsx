@@ -139,9 +139,11 @@ const HorariosDis = () => {
   };
 
   const filteredCitas = citasDelDia.filter((cita) =>
-    cita.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cita.apellidopa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cita.apellidoma.toLowerCase().includes(searchTerm.toLowerCase())
+    cita.estado === 'pendiente' && (
+      cita.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cita.apellidopa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cita.apellidoma.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const handleChangePage = (event, newPage) => {
