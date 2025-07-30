@@ -106,13 +106,15 @@ const HorariosDis = () => {
       // Obtener predicciones para cada cita
       const citasConPrediccion = await Promise.all(citasResponse.data.map(async (cita) => {
         const data = {
-          edad: cita.edad,
-          mes: cita.mes,
-          dia: cita.dia,
-          hora_inicio: cita.hora_inicio,
-          servicio: cita.servicio,
-          total_citas: cita.total_citas,
-          total_completadas: cita.total_completadas
+          edad: cita.edad || 0,
+          mes: cita.mes || '',
+          dia: cita.dia || '',
+          hora_inicio: cita.hora_inicio || '',
+          servicio: cita.servicio || '',
+          total_citas: cita.total_citas || 0,
+          total_canceladas: cita.total_canceladas || 0,
+          total_completadas: cita.total_completadas || 0,
+          total_pendientes: cita.total_pendientes || 0
         };
 
         try {
@@ -134,7 +136,7 @@ const HorariosDis = () => {
     } finally {
       setLoading(false);
     }
-  };
+};
 
   const filteredCitas = citasDelDia.filter((cita) =>
     cita.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
