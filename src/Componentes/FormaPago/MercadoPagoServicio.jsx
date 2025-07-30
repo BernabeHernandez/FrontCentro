@@ -214,7 +214,7 @@ const registrarCita = async (citaData, horarios, setHorarios) => {
       horaFinFinal = normalizarHora(franjaSeleccionada.hora_fin);
     }
 
-    const reservaResponse = await axios.put('https://backendcentro.onrender.com/api/citasC/sacar-cita', {
+    const reservaResponse = await axios.put('http://localhost:3302/api/citasC/sacar-cita', {
       dia,
       horaInicio: horaNormalizada,
       horaFin: horaFinFinal,
