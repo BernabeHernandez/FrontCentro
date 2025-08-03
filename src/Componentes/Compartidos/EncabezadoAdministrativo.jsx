@@ -102,7 +102,7 @@ const EncabezadoAdministrativo = () => {
         { key: 'inventarioservicios', label: 'Inventario de Servicios' },
         { key: 'categoria', label: 'Categorías' },
         { key: 'registroHo', label: 'Registro Horario' },
-        { key: 'horariosDis', label: 'Disponibilidad' },
+        { key: 'horariosDis', label: 'Citas del Día' },
         { key: 'promociones', label: 'Promociones' },
         { key: 'historialclinico', label: 'Historial Clinico' },
       ]

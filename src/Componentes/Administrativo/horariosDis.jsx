@@ -109,9 +109,7 @@ const HorariosDis = () => {
           hora_inicio: cita.hora_inicio || '',
           servicio: cita.servicio || '',
           total_citas: cita.total_citas || 0,
-          total_canceladas: cita.total_canceladas || 0,
-          total_completadas: cita.total_completadas || 0,
-          total_pendientes: cita.total_pendientes || 0
+          total_completadas: cita.total_completadas || 0
         };
 
         try {
