@@ -90,8 +90,6 @@ const HorariosDis = () => {
     getDiasDisponibles();
   }, []);
 
-
-
   const handleSelectDay = async (dia, fecha) => {
     setSelectedDay(dia);
     setLoading(true);
@@ -107,7 +105,6 @@ const HorariosDis = () => {
       const citasConPrediccion = await Promise.all(citasResponse.data.map(async (cita) => {
         const data = {
           edad: cita.edad || 0,
-          mes: cita.mes || '',
           dia: cita.dia || '',
           hora_inicio: cita.hora_inicio || '',
           servicio: cita.servicio || '',
@@ -136,7 +133,7 @@ const HorariosDis = () => {
     } finally {
       setLoading(false);
     }
-  };
+};
 
   const filteredCitas = citasDelDia.filter((cita) =>
     cita.estado === 'pendiente' && (
@@ -302,7 +299,7 @@ const HorariosDis = () => {
                          <TableContainer sx={{
                borderRadius: "12px",
                overflow: "hidden",
-               minWidth: 1400, // Aumentado para asegurar que todas las columnas sean visibles
+               minWidth: 1000, // Aumentado para asegurar que todas las columnas sean visibles
              }}>
                              <Table sx={{ "& .MuiTableCell-root": { padding: "6px 8px", fontSize: "0.875rem", textAlign: "center" } }}>
                 <TableHead>
@@ -324,50 +321,14 @@ const HorariosDis = () => {
                      </TableCell>
                      <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <Info sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Edad
-                       </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <AccessTime sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Inicio
+                         <AccessTime sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Hora
                        </Box>
                      </TableCell>
                      <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                          <Build sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Servicio
                        </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <Event sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Mes
-                       </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <Event sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Día
-                       </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <Info sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Total Citas
-                       </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <CheckCircle sx={{ mr: 1, color: "#388e3c", fontSize: "1.2rem" }} /> Completadas
-                       </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <Cancel sx={{ mr: 1, color: "#d32f2f", fontSize: "1.2rem" }} /> Canceladas
-                       </Box>
-                     </TableCell>
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <AccessTime sx={{ mr: 1, color: "#f57c00", fontSize: "1.2rem" }} /> Pendientes
-                       </Box>
-                     </TableCell>
-
+                     </TableCell>                    
                      <TableCell sx={{ fontWeight: "bold", color: "#424242", minWidth: 120, textAlign: "center" }}>
                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                          <Info sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Predicción
@@ -383,18 +344,9 @@ const HorariosDis = () => {
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.nombre}</TableCell>
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidopa}</TableCell>
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidoma}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.edad}</TableCell>
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.servicio}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.mes}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.dia}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_citas}</TableCell>
-
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_completadas}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_canceladas}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.total_pendientes}</TableCell>
-
-                                                 <TableCell sx={{ borderBottom: "1px solid #e0e0e0", minWidth: 120 }}>{cita.prediccion}</TableCell>
+                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0", minWidth: 120 }}>{cita.prediccion}</TableCell>
                       </TableRow>
                     ))
                   ) : (
