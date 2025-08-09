@@ -1017,7 +1017,7 @@ function PaginaPrincipalCliente() {
                     left: 0,
                     right: 0,
                     height: 6,
-                    background: "linear-gradient(90deg, #62e90eff, #0284c7)",
+                    background: "linear-gradient(90deg, #14b8a6, #0d9488)",
                   },
                 }}
               >
