@@ -5,8 +5,12 @@ import {
   Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Typography, Collapse, Toolbar, AppBar
 } from '@mui/material';
 import {
-  Home as HomeIcon, Logout as LogoutIcon, Description as FileTextIcon, AdminPanelSettings  as TeamIcon, Menu as MenuIcon, ExpandMore, ExpandLess,
-  ManageAccounts as AppsIcon, LocalShipping as DeliveryIcon,   SupervisorAccount as PatientAssistIcon, Security as AuditIcon, BarChart    as SalesReportIcon
+  Home as HomeIcon, Logout as LogoutIcon, Description as FileTextIcon, AdminPanelSettings as TeamIcon, Menu as MenuIcon, ExpandMore, ExpandLess,
+  ManageAccounts as AppsIcon, LocalShipping as DeliveryIcon, SupervisorAccount as PatientAssistIcon, Security as AuditIcon, BarChart as SalesReportIcon,
+  Inventory as InventoryIcon, Category as CategoryIcon, LocalOffer as OfferIcon, History as HistoryIcon, Assignment as AssignmentIcon,
+  ListAlt as ListAltIcon, Lock as LockIcon, Block as BlockIcon, Store as StoreIcon, MiscellaneousServices as MiscServicesIcon,
+  Schedule as ScheduleIcon, EventAvailable as EventIcon, Description as DescriptionIcon, Visibility as VisibilityIcon, Info as InfoIcon,
+  Receipt as ReceiptIcon, ShoppingCart as ShoppingCartIcon, People as PeopleIcon
 } from '@mui/icons-material';
 
 const EncabezadoAdministrativo = () => {
@@ -96,15 +100,15 @@ const EncabezadoAdministrativo = () => {
       label: 'Control',
       icon: <AppsIcon sx={{ color: '#6B728E', fontSize: 20 }} />,
       subItems: [
-        { key: 'productos', label: 'Productos' },
-        { key: 'inventarioproductos', label: 'Inventario de Productos' },
-        { key: 'servicios', label: 'Servicios' },
-        { key: 'inventarioservicios', label: 'Inventario de Servicios' },
-        { key: 'categoria', label: 'Categorías' },
-        { key: 'registroHo', label: 'Registro Horario' },
-        { key: 'horariosDis', label: 'Citas del Día' },
-        { key: 'promociones', label: 'Promociones' },
-        { key: 'historialclinico', label: 'Historial Clinico' },
+        { key: 'productos', label: 'Productos', icon: <StoreIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> }, // verde
+        { key: 'inventarioproductos', label: 'Inventario de Productos', icon: <InventoryIcon sx={{ color: '#388E3C', fontSize: 18 }} /> }, // verde oscuro
+        { key: 'servicios', label: 'Servicios', icon: <MiscServicesIcon sx={{ color: '#2196F3', fontSize: 18 }} /> }, // azul
+        { key: 'inventarioservicios', label: 'Inventario de Servicios', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> }, // azul oscuro
+        { key: 'categoria', label: 'Categorías', icon: <CategoryIcon sx={{ color: '#FF9800', fontSize: 18 }} /> }, // naranja
+        { key: 'registroHo', label: 'Registro Horario', icon: <ScheduleIcon sx={{ color: '#9C27B0', fontSize: 18 }} /> }, // morado
+        { key: 'horariosDis', label: 'Citas del Día', icon: <EventIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> }, // cyan
+        { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> }, // rosa
+        { key: 'historialclinico', label: 'Historial Clinico', icon: <HistoryIcon sx={{ color: '#795548', fontSize: 18 }} /> }, // café
       ]
     },
     {
@@ -112,12 +116,12 @@ const EncabezadoAdministrativo = () => {
       label: 'Datos de la Empresa',
       icon: <FileTextIcon sx={{ color: '#FFD700', fontSize: 20 }} />,
       subItems: [
-        { key: 'perfil', label: 'Perfil' },
-        { key: 'terminos', label: 'Términos' },
-        { key: 'politicas', label: 'Políticas' },
-        { key: 'deslinde', label: 'Deslinde' },
-        { key: 'mision', label: 'Misión' },
-        { key: 'vision', label: 'Visión' },
+        { key: 'perfil', label: 'Perfil', icon: <PeopleIcon sx={{ color: '#607D8B', fontSize: 18 }} /> }, // azul gris
+        { key: 'terminos', label: 'Términos', icon: <DescriptionIcon sx={{ color: '#009688', fontSize: 18 }} /> }, // teal
+        { key: 'politicas', label: 'Políticas', icon: <AssignmentIcon sx={{ color: '#FFC107', fontSize: 18 }} /> }, // amarillo
+        { key: 'deslinde', label: 'Deslinde', icon: <InfoIcon sx={{ color: '#F44336', fontSize: 18 }} /> }, // rojo
+        { key: 'mision', label: 'Misión', icon: <VisibilityIcon sx={{ color: '#3F51B5', fontSize: 18 }} /> }, // azul
+        { key: 'vision', label: 'Visión', icon: <VisibilityIcon sx={{ color: '#8BC34A', fontSize: 18 }} /> }, // verde claro
       ]
     },
     {
@@ -125,9 +129,9 @@ const EncabezadoAdministrativo = () => {
       label: 'Registro de Actividades',
       icon: <AuditIcon sx={{ color: '#00CED1', fontSize: 20 }} />,
       subItems: [
-        { key: 'activity-log', label: 'Registro de Logeos' },
-        { key: 'registro-password', label: 'Registro de Contraseña' },
-        { key: 'registro-sospechosos', label: 'Lista Negra' },
+        { key: 'activity-log', label: 'Registro de Logeos', icon: <ListAltIcon sx={{ color: '#3F51B5', fontSize: 18 }} /> }, // azul
+        { key: 'registro-password', label: 'Registro de Contraseña', icon: <LockIcon sx={{ color: '#FF5722', fontSize: 18 }} /> }, // naranja fuerte
+        { key: 'registro-sospechosos', label: 'Lista Negra', icon: <BlockIcon sx={{ color: '#9E9E9E', fontSize: 18 }} /> }, // gris
       ]
     },
     {
@@ -135,27 +139,28 @@ const EncabezadoAdministrativo = () => {
       label: 'Reporte de Ventas',
       icon: <SalesReportIcon sx={{ color: '#FF69B4', fontSize: 20 }} />,
       subItems: [
-        { key: 'ventas', label: 'Ventas' },
-        { key: 'detalleventas', label: 'Detalle de las Ventas' },
-        { key: 'detallecitas', label: 'Detalle Citas' },
+        { key: 'ventas', label: 'Ventas', icon: <ShoppingCartIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> }, // verde
+        { key: 'detalleventas', label: 'Detalle de las Ventas', icon: <ReceiptIcon sx={{ color: '#607D8B', fontSize: 18 }} /> }, // azul gris
+        { key: 'detallecitas', label: 'Detalle Citas', icon: <EventIcon sx={{ color: '#FF9800', fontSize: 18 }} /> }, // naranja
       ]
     },
     { key: 'roles', label: 'Roles', icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 20 }} /> },
     { key: 'entregaproductos', label: 'Entrega de Productos', icon: <DeliveryIcon sx={{ color: '#3CB371', fontSize: 20 }} /> },
     { key: 'asistenciapaciente', label: 'Asistencia de Pacientes', icon: <PatientAssistIcon sx={{ color: '#DC143C', fontSize: 20 }} /> },
     { key: 'cerrarSesion', label: 'Cerrar Sesión', icon: <LogoutIcon sx={{ color: '#FF4500', fontSize: 20 }} /> },
-  
   ];
 
   const drawerContent = (
     <Box
       sx={{
         width: 250,
+        minWidth: 250,
+        maxWidth: 250,
         backgroundColor: '#1A2526',
         color: '#FFFFFF',
         height: '100%',
         overflowY: 'auto',
-        overflowX: 'hidden',
+        overflowX: 'hidden', // Oculta el scroll horizontal
         '&::-webkit-scrollbar': {
           display: 'none',
         },
@@ -236,7 +241,7 @@ const EncabezadoAdministrativo = () => {
                       button
                       key={subItem.key}
                       sx={{
-                        pl: 4, // Reducimos la indentación para mejor alineación
+                        pl: 4,
                         '&:hover': { backgroundColor: '#B0BEC5', color: '#000000' },
                         py: 0.5,
                         backgroundColor: selectedOption === subItem.key ? '#B0BEC5' : 'transparent',
@@ -244,6 +249,9 @@ const EncabezadoAdministrativo = () => {
                       }}
                       onClick={() => handleMenuClick(subItem.key)}
                     >
+                      <ListItemIcon sx={{ color: 'gray', minWidth: 32 }}>
+                        {subItem.icon}
+                      </ListItemIcon>
                       <ListItemText
                         primary={subItem.label}
                         primaryTypographyProps={{
@@ -302,8 +310,11 @@ const EncabezadoAdministrativo = () => {
         variant="permanent"
         sx={{
           width: 250,
+          minWidth: 250,
+          maxWidth: 250,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: 250, boxSizing: 'border-box', backgroundColor: '#1A2526' },
+          overflowX: 'hidden',
+          [`& .MuiDrawer-paper`]: { width: 250, minWidth: 250, maxWidth: 250, boxSizing: 'border-box', backgroundColor: '#1A2526', overflowX: 'hidden' },
           display: { xs: 'none', md: 'block' },
         }}
       >

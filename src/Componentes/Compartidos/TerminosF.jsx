@@ -11,7 +11,7 @@ import {
   createTheme,
   CircularProgress,
 } from '@mui/material';
-import { Shield, FileText } from 'lucide-react';
+import {FileText } from 'lucide-react';
 
 // Crear tema personalizado
 const theme = createTheme({
