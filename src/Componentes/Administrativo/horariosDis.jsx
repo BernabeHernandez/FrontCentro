@@ -100,30 +100,7 @@ const HorariosDis = () => {
 
       const fechaFormateada = format(fecha, "yyyy-MM-dd");
       const citasResponse = await axios.get(`https://backendcentro.onrender.com/api/citasC/citas-del-dia/${fechaFormateada}`);
-
-      // Obtener predicciones para cada cita
-      const citasConPrediccion = await Promise.all(citasResponse.data.map(async (cita) => {
-        const data = {
-          edad: cita.edad || 0,
-          dia: cita.dia || '',
-          hora_inicio: cita.hora_inicio || '',
-          servicio: cita.servicio || '',
-          total_citas: cita.total_citas || 0,
-          total_completadas: cita.total_completadas || 0
-        };
-
-        try {
-          const predictionResponse = await axios.post('https://backendmodelos.onrender.com/predict', data, {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          return { ...cita, prediccion: predictionResponse.data.prediction };
-        } catch (error) {
-          console.error(`Error al predecir para cita ${cita.id_cita}:`, error);
-          return { ...cita, prediccion: 'Error en predicción' };
-        }
-      }));
-
-      setCitasDelDia(citasConPrediccion);
+      setCitasDelDia(citasResponse.data);
     } catch (error) {
       console.error("Error al obtener las franjas horarias o citas:", error);
       setHorarios([]);
@@ -131,7 +108,7 @@ const HorariosDis = () => {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   const filteredCitas = citasDelDia.filter((cita) =>
     cita.estado === 'pendiente' && (
@@ -327,11 +304,7 @@ const HorariosDis = () => {
                          <Build sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Servicio
                        </Box>
                      </TableCell>                    
-                     <TableCell sx={{ fontWeight: "bold", color: "#424242", minWidth: 120, textAlign: "center" }}>
-                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                         <Info sx={{ mr: 1, color: "#0288d1", fontSize: "1.2rem" }} /> Predicción
-                       </Box>
-                     </TableCell>
+                    {/* ...existing code... */}
                     
                   </TableRow>
                 </TableHead>
@@ -344,7 +317,7 @@ const HorariosDis = () => {
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.apellidoma}</TableCell>
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.hora_inicio}</TableCell>
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.servicio}</TableCell>
-                        <TableCell sx={{ borderBottom: "1px solid #e0e0e0", minWidth: 120 }}>{cita.prediccion}</TableCell>
+                        {/* ...existing code... */}
                       </TableRow>
                     ))
                   ) : (
