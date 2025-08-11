@@ -319,7 +319,7 @@ const HorariosDis = () => {
                         <TableCell sx={{ borderBottom: "1px solid #e0e0e0" }}>{cita.servicio}</TableCell>
                         {/* ...existing code... */}
                       </TableRow>
-                    ))
+                    )) 
                   ) : (
                     <TableRow>
                       <TableCell colSpan={13} align="center" sx={{ borderBottom: "1px solid #e0e0e0", height: "36px" }}>
