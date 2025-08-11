@@ -94,59 +94,89 @@ const EncabezadoAdministrativo = () => {
   };
 
   const menuItems = [
-    { key: 'home', label: 'Home', icon: <HomeIcon sx={{ color: '#FF6F61', fontSize: 20 }} /> },
+    { key: 'home', label: 'Inicio', icon: <HomeIcon sx={{ color: '#FF6F61', fontSize: 20 }} /> },
+   
     {
       key: 'control',
-      label: 'Control',
+      label: 'Productos y Servicios',
       icon: <AppsIcon sx={{ color: '#6B728E', fontSize: 20 }} />,
       subItems: [
-        { key: 'productos', label: 'Productos', icon: <StoreIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> }, // verde
-        { key: 'inventarioproductos', label: 'Inventario de Productos', icon: <InventoryIcon sx={{ color: '#388E3C', fontSize: 18 }} /> }, // verde oscuro
-        { key: 'servicios', label: 'Servicios', icon: <MiscServicesIcon sx={{ color: '#2196F3', fontSize: 18 }} /> }, // azul
-        { key: 'inventarioservicios', label: 'Inventario de Servicios', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> }, // azul oscuro
-        { key: 'categoria', label: 'Categorías', icon: <CategoryIcon sx={{ color: '#FF9800', fontSize: 18 }} /> }, // naranja
-        { key: 'registroHo', label: 'Registro Horario', icon: <ScheduleIcon sx={{ color: '#9C27B0', fontSize: 18 }} /> }, // morado
-        { key: 'horariosDis', label: 'Citas del Día', icon: <EventIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> }, // cyan
-        { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> }, // rosa
-        { key: 'historialclinico', label: 'Historial Clinico', icon: <HistoryIcon sx={{ color: '#795548', fontSize: 18 }} /> }, // café
+        { key: 'productos', label: 'Productos', icon: <StoreIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> },
+        { key: 'inventarioproductos', label: 'Inventario de Productos', icon: <InventoryIcon sx={{ color: '#388E3C', fontSize: 18 }} /> },
+        { key: 'servicios', label: 'Servicios', icon: <MiscServicesIcon sx={{ color: '#2196F3', fontSize: 18 }} /> },
+        { key: 'inventarioservicios', label: 'Inventario de Servicios', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> },
+        { key: 'categoria', label: 'Categorías', icon: <CategoryIcon sx={{ color: '#FF9800', fontSize: 18 }} /> },
+        { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> },
       ]
     },
     {
+      key: 'horariosycitas',
+      label: 'Horarios y Citas',
+      icon: <ScheduleIcon sx={{ color: '#32cb8eff', fontSize: 20 }} />,
+      subItems: [
+        { key: 'registroHo', label: 'Registro Horario', icon: <ScheduleIcon sx={{ color: '#9C27B0', fontSize: 18 }} /> },
+        { key: 'horariosDis', label: 'Citas del Día', icon: <EventIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
+        { key: 'detallecitas', label: 'Detalle Citas', icon: <EventIcon sx={{ color: '#FF9800', fontSize: 18 }} /> },
+      ]
+    },
+    {
+      key: 'pacientes',
+      label: 'Pacientes',
+      icon: <PatientAssistIcon sx={{ color: '#DC143C', fontSize: 20 }} />,
+      subItems: [
+        { key: 'asistenciapaciente', label: 'Asistencia de Pacientes', icon: <PatientAssistIcon sx={{ color: '#DC143C', fontSize: 18 }} /> },
+        { key: 'historialclinico', label: 'Historial Clínico', icon: <HistoryIcon sx={{ color: '#795548', fontSize: 18 }} /> },
+      ]
+    },
+    {
+      key: 'ventas',
+      label: 'Ventas',
+      icon: <SalesReportIcon sx={{ color: '#FF69B4', fontSize: 20 }} />,
+      subItems: [
+        { key: 'ventas', label: 'Ventas', icon: <ShoppingCartIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> },
+        { key: 'detalleventas', label: 'Detalle de las Ventas', icon: <ReceiptIcon sx={{ color: '#607D8B', fontSize: 18 }} /> },
+        { key: 'entregaproductos', label: 'Entrega de Productos', icon: <DeliveryIcon sx={{ color: '#3CB371', fontSize: 18 }} /> },
+      ]
+    },
+     {
       key: 'empresa',
-      label: 'Datos de la Empresa',
+      label: 'Empresa',
       icon: <FileTextIcon sx={{ color: '#FFD700', fontSize: 20 }} />,
       subItems: [
-        { key: 'perfil', label: 'Perfil', icon: <PeopleIcon sx={{ color: '#607D8B', fontSize: 18 }} /> }, // azul gris
-        { key: 'terminos', label: 'Términos', icon: <DescriptionIcon sx={{ color: '#009688', fontSize: 18 }} /> }, // teal
-        { key: 'politicas', label: 'Políticas', icon: <AssignmentIcon sx={{ color: '#FFC107', fontSize: 18 }} /> }, // amarillo
-        { key: 'deslinde', label: 'Deslinde', icon: <InfoIcon sx={{ color: '#F44336', fontSize: 18 }} /> }, // rojo
-        { key: 'mision', label: 'Misión', icon: <VisibilityIcon sx={{ color: '#3F51B5', fontSize: 18 }} /> }, // azul
-        { key: 'vision', label: 'Visión', icon: <VisibilityIcon sx={{ color: '#8BC34A', fontSize: 18 }} /> }, // verde claro
+        { key: 'perfil', label: 'Perfil', icon: <PeopleIcon sx={{ color: '#607D8B', fontSize: 18 }} /> },
+        { key: 'terminos', label: 'Términos', icon: <DescriptionIcon sx={{ color: '#009688', fontSize: 18 }} /> },
+        { key: 'politicas', label: 'Políticas', icon: <AssignmentIcon sx={{ color: '#FFC107', fontSize: 18 }} /> },
+        { key: 'deslinde', label: 'Deslinde', icon: <InfoIcon sx={{ color: '#F44336', fontSize: 18 }} /> },
+        { key: 'mision', label: 'Misión', icon: <VisibilityIcon sx={{ color: '#3F51B5', fontSize: 18 }} /> },
+        { key: 'vision', label: 'Visión', icon: <VisibilityIcon sx={{ color: '#8BC34A', fontSize: 18 }} /> },
       ]
     },
     {
       key: 'actividades',
-      label: 'Registro de Actividades',
+      label: 'Actividades y Seguridad',
       icon: <AuditIcon sx={{ color: '#00CED1', fontSize: 20 }} />,
       subItems: [
-        { key: 'activity-log', label: 'Registro de Logeos', icon: <ListAltIcon sx={{ color: '#3F51B5', fontSize: 18 }} /> }, // azul
-        { key: 'registro-password', label: 'Registro de Contraseña', icon: <LockIcon sx={{ color: '#FF5722', fontSize: 18 }} /> }, // naranja fuerte
-        { key: 'registro-sospechosos', label: 'Lista Negra', icon: <BlockIcon sx={{ color: '#9E9E9E', fontSize: 18 }} /> }, // gris
+        { key: 'activity-log', label: 'Registro de Logeos', icon: <ListAltIcon sx={{ color: '#3F51B5', fontSize: 18 }} /> },
+        { key: 'registro-password', label: 'Registro de Contraseña', icon: <LockIcon sx={{ color: '#FF5722', fontSize: 18 }} /> },
+        { key: 'registro-sospechosos', label: 'Lista Negra', icon: <BlockIcon sx={{ color: '#9E9E9E', fontSize: 18 }} /> },
       ]
     },
     {
-      key: 'ventasa',
-      label: 'Reporte de Ventas',
-      icon: <SalesReportIcon sx={{ color: '#FF69B4', fontSize: 20 }} />,
+      key: 'administracion',
+      label: 'Administración',
+      icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 20 }} />,
       subItems: [
-        { key: 'ventas', label: 'Ventas', icon: <ShoppingCartIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> }, // verde
-        { key: 'detalleventas', label: 'Detalle de las Ventas', icon: <ReceiptIcon sx={{ color: '#607D8B', fontSize: 18 }} /> }, // azul gris
-        { key: 'detallecitas', label: 'Detalle Citas', icon: <EventIcon sx={{ color: '#FF9800', fontSize: 18 }} /> }, // naranja
+        { key: 'roles', label: 'Roles', icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 18 }} /> },
       ]
     },
-    { key: 'roles', label: 'Roles', icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 20 }} /> },
-    { key: 'entregaproductos', label: 'Entrega de Productos', icon: <DeliveryIcon sx={{ color: '#3CB371', fontSize: 20 }} /> },
-    { key: 'asistenciapaciente', label: 'Asistencia de Pacientes', icon: <PatientAssistIcon sx={{ color: '#DC143C', fontSize: 20 }} /> },
+    {
+      key: 'otras',
+      label: 'Otras opciones',
+  icon: <SalesReportIcon sx={{ color: '#607D8B', fontSize: 20 }} />,
+      subItems: [
+  { key: 'prediccion-clasificacion', label: 'Predicción/Clasificación (si aplica)', icon: <SalesReportIcon sx={{ color: '#607D8B', fontSize: 18 }} /> },
+      ]
+    },
     { key: 'cerrarSesion', label: 'Cerrar Sesión', icon: <LogoutIcon sx={{ color: '#FF4500', fontSize: 20 }} /> },
   ];
 
