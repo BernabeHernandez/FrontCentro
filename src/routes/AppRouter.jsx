@@ -83,6 +83,7 @@ import AsistenciaPaciente from '../Componentes/Administrativo/AsistenciaPaciente
 import EntregaProductos from '../Componentes/Administrativo/EntregaProductos/EntregaProductos';
 import MisCompras from '../Componentes/Cliente/Compras/MisCompras';
 import PrediccionClasificacion from '../Models/PrediccionClasificacion';
+import Rutinas from '../Componentes/Administrativo/Rutinas/Rutinas';
 
 const AppRouter = () => (
   <Routes>
@@ -125,6 +126,8 @@ const AppRouter = () => (
     <Route path="/admin/asistenciaPaciente" element={<ProtectedRoute allowedRoles={["Administrador"]}><AsistenciaPaciente /></ProtectedRoute>} />
     <Route path="/admin/entregaproductos" element={<ProtectedRoute allowedRoles={["Administrador"]}><EntregaProductos /></ProtectedRoute>} />
     <Route path="/admin/prediccion-clasificacion" element={<ProtectedRoute allowedRoles={["Administrador"]}><PrediccionClasificacion /></ProtectedRoute>} />
+    <Route path="/admin/rutinas" element={<ProtectedRoute allowedRoles={["Administrador"]}><Rutinas /></ProtectedRoute>} />
+
 
     {/* Rutas protegidas para clientes */}
     <Route path="/cliente" element={<ProtectedRoute allowedRoles={["Cliente"]}><PaginaPrincipalCliente /></ProtectedRoute>} />

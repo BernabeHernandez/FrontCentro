@@ -63,6 +63,7 @@ const EncabezadoAdministrativo = () => {
       case "registroHo": navigate('/admin/registroH'); break;
       case "horariosDis": navigate('/admin/horariosD'); break;
       case "promociones": navigate('/admin/promociones'); break;
+  case "rutinas": navigate('/admin/rutinas'); break;
       case "historialclinico": navigate('/admin/historial'); break;
       case "ventas": navigate('/admin/ventas'); break;
       case "detalleventas": navigate('/admin/detalleventas'); break;
@@ -107,6 +108,7 @@ const EncabezadoAdministrativo = () => {
         { key: 'inventarioservicios', label: 'Inventario de Servicios', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> },
         { key: 'categoria', label: 'Categorías', icon: <CategoryIcon sx={{ color: '#FF9800', fontSize: 18 }} /> },
         { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> },
+  { key: 'rutinas', label: 'Rutinas', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
       ]
     },
     {
