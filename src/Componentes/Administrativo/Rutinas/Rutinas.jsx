@@ -31,8 +31,6 @@ import {
   Add as Plus,
   Image as ImageIcon,
   Close as X,
-  Wifi,
-  WifiOff,
   CloudUpload,
 } from "@mui/icons-material"
 
@@ -46,7 +44,7 @@ export default function Rutinas() {
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
-    pasos: [],
+  pasos: [], // [{ nombre, descripcion, tiempo_estimado, repeticiones, descanso, imagen }]
   })
   const [imageFiles, setImageFiles] = useState([])
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" })
@@ -143,7 +141,17 @@ export default function Rutinas() {
   const agregarPaso = () => {
     setFormData((prev) => ({
       ...prev,
-      pasos: [...prev.pasos, { titulo: "", actividad: "", imagen: null }],
+      pasos: [
+        ...prev.pasos,
+        {
+          nombre: "",
+          descripcion: "",
+          tiempo_estimado: "",
+          repeticiones: "",
+          descanso: "",
+          imagen: null,
+        },
+      ],
     }))
     setImageFiles((prev) => [...prev, null])
   }
@@ -188,6 +196,14 @@ export default function Rutinas() {
       return
     }
 
+    // Validar campos de pasos
+    for (const paso of formData.pasos) {
+      if (!paso.nombre.trim()) {
+        showToast("Cada paso debe tener un nombre", "error")
+        return
+      }
+    }
+
     try {
       setLoading(true)
 
@@ -210,9 +226,13 @@ export default function Rutinas() {
         formDataToSend.append("titulo", formData.titulo)
         formDataToSend.append("descripcion", formData.descripcion)
 
+        // Mapear los pasos a la nueva estructura
         const pasosParaEnviar = formData.pasos.map((paso) => ({
-          titulo: paso.titulo,
-          actividad: paso.actividad,
+          nombre: paso.nombre,
+          descripcion: paso.descripcion,
+          tiempo_estimado: paso.tiempo_estimado,
+          repeticiones: paso.repeticiones,
+          descanso: paso.descanso,
         }))
         formDataToSend.append("pasos", JSON.stringify(pasosParaEnviar))
 
@@ -279,7 +299,14 @@ export default function Rutinas() {
     setFormData({
       titulo: rutina.titulo,
       descripcion: rutina.descripcion,
-      pasos: rutina.pasos || [],
+      pasos: (rutina.pasos || []).map((paso) => ({
+        nombre: paso.nombre || "",
+        descripcion: paso.descripcion || "",
+        tiempo_estimado: paso.tiempo_estimado || "",
+        repeticiones: paso.repeticiones || "",
+        descanso: paso.descanso || "",
+        imagen: paso.imagen || null,
+      })),
     })
     setImageFiles(new Array(rutina.pasos?.length || 0).fill(null))
     setIsDialogOpen(true)
@@ -425,7 +452,7 @@ export default function Rutinas() {
                               variant="body2"
                               sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                             >
-                              {paso.titulo}
+                              {paso.nombre}
                             </Typography>
                           </Box>
                         ))}
@@ -549,9 +576,9 @@ export default function Rutinas() {
                         <Stack spacing={2}>
                           <TextField
                             fullWidth
-                            label="Título del Paso"
-                            value={paso.titulo}
-                            onChange={(e) => actualizarPaso(index, "titulo", e.target.value)}
+                            label="Nombre del Paso"
+                            value={paso.nombre}
+                            onChange={(e) => actualizarPaso(index, "nombre", e.target.value)}
                             placeholder="Ej: Flexión de rodilla"
                           />
 
@@ -559,11 +586,44 @@ export default function Rutinas() {
                             fullWidth
                             multiline
                             rows={3}
-                            label="Descripción de la Actividad"
-                            value={paso.actividad}
-                            onChange={(e) => actualizarPaso(index, "actividad", e.target.value)}
-                            placeholder="Describe cómo realizar este paso, repeticiones, duración..."
+                            label="Descripción"
+                            value={paso.descripcion}
+                            onChange={(e) => actualizarPaso(index, "descripcion", e.target.value)}
+                            placeholder="Describe cómo realizar este paso..."
                           />
+
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                fullWidth
+                                label="Tiempo estimado (min)"
+                                value={paso.tiempo_estimado}
+                                onChange={(e) => actualizarPaso(index, "tiempo_estimado", e.target.value)}
+                                placeholder="Ej: 10"
+                                type="number"
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                fullWidth
+                                label="Repeticiones"
+                                value={paso.repeticiones}
+                                onChange={(e) => actualizarPaso(index, "repeticiones", e.target.value)}
+                                placeholder="Ej: 15"
+                                type="number"
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                fullWidth
+                                label="Descanso (seg)"
+                                value={paso.descanso}
+                                onChange={(e) => actualizarPaso(index, "descanso", e.target.value)}
+                                placeholder="Ej: 30"
+                                type="number"
+                              />
+                            </Grid>
+                          </Grid>
 
                           <Box>
                             <Typography variant="subtitle2" sx={{ mb: 1 }}>
