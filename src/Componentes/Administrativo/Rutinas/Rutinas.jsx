@@ -133,6 +133,7 @@ export default function Rutinas() {
     localStorage.setItem("rutinas-local", JSON.stringify(nuevasRutinas))
     setRutinas(nuevasRutinas)
   }
+  
 
   useEffect(() => {
     cargarRutinas()
