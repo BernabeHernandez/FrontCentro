@@ -11,7 +11,7 @@ module.exports = {
   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
 
   // Archivo SW que se va a generar
-  swDest: "build/service-worker.js",
+  swDest: "public/service-worker.js",
 
   // Cache dinámico para APIs
   runtimeCaching: [
