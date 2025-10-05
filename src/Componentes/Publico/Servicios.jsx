@@ -75,7 +75,12 @@ const Servicios = () => {
   useEffect(() => {
     const fetchServicios = async () => {
       try {
-        const response = await fetch("https://backendcentro.onrender.com/api/serviciosConDes/todos-con-y-sin-descuento");
+        const idUsuario = localStorage.getItem('usuario_id') || localStorage.getItem('id');
+        const base = 'https://backendcentro.onrender.com';
+        const url = idUsuario
+          ? `${base}/api/serviciosConDes/usuario/${idUsuario}`
+          : `${base}/api/serviciosConDes/todos-con-y-sin-descuento`;
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`Error al obtener los servicios: ${response.statusText}`);
         }

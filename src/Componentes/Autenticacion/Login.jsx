@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { LockOutlined, Visibility, VisibilityOff, Login as LoginIcon, ArrowForward } from "@mui/icons-material";
-import imageForBlackBackground6 from "../Imagenes/confident-doctor-posing-2273895-removebg-preview.png"; // Imagen importada
+import imageForBlackBackground6 from "../Imagenes/confident-doctor-posing-2273895-removebg-preview.png";
 
 const MySwal = withReactContent(Swal);
 
@@ -44,11 +44,11 @@ const theme = createTheme({
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h3: {
-      fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif', // Tipografía bonita para el título
+      fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
       fontWeight: 700,
     },
     h6: {
-      fontFamily: '"Lora", "Roboto", "Helvetica", "Arial", sans-serif', // Tipografía elegante para la descripción
+      fontFamily: '"Lora", "Roboto", "Helvetica", "Arial", sans-serif',
       fontWeight: 400,
       lineHeight: 1.6,
     },
@@ -64,7 +64,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: 8,
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-  background: "#ffffff", // Fondo blanco puro como MongoDB Atlas
+  background: "#ffffff",
   border: "none",
 }));
 
@@ -92,10 +92,10 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 const InfoBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
-  background: "transparent", // Fondo transparente para integrarse con el fondo oscuro
+  background: "transparent",
   maxWidth: 600,
   display: "flex",
-  flexDirection: "row", // Texto e imagen lado a lado
+  flexDirection: "row",
   alignItems: "center",
   gap: theme.spacing(3),
 }));
@@ -162,8 +162,22 @@ function Login() {
       // Llamar a la función de login del contexto de autenticación
       login({ user: username, id: id_usuario, tipo });
 
-      // Redirigir según el rol
-      const ruta = tipo === "Administrador" ? "/admin" : "/cliente";
+      // Verificar elegibilidad para la ruleta si es cliente
+      let ruta = tipo === "Administrador" ? "/admin" : "/cliente";
+      if (tipo === "Cliente") {
+        try {
+          const eligibilityResponse = await axios.get(
+            `https://backendcentro.onrender.com/api/ruleta/elegibilidad/${id_usuario}`
+          );
+          if (eligibilityResponse.data?.elegible) {
+            ruta = "/cliente/ruleta";
+          }
+        } catch (error) {
+          console.error("Error al verificar elegibilidad:", error);
+          // Si hay error, redirigir a /cliente por defecto
+          ruta = "/cliente";
+        }
+      }
 
       MySwal.fire({
         position: "center",
@@ -228,7 +242,7 @@ function Login() {
   };
 
   const handleNavigate = () => {
-    navigate("/about"); // Redirige a la ruta "/about"
+    navigate("/about");
   };
 
   const formatLockTime = (timeInSeconds) => {
@@ -244,7 +258,7 @@ function Login() {
         <Box
           sx={{
             minHeight: "100vh",
-            background: "#1a2525", // Fondo oscuro como MongoDB Atlas
+            background: "#1a2525",
             position: "relative",
             overflow: "hidden",
             display: "flex",
@@ -376,20 +390,20 @@ function Login() {
                 </StyledCard>
               </Grid>
 
-              {/* Sección de información como MongoDB Atlas */}
+              {/* Sección de información */}
               <Grid item xs={12} md={6}>
                 <InfoBox>
                   <Box sx={{ flex: 1 }}>
                     <Typography
                       variant="h3"
-                      color="#ffffff" // Blanco como en MongoDB Atlas
+                      color="#ffffff"
                       gutterBottom
                     >
                       Centro de Rehabilitación Integral San Juan
                     </Typography>
                     <Typography
                       variant="h6"
-                      color="#e0e0e0" // Gris claro para el texto
+                      color="#e0e0e0"
                       paragraph
                     >
                       Gestiona tus citas y accede a servicios especializados para tu recuperación física y mental, todo desde un solo lugar.
@@ -415,7 +429,7 @@ function Login() {
                     src={imageForBlackBackground6}
                     alt="Centro de Rehabilitación Integral San Juan"
                     sx={{
-                      width: 300, // Imagen más grande
+                      width: 300,
                       height: 500,
                       objectFit: "cover",
                       borderRadius: 8,

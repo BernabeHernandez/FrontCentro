@@ -52,10 +52,13 @@ const DetallesServicio = () => {
   useEffect(() => {
     const fetchServicio = async () => {
       try {
-        // Obtener servicios con promociones
-        const response = await fetch(
-          `https://backendcentro.onrender.com/api/serviciosConDes/todos-con-y-sin-descuento`
-        );
+        // Obtener servicios con promociones (aplica descuento de ruleta si usuario tiene)
+        const idUsuario = localStorage.getItem('usuario_id') || localStorage.getItem('id');
+        const base = 'https://backendcentro.onrender.com';
+        const url = idUsuario
+          ? `${base}/api/serviciosConDes/usuario/${idUsuario}`
+          : `${base}/api/serviciosConDes/todos-con-y-sin-descuento`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Error al obtener los servicios");
         const serviciosData = await response.json();
         

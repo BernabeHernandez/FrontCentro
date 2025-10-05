@@ -303,7 +303,7 @@ const MercadoPagoServicio = () => {
                 nombre_servicio
               );
             })
-            .then(() => {
+            .then(async () => {
               console.log('PDF generado exitosamente');
               Swal.fire({
                 title: 'Pago Exitoso',
@@ -311,10 +311,23 @@ const MercadoPagoServicio = () => {
                 icon: 'success',
                 confirmButtonText: 'Aceptar',
               });
-              navigate('/cliente/CitasCliente', {
-                state: { servicioId: id_servicio },
-                replace: true,
-              });
+              // Verificar elegibilidad para la ruleta
+              try {
+                const eligibilityResponse = await axios.get(
+                  `https://backendcentro.onrender.com/api/ruleta/elegibilidad/${id_usuario}`
+                );
+                const ruta = eligibilityResponse.data?.elegible ? '/cliente/ruleta' : '/cliente/CitasCliente';
+                navigate(ruta, {
+                  state: { servicioId: id_servicio },
+                  replace: true,
+                });
+              } catch (error) {
+                console.error('Error al verificar elegibilidad:', error);
+                navigate('/cliente/CitasCliente', {
+                  state: { servicioId: id_servicio },
+                  replace: true,
+                });
+              }
             })
             .catch((error) => {
               console.error('Error en el flujo de pago:', error);
@@ -324,7 +337,7 @@ const MercadoPagoServicio = () => {
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
               });
-              navigate('/CitasCliente', {
+              navigate('/cliente/CitasCliente', {
                 state: { servicioId: id_servicio },
                 replace: true,
               });
@@ -337,7 +350,7 @@ const MercadoPagoServicio = () => {
             icon: 'error',
             confirmButtonText: 'Aceptar',
           });
-          navigate('/CitasCliente', {
+          navigate('/cliente/CitasCliente', {
             state: { servicioId: id_servicio },
             replace: true,
           });
@@ -350,7 +363,7 @@ const MercadoPagoServicio = () => {
           icon: 'error',
           confirmButtonText: 'Aceptar',
         });
-        navigate('/CitasCliente', {
+        navigate('/cliente/CitasCliente', {
           state: { servicioId: id_servicio },
           replace: true,
         });

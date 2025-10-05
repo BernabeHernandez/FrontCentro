@@ -84,6 +84,7 @@ import EntregaProductos from '../Componentes/Administrativo/EntregaProductos/Ent
 import MisCompras from '../Componentes/Cliente/Compras/MisCompras';
 import PrediccionClasificacion from '../Models/PrediccionClasificacion';
 import Rutinas from '../Componentes/Administrativo/Rutinas/Rutinas';
+import GamificacionRoleta from '../Componentes/Cliente/Gamificacion/GamificacioRoleta';
 
 const AppRouter = () => (
   <Routes>
@@ -151,16 +152,15 @@ const AppRouter = () => (
     <Route path="/cliente/misionview" element={<ProtectedRoute allowedRoles={["Cliente"]}><MisionView /></ProtectedRoute>} /> 
     <Route path="/cliente/visionview" element={<ProtectedRoute allowedRoles={["Cliente"]}><VisionView /></ProtectedRoute>} />    
     <Route path="/cliente/metodo" element={<ProtectedRoute allowedRoles={["Cliente"]}><OpcionPago /></ProtectedRoute>} />  
-
     <Route path="/cliente/paypal" element={<ProtectedRoute allowedRoles={["Cliente"]}><PayPal /></ProtectedRoute>} />  
     <Route path="/cliente/mastercard" element={<ProtectedRoute allowedRoles={["Cliente"]}><MasterCard /></ProtectedRoute>} />  
     <Route path="/cliente/mercadopago" element={<ProtectedRoute allowedRoles={["Cliente"]}><MercadoPago /></ProtectedRoute>} />     
     <Route path="/cliente/metodoServicios" element={<ProtectedRoute allowedRoles={["Cliente"]}><MetodoPagoServicios /></ProtectedRoute>} />       
-
     <Route path="/cliente/pago-servicio/paypal" element={<ProtectedRoute allowedRoles={["Cliente"]}><PayPalServicio /></ProtectedRoute>} />  
     <Route path="/cliente/pago-servicio/mercadopago" element={<ProtectedRoute allowedRoles={["Cliente"]}><MercadoPagoServicio /></ProtectedRoute>} />   
     <Route path="/cliente/facturacion/:id" element={<ProtectedRoute allowedRoles={["Cliente"]}><Facturacion /></ProtectedRoute>} />  
     <Route path="/cliente/misCompras/:idUsuario" element={<ProtectedRoute allowedRoles={["Cliente"]}><MisCompras /></ProtectedRoute>} />  
+     <Route path="/cliente/ruleta" element={<ProtectedRoute allowedRoles={["Cliente"]}><GamificacionRoleta /></ProtectedRoute>} />  
 
     {/* Rutas públicas */}
     <Route path="/verificar_correo" element={<SolicitarCodigo />} />
