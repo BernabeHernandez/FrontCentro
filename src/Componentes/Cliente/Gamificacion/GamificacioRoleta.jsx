@@ -62,9 +62,11 @@ export default function GamificacioRoleta() {
 
     const randomPrizeIndex = Math.floor(Math.random() * prizes.length)
     const segmentAngle = 360 / prizes.length
+    // Ajustar el ángulo para que apunte al centro del segmento seleccionado
     const targetAngle = segmentAngle * randomPrizeIndex + segmentAngle / 2
     const spins = 5 + Math.random() * 3
-    const finalRotation = rotation + spins * 360 + (360 - targetAngle)
+    // Rotar la ruleta al ángulo del segmento seleccionado, sumando giros completos
+    const finalRotation = rotation + spins * 360 + targetAngle
 
     setRotation(finalRotation)
 
@@ -78,7 +80,7 @@ export default function GamificacioRoleta() {
           setEligible(false)
           return
         }
-        await axios.post(`http://localhost:3302/api/ruleta/girar/${usuarioId}`, {
+        await axios.post(`https://backendcentro.onrender.com/api/ruleta/girar/${usuarioId}`, {
           porcentaje: premio.discount,
         })
         setEligible(false)
@@ -99,7 +101,7 @@ export default function GamificacioRoleta() {
 
   const createSegmentPath = (index, total) => {
     const angle = (2 * Math.PI) / total
-    const startAngle = angle * index - Math.PI / 2
+    const startAngle = angle * index
     const endAngle = startAngle + angle
     const radius = 180
     const innerRadius = 0
