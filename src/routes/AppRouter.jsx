@@ -85,6 +85,7 @@ import MisCompras from '../Componentes/Cliente/Compras/MisCompras';
 import PrediccionClasificacion from '../Models/PrediccionClasificacion';
 import Rutinas from '../Componentes/Administrativo/Rutinas/Rutinas';
 import GamificacionRoleta from '../Componentes/Cliente/Gamificacion/GamificacioRoleta';
+import RuletaPremios from '../Componentes/Administrativo/ControlRuleta/RuletaPremios';
 
 const AppRouter = () => (
   <Routes>
@@ -128,6 +129,7 @@ const AppRouter = () => (
     <Route path="/admin/entregaproductos" element={<ProtectedRoute allowedRoles={["Administrador"]}><EntregaProductos /></ProtectedRoute>} />
     <Route path="/admin/prediccion-clasificacion" element={<ProtectedRoute allowedRoles={["Administrador"]}><PrediccionClasificacion /></ProtectedRoute>} />
     <Route path="/admin/rutinas" element={<ProtectedRoute allowedRoles={["Administrador"]}><Rutinas /></ProtectedRoute>} />
+    <Route path="/admin/ruleta-premios" element={<ProtectedRoute allowedRoles={["Administrador"]}><RuletaPremios /></ProtectedRoute>} />
 
 
     {/* Rutas protegidas para clientes */}

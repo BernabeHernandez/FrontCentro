@@ -63,7 +63,7 @@ const EncabezadoAdministrativo = () => {
       case "registroHo": navigate('/admin/registroH'); break;
       case "horariosDis": navigate('/admin/horariosD'); break;
       case "promociones": navigate('/admin/promociones'); break;
-  case "rutinas": navigate('/admin/rutinas'); break;
+      case "rutinas": navigate('/admin/rutinas'); break;
       case "historialclinico": navigate('/admin/historial'); break;
       case "ventas": navigate('/admin/ventas'); break;
       case "detalleventas": navigate('/admin/detalleventas'); break;
@@ -71,6 +71,7 @@ const EncabezadoAdministrativo = () => {
       case "entregaproductos": navigate('/admin/entregaproductos'); break;
       case "asistenciapaciente": navigate('/admin/asistenciaPaciente'); break;
       case "prediccion-clasificacion": navigate('/admin/prediccion-clasificacion'); break;
+      case "ruleta-premios": navigate('/admin/ruleta-premios'); break;
       case "cerrarSesion": handleLogout(); break;
       default: console.log("No se reconoce la acción del menú");
     }
@@ -108,7 +109,8 @@ const EncabezadoAdministrativo = () => {
         { key: 'inventarioservicios', label: 'Inventario de Servicios', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> },
         { key: 'categoria', label: 'Categorías', icon: <CategoryIcon sx={{ color: '#FF9800', fontSize: 18 }} /> },
         { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> },
-  { key: 'rutinas', label: 'Rutinas', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
+        { key: 'rutinas', label: 'Rutinas', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
+        { key: 'ruleta-premios', label: 'Ruleta de Premios', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
       ]
     },
     {
