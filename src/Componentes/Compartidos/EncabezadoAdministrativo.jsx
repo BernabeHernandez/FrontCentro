@@ -72,6 +72,7 @@ const EncabezadoAdministrativo = () => {
       case "asistenciapaciente": navigate('/admin/asistenciaPaciente'); break;
       case "prediccion-clasificacion": navigate('/admin/prediccion-clasificacion'); break;
       case "ruleta-premios": navigate('/admin/ruleta-premios'); break;
+      case "asignar-rutinas": navigate('/admin/asignarutina'); break;
       case "cerrarSesion": handleLogout(); break;
       default: console.log("No se reconoce la acción del menú");
     }
@@ -111,6 +112,7 @@ const EncabezadoAdministrativo = () => {
         { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> },
         { key: 'rutinas', label: 'Rutinas', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
         { key: 'ruleta-premios', label: 'Ruleta de Premios', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
+        { key: 'asignar-rutinas', label: 'Asignar Rutinas', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
       ]
     },
     {
