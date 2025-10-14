@@ -104,10 +104,10 @@ const EncabezadoAdministrativo = () => {
       label: 'Productos y Servicios',
       icon: <AppsIcon sx={{ color: '#6B728E', fontSize: 20 }} />,
       subItems: [
-        { key: 'productos', label: 'Productos', icon: <StoreIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> },
+        { key: 'productos', label: 'Registro de Productos', icon: <StoreIcon sx={{ color: '#4CAF50', fontSize: 18 }} /> },
         { key: 'inventarioproductos', label: 'Inventario de Productos', icon: <InventoryIcon sx={{ color: '#388E3C', fontSize: 18 }} /> },
-        { key: 'servicios', label: 'Servicios', icon: <MiscServicesIcon sx={{ color: '#2196F3', fontSize: 18 }} /> },
-        { key: 'inventarioservicios', label: 'Inventario de Servicios', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> },
+        { key: 'servicios', label: 'Registro de Servicios', icon: <MiscServicesIcon sx={{ color: '#2196F3', fontSize: 18 }} /> },
+        { key: 'inventarioservicios', label: 'Servicios Disponibles', icon: <InventoryIcon sx={{ color: '#1976D2', fontSize: 18 }} /> },
         { key: 'categoria', label: 'Categorías', icon: <CategoryIcon sx={{ color: '#FF9800', fontSize: 18 }} /> },
         { key: 'promociones', label: 'Promociones', icon: <OfferIcon sx={{ color: '#E91E63', fontSize: 18 }} /> },
         { key: 'rutinas', label: 'Rutinas', icon: <AssignmentIcon sx={{ color: '#00BCD4', fontSize: 18 }} /> },
