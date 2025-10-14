@@ -175,14 +175,6 @@ const EncabezadoAdministrativo = () => {
         { key: 'roles', label: 'Roles', icon: <TeamIcon sx={{ color: '#7B68EE', fontSize: 18 }} /> },
       ]
     },
-    {
-      key: 'otras',
-      label: 'Otras opciones',
-  icon: <SalesReportIcon sx={{ color: '#607D8B', fontSize: 20 }} />,
-      subItems: [
-  { key: 'prediccion-clasificacion', label: 'Predicción/Clasificación (si aplica)', icon: <SalesReportIcon sx={{ color: '#607D8B', fontSize: 18 }} /> },
-      ]
-    },
     { key: 'cerrarSesion', label: 'Cerrar Sesión', icon: <LogoutIcon sx={{ color: '#FF4500', fontSize: 20 }} /> },
   ];
 
