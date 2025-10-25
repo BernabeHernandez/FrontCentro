@@ -11,100 +11,121 @@ on:
     branches: ["master"]
 
 jobs:
+  # 🧱 Construcción del proyecto
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Obtener repositorio
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: Instalar dependencias
         run: npm ci
-      - name: Build project
+
+      - name: Compilar proyecto
         run: npm run build --if-present
         env:
           CI: false
-      - name: Upload build artifact
+
+      - name: Subir artefacto de compilación
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
           path: build
 
+  #  Pruebas unitarias con Jest
   test-unit:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout repository
+      - name: Obtener repositorio
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: Instalar dependencias
         run: npm ci
-      - name: Run Jest Unit Tests
+
+      - name: Ejecutar pruebas unitarias (Jest)
         run: npm test -- --coverage src/Componentes/Cliente/Gamificacion/GamificacioRoleta.unit.test.jsx || true
         env:
           NODE_ENV: test
-      - name: Upload unit coverage
+
+      - name: Subir cobertura de pruebas unitarias
         uses: actions/upload-artifact@v4
         with:
           name: jest-unit-coverage
           path: coverage/
 
+  # Pruebas de integración con Jest
   test-integration:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout repository
+      - name: Obtener repositorio
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: Instalar dependencias
         run: npm ci
-      - name: Run Jest Integration Tests
+
+      - name: Ejecutar pruebas de integración (Jest)
         run: npm test -- --coverage src/Componentes/Cliente/Gamificacion/GamificacioRoleta.integration.test.jsx || true
         env:
           NODE_ENV: test
-      - name: Upload integration coverage
+
+      - name: Subir cobertura de integración
         uses: actions/upload-artifact@v4
         with:
           name: jest-integration-coverage
           path: coverage/
 
+  # Pruebas End-to-End (Cypress)
   test-e2e:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout repository
+      - name: 🔄 Obtener repositorio
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
+      - name: ⚙️ Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: Instalar dependencias
         run: npm ci
-      - name: Install Cypress
+
+      - name: Instalar Cypress
         run: npm install cypress@15.5.0 --no-save
-      - name: Download build artifact
+
+      - name: Descargar artefacto de compilación
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
           path: build
-      - name: Run Cypress E2E Tests
+
+      - name: Ejecutar pruebas E2E con Cypress
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
           start: npm start
-          wait-on: 'http://localhost:3000/cliente/ruleta'
+          wait-on: 'https://centrorehabilitacion-sepia.vercel.app/cliente/ruleta'
           wait-on-timeout: 300
           spec: cypress/e2e/gamificacion_ruleta.cy.js
           install: false
@@ -112,38 +133,45 @@ jobs:
         env:
           CI: false
           CYPRESS_LOG_LEVEL: debug
-      - name: Upload screenshots on failure
+
+      - name: 📸 Subir capturas en caso de fallo
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-      - name: Upload logs on failure
+
+      - name: 📋 Subir registros en caso de fallo
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-logs
           path: cypress/logs
 
+  # Despliegue automático
   deploy:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [test-unit, test-integration, test-e2e]
     steps:
-      - name: Checkout repository
+      - name: 🔄 Obtener repositorio
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
+      - name: ⚙️ Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: 📦 Instalar dependencias
         run: npm ci
-      - name: Build project
+
+      - name: 🏗️ Compilar proyecto para despliegue
         run: npm run build --if-present
         env:
           CI: false
-      - name: Deploy to GitHub Pages
+
+      - name: Desplegar en GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build
