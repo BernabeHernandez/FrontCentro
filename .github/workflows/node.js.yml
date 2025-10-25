@@ -1,7 +1,7 @@
-# Workflow de Integración Continua para el módulo de Gamificación (Ruleta)
-# Ejecuta instalación, compilación y pruebas unitarias y E2E automáticas en GitHub Actions
+# Workflow de Integración Continua y Despliegue para el módulo de Gamificación (Ruleta)
+# Ejecuta build, pruebas unitarias/integración con Jest, E2E con Cypress, y deploy a GitHub Pages
 
-name: CI - Gamificación Ruleta
+name: CI/CD - Gamificación Ruleta
 
 on:
   push:
@@ -28,9 +28,15 @@ jobs:
       - name: Build project
         run: CI=false npm run build --if-present
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: build  # o 'dist' si usas Vite
+
   test-jest:
     runs-on: ubuntu-latest
-    needs: build   # se ejecuta después del build
+    needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,9 +53,15 @@ jobs:
       - name: Run Jest unit and integration tests
         run: npm test -- --coverage
 
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-coverage
+          path: coverage/
+
   test-cypress:
     runs-on: ubuntu-latest
-    needs: build   # también después del build
+    needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,8 +75,42 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: build
+
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v5
         with:
           browser: chrome
+          build: npm run build  
           start: npm start
+          wait-on: 'http://localhost:3000'  
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: [test-jest, test-cypress]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: CI=false npm run build --if-present
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build  # o 'dist'
+          branch: gh-pages
