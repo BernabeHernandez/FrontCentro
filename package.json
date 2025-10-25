@@ -94,7 +94,10 @@
     ]
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
     "autoprefixer": "^10.4.21",
+    "babel-jest": "^30.2.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.14",
     "workbox-cli": "^7.3.0"
