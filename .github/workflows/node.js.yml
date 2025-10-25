@@ -5,9 +5,9 @@ name: CI - Gamificación Ruleta
 
 on:
   push:
-    branches: [ "main" ] # Usa 'main' si es tu rama principal
+    branches: [ "master" ] # Usa 'main' si es tu rama principal
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   build-and-test:
