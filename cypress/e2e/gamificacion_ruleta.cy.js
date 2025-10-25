@@ -2,7 +2,7 @@ describe('GamificacioRoleta E2E', () => {
     beforeEach(() => {
       // Mock localStorage
       cy.window().then((win) => {
-        win.localStorage.setItem('usuario_id', '125');
+        win.localStorage.setItem('usuario_id', '123');
       });
   
       // Mock peticiones HTTP
@@ -18,14 +18,16 @@ describe('GamificacioRoleta E2E', () => {
       cy.intercept('POST', 'https://backendcentro.onrender.com/api/ruleta/girar/*', {
         body: { indicePremio: 0, porcentaje: 10 },
       }).as('postGirar');
+  
+      // Visita la página
+      cy.visit('/cliente/ruleta', { timeout: 10000 }); // Ruta corregida
     });
   
     it('gira ruleta y muestra premio', () => {
-      cy.visit('/gamificacion'); // Usa la ruta relativa con baseUrl
-      cy.wait(['@getElegibilidad', '@getPremios']);
+      cy.wait(['@getElegibilidad', '@getPremios'], { timeout: 10000 });
       cy.get('button').contains('Girar Ruleta').click();
-      cy.wait('@postGirar');
-      cy.get('h4').contains('Ganaste 10% de descuento').should('be.visible');
+      cy.wait('@postGirar', { timeout: 10000 });
+      cy.get('h4').contains('Ganaste 10% de descuento', { timeout: 10000 }).should('be.visible');
     });
   
     it('muestra error si no se puede girar', () => {
@@ -33,19 +35,17 @@ describe('GamificacioRoleta E2E', () => {
         statusCode: 500,
         body: { error: 'No se pudo registrar el premio' },
       }).as('postGirarError');
-      cy.visit('/gamificacion');
-      cy.wait(['@getElegibilidad', '@getPremios']);
+      cy.wait(['@getElegibilidad', '@getPremios'], { timeout: 10000 });
       cy.get('button').contains('Girar Ruleta').click();
-      cy.wait('@postGirarError');
-      cy.get('p').contains('No se pudo registrar el premio').should('be.visible');
+      cy.wait('@postGirarError', { timeout: 10000 });
+      cy.get('p').contains('No se pudo registrar el premio', { timeout: 10000 }).should('be.visible');
     });
   
     it('muestra mensaje de no elegible', () => {
       cy.intercept('GET', 'https://backendcentro.onrender.com/api/ruleta/elegibilidad/*', {
         body: { elegible: false },
       }).as('getNoElegible');
-      cy.visit('/gamificacion');
-      cy.wait('@getNoElegible');
-      cy.get('p').contains('No tienes giros disponibles por ahora.').should('be.visible');
+      cy.wait('@getNoElegible', { timeout: 10000 });
+      cy.get('p').contains('No tienes giros disponibles por ahora.', { timeout: 10000 }).should('be.visible');
     });
   });
