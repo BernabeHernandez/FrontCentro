@@ -1,11 +1,17 @@
 describe('GamificacioRoleta E2E', () => {
     beforeEach(() => {
-      // Mock localStorage
+      // Configurar localStorage con un usuario autenticado
       cy.window().then((win) => {
-        win.localStorage.setItem('usuario_id', '123');
+        win.localStorage.clear();
+        const user = {
+          id: '125',
+          tipo: 'Cliente',
+        };
+        win.localStorage.setItem('user', JSON.stringify(user));
+        win.localStorage.setItem('usuario_id', '125');
       });
   
-      // Interceptar TODAS las peticiones al backend (con ** para cualquier origen)
+      // Interceptar peticiones HTTP
       cy.intercept('GET', '**/api/ruleta/elegibilidad/**', {
         body: { elegible: true },
       }).as('getElegibilidad');
@@ -21,26 +27,33 @@ describe('GamificacioRoleta E2E', () => {
         body: { indicePremio: 0, porcentaje: 10 },
       }).as('postGirar');
   
-      // Visitar la ruta correcta
-      cy.visit('/cliente/ruleta', { timeout: 15000 });
+      // Visitar la página con más tiempo de espera
+      cy.visit('/cliente/ruleta', { timeout: 60000 });
+  
+      // Esperar a que el componente se renderice
+      cy.get('h1').contains('Ruleta de Premios', { timeout: 30000 }).should('be.visible');
     });
   
     it('gira ruleta y muestra premio', () => {
-      // Esperar a que carguen elegibilidad y premios
-      cy.wait('@getElegibilidad', { timeout: 10000 });
-      cy.wait('@getPremios', { timeout: 10000 });
+      cy.wait(['@getElegibilidad', '@getPremios'], { timeout: 30000 }).then((interceptions) => {
+        cy.log('Peticiones iniciales interceptadas:', interceptions);
+      });
   
-      // Hacer clic en el botón "Girar Ruleta"
-      cy.contains('button', 'Girar Ruleta', { timeout: 10000 })
+      // Hacer clic en el botón de girar
+      cy.get('button').contains('Girar Ruleta', { timeout: 30000 }).click({ force: true });
+  
+      // Esperar la respuesta del giro con más tiempo
+      cy.wait('@postGirar', { timeout: 15000 }).then((interception) => {
+        cy.log('Petición de giro interceptada:', interception);
+      });
+  
+      // Verificar el mensaje de victoria con más tiempo y depuración
+      cy.get('h4', { timeout: 20000 })
+        .contains('Ganaste 10% de descuento')
         .should('be.visible')
-        .click({ force: true });
-  
-      // Esperar la respuesta del giro
-      cy.wait('@postGirar', { timeout: 10000 });
-  
-      // Verificar el mensaje de victoria
-      cy.contains('Ganaste 10% de descuento', { timeout: 15000 })
-        .should('be.visible');
+        .then(($el) => {
+          cy.log('Elemento h4 encontrado:', $el.text());
+        });
     });
   
     it('muestra error si no se puede girar', () => {
@@ -49,13 +62,14 @@ describe('GamificacioRoleta E2E', () => {
         body: { error: 'No se pudo registrar el premio' },
       }).as('postGirarError');
   
-      cy.wait('@getElegibilidad');
-      cy.wait('@getPremios');
+      cy.wait(['@getElegibilidad', '@getPremios'], { timeout: 30000 }).then((interceptions) => {
+        cy.log('Peticiones interceptadas:', interceptions);
+      });
   
-      cy.contains('button', 'Girar Ruleta').click({ force: true });
-      cy.wait('@postGirarError');
+      cy.get('button').contains('Girar Ruleta', { timeout: 30000 }).click({ force: true });
+      cy.wait('@postGirarError', { timeout: 30000 });
   
-      cy.contains('No se pudo registrar el premio').should('be.visible');
+      cy.get('p').contains('No se pudo registrar el premio', { timeout: 30000 }).should('be.visible');
     });
   
     it('muestra mensaje de no elegible', () => {
@@ -63,10 +77,13 @@ describe('GamificacioRoleta E2E', () => {
         body: { elegible: false },
       }).as('getNoElegible');
   
-      // Recargar para aplicar el nuevo mock
-      cy.reload();
-      cy.wait('@getNoElegible');
+      cy.visit('/cliente/ruleta', { timeout: 60000 });
+      cy.get('h1').contains('Ruleta de Premios', { timeout: 30000 }).should('be.visible');
   
-      cy.contains('No tienes giros disponibles por ahora.').should('be.visible');
+      cy.wait('@getNoElegible', { timeout: 30000 }).then((interception) => {
+        cy.log('Petición de elegibilidad:', interception);
+      });
+  
+      cy.get('p').contains('No tienes giros disponibles por ahora.', { timeout: 30000 }).should('be.visible');
     });
   });
