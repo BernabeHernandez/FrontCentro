@@ -1,0 +1,30 @@
+{
+  "files": {
+    "main.js": "/static/js/main.7e68da68.js",
+    "static/js/213.18a0af24.chunk.js": "/static/js/213.18a0af24.chunk.js",
+    "static/js/667.e33b7cb8.chunk.js": "/static/js/667.e33b7cb8.chunk.js",
+    "static/media/MapWhite.png": "/static/media/MapWhite.a9e650c4cef6db6205e4.png",
+    "static/media/MapBlack.png": "/static/media/MapBlack.2d464a6e34dbe80e2f00.png",
+    "static/media/Image2.png": "/static/media/Image2.c3f348c351ec73501d8d.png",
+    "static/media/Logo_Circular.png": "/static/media/Logo_Circular.6a974182a6a630647bdf.png",
+    "static/media/mercado-pago.png": "/static/media/mercado-pago.ece0ac767d79d10890ff.png",
+    "static/media/Paypal_2014_logo.png": "/static/media/Paypal_2014_logo.04b3edb65b438fe60d98.png",
+    "static/media/confident-doctor-posing-2273895-removebg-preview.png": "/static/media/confident-doctor-posing-2273895-removebg-preview.993b77ffc06bdded8eb1.png",
+    "static/media/Rehabi.jpg": "/static/media/Rehabi.37caec39cbfab6c9af0e.jpg",
+    "static/media/404.webp": "/static/media/404.36a864603518d0463b19.webp",
+    "static/media/Mastercard-logo.svg.png": "/static/media/Mastercard-logo.svg.50b4e7cb54343895f0f1.png",
+    "static/media/perfil2.jpg": "/static/media/perfil2.e951760562fd6c298f6d.jpg",
+    "static/media/500.webp": "/static/media/500.d97b2f622b3f2b0649a3.webp",
+    "static/media/error400.webp": "/static/media/error400.cf78a1c6fa44301bdb4a.webp",
+    "static/media/perfil3.jpg": "/static/media/perfil3.ba011f2fd320e86e34f6.jpg",
+    "static/media/perfil1.jpg": "/static/media/perfil1.e7ce6427322ec71b19b8.jpg",
+    "static/media/Visa_Logo.png": "/static/media/Visa_Logo.a458aef00665743f91bf.png",
+    "index.html": "/index.html",
+    "main.7e68da68.js.map": "/static/js/main.7e68da68.js.map",
+    "213.18a0af24.chunk.js.map": "/static/js/213.18a0af24.chunk.js.map",
+    "667.e33b7cb8.chunk.js.map": "/static/js/667.e33b7cb8.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.7e68da68.js"
+  ]
+}
