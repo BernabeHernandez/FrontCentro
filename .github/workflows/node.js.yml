@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 # Usa Node.js 20
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -74,6 +74,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Cypress explicitly
+        run: npm install cypress@15.5.0 --no-save
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
@@ -81,12 +84,15 @@ jobs:
           path: build
 
       - name: Run Cypress E2E tests
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6 
         with:
           browser: chrome
           start: npm start
-          wait-on: 'http://localhost:3000' # Ajusta si usas otro puerto
+          wait-on: 'http://localhost:3000' 
           spec: cypress/e2e/gamificacion_ruleta.cy.js
+          install: false # Evita instalación redundante
+        env:
+          CI: false
 
   deploy:
     if: github.ref == 'refs/heads/master'
