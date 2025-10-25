@@ -1,5 +1,9 @@
 name: CI/CD - Gamificación Ruleta
 
+permissions:
+  contents: write 
+  pages: write
+
 on:
   push:
     branches: ["master"]
@@ -89,13 +93,13 @@ jobs:
           browser: chrome
           start: npm start
           wait-on: 'http://localhost:3000/cliente/ruleta'
-          wait-on-timeout: 300 # Aumentado a 300 segundos
+          wait-on-timeout: 300 
           spec: cypress/e2e/gamificacion_ruleta.cy.js
           install: false
           headless: true
         env:
           CI: false
-          CYPRESS_LOG_LEVEL: debug # Para depuración adicional
+          CYPRESS_LOG_LEVEL: debug 
 
       - name: Upload screenshots on failure
         if: failure()
