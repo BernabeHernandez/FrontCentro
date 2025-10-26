@@ -8,109 +8,106 @@ on:
 
 jobs:
   build:
-    name: 🏗️ Build
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
       - run: npm ci
-
       - run: npm run build --if-present
         env:
           CI: false
 
   pruebas-unitarias:
-    name: 🧪 Pruebas Unitarias
+    name: Pruebas Unitarias
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
       - run: npm ci
-
       - run: npm test -- --testPathPattern="unit.test.jsx"
         env:
           NODE_ENV: test
           CI: true
 
   pruebas-integracion:
-    name: 🔗 Pruebas de Integración
+    name: Pruebas de Integración
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
       - run: npm ci
-
       - run: npm test -- --testPathPattern="integration.test.jsx"
         env:
           NODE_ENV: test
           CI: true
 
   pruebas-extremo-a-extremo:
-    name: 🎭 Pruebas E2E (Cypress)
+    name: Pruebas E2E (Cypress)
     runs-on: ubuntu-latest
     needs: [pruebas-unitarias, pruebas-integracion]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
       - run: npm ci
-
       - run: npm install cypress@13.6.0 --save-dev
-
-      - uses: cypress-io/github-action@v6
+      - name: Build and serve static files
+        run: npm run build && npx serve -s build -l 3000
+      - name: Run Cypress E2E Tests
+        uses: cypress-io/github-action@v6
         with:
           browser: chrome
-          start: npm start
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 120
-          spec: cypress/e2e/**/*.cy.js
+          start: npx serve -s build -l 3000
+          wait-on: 'http://localhost:3000/cliente/ruleta'
+          wait-on-timeout: 300
+          spec: cypress/e2e/gamificacion_ruleta.cy.js
           install: false
-          headless: true
         env:
-          CI: false
+          CI: true
           CYPRESS_baseUrl: http://localhost:3000
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-logs
+          path: cypress/logs
 
   deploy:
-    name: 🚀 Deploy a GitHub Pages
+    name: Deploy a GitHub Pages
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: [pruebas-unitarias, pruebas-integracion, pruebas-extremo-a-extremo]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-
       - run: npm ci
-
       - run: npm run build
         env:
           CI: false
           PUBLIC_URL: /centro-rehabilitacion
-
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build
