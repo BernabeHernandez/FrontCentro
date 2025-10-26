@@ -64,9 +64,11 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - run: npm install cypress@13.6.0 --save-dev
+      - run: npm install cypress@15.5.0 serve --save-dev
       - name: Build and serve static files
         run: npm run build && npx serve -s build -l 3000
+        env:
+          CI: false
       - name: Run Cypress E2E Tests
         uses: cypress-io/github-action@v6
         with:
@@ -85,12 +87,6 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-      - name: Upload logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-logs
-          path: cypress/logs
 
   deploy:
     name: Deploy a GitHub Pages
