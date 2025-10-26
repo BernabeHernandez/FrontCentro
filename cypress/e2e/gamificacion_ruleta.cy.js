@@ -1,6 +1,5 @@
 describe('GamificacioRoleta E2E', () => {
     beforeEach(() => {
-      // Configurar localStorage con un usuario autenticado
       cy.window().then((win) => {
         win.localStorage.clear();
         const user = {
@@ -11,7 +10,6 @@ describe('GamificacioRoleta E2E', () => {
         win.localStorage.setItem('usuario_id', '125');
       });
   
-      // Interceptar peticiones HTTP
       cy.intercept('GET', '**/api/ruleta/elegibilidad/**', {
         body: { elegible: true },
       }).as('getElegibilidad');
@@ -27,10 +25,8 @@ describe('GamificacioRoleta E2E', () => {
         body: { indicePremio: 0, porcentaje: 10 },
       }).as('postGirar');
   
-      // Visitar la página con más tiempo de espera
       cy.visit('/cliente/ruleta', { timeout: 60000 });
   
-      // Esperar a que el componente se renderice
       cy.get('h1').contains('Ruleta de Premios', { timeout: 30000 }).should('be.visible');
     });
   
@@ -39,15 +35,12 @@ describe('GamificacioRoleta E2E', () => {
         cy.log('Peticiones iniciales interceptadas:', interceptions);
       });
   
-      // Hacer clic en el botón de girar
       cy.get('button').contains('Girar Ruleta', { timeout: 30000 }).click({ force: true });
   
-      // Esperar la respuesta del giro con más tiempo
       cy.wait('@postGirar', { timeout: 15000 }).then((interception) => {
         cy.log('Petición de giro interceptada:', interception);
       });
   
-      // Verificar el mensaje de victoria con más tiempo y depuración
       cy.get('h4', { timeout: 20000 })
         .contains('Ganaste 10% de descuento')
         .should('be.visible')

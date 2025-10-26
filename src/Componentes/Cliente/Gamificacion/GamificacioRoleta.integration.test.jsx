@@ -1,4 +1,3 @@
-// GamificacioRoleta.integration.test.jsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { server } from '../../setupTests';
@@ -12,14 +11,14 @@ describe('GamificacioRoleta - Integration Tests', () => {
       writable: true,
     });
     jest.useFakeTimers();
-    server.listen(); // Iniciar el servidor MSW
+    server.listen(); 
   });
 
   afterEach(() => {
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-    server.resetHandlers(); // Restablecer handlers de MSW
-    server.close(); // Cerrar el servidor MSW
+    server.resetHandlers();
+    server.close(); 
   });
 
   test('Integration - Positiva: registrar premio correctamente en backend', async () => {
@@ -37,7 +36,7 @@ describe('GamificacioRoleta - Integration Tests', () => {
 
     const button = await screen.findByText('Girar Ruleta');
     fireEvent.click(button);
-    jest.advanceTimersByTime(5500); // Simular animación
+    jest.advanceTimersByTime(5500); 
     expect(await screen.findByText('Ganaste 10% de descuento')).toBeInTheDocument();
   });
 
@@ -56,7 +55,7 @@ describe('GamificacioRoleta - Integration Tests', () => {
 
     const button = await screen.findByText('Girar Ruleta');
     fireEvent.click(button);
-    jest.advanceTimersByTime(5500); // Simular animación
+    jest.advanceTimersByTime(5500); 
     expect(await screen.findByText('No se pudo registrar el premio')).toBeInTheDocument();
   });
 });

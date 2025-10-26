@@ -1,5 +1,4 @@
-// GamificacioRoleta.unit.test.jsx
-import { verificarElegibilidad, calcularPremio } from './GamificacioRoleta'; // Ajusta las importaciones según tu código
+import { verificarElegibilidad, calcularPremio } from './GamificacioRoleta'; 
 
 describe('GamificacioRoleta - Unit Tests', () => {
   test('Unit - Positiva: calcular correctamente premio para usuario elegible', () => {
@@ -7,7 +6,7 @@ describe('GamificacioRoleta - Unit Tests', () => {
     const elegible = true;
     const premios = [{ id: 1, porcentaje: 10 }, { id: 2, porcentaje: 20 }];
     const resultado = calcularPremio(usuarioId, elegible, premios);
-    expect(resultado).toEqual({ indicePremio: 0, porcentaje: 10 }); // Ajusta según la lógica
+    expect(resultado).toEqual({ indicePremio: 0, porcentaje: 10 });
   });
 
   test('Unit - Negativa: enviar usuario no elegible y verificar manejo de error', () => {
@@ -15,6 +14,5 @@ describe('GamificacioRoleta - Unit Tests', () => {
     const elegible = false;
     const premios = [{ id: 1, porcentaje: 10 }];
     expect(() => calcularPremio(usuarioId, elegible, premios)).toThrow('Usuario no elegible');
-    // O verifica que devuelva null/undefined según tu implementación
   });
 });
