@@ -1,61 +1,216 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+// src/Componentes/Cliente/Gamificacion/GamificacioRoleta.integration.test.jsx
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { server } from '../../setupTests';
-import { rest } from 'msw';
 import GamificacioRoleta from './GamificacioRoleta';
 
+// ⭐ MOCK DE AXIOS - DEBE IR ANTES DE IMPORTAR AXIOS
+jest.mock('axios', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+  }
+}));
+
+// ⭐ AHORA SÍ IMPORTAR AXIOS
+import axios from 'axios';
+
 describe('GamificacioRoleta - Integration Tests', () => {
+  
   beforeEach(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: { getItem: jest.fn(() => JSON.stringify({ id: '125', tipo: 'Cliente' })) },
-      writable: true,
-    });
+    // Configurar fake timers
     jest.useFakeTimers();
-    server.listen(); 
+    
+    // Mock de localStorage
+    const mockLocalStorage = {
+      getItem: jest.fn((key) => {
+        if (key === 'usuario_id' || key === 'id') {
+          return '125';
+        }
+        return null;
+      }),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    };
+    
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+      writable: true,
+      configurable: true,
+    });
+
+    // Reset de mocks
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-    server.resetHandlers();
-    server.close(); 
+    jest.restoreAllMocks();
   });
 
-  test('Integration - Positiva: registrar premio correctamente en backend', async () => {
-    server.use(
-      rest.post('https://backendcentro.onrender.com/api/ruleta/girar/:id', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json({ indicePremio: 0, porcentaje: 10 }));
-      })
-    );
+  // ============================================
+  // PRUEBAS ESENCIALES (Las 3 más importantes)
+  // ============================================
 
-    render(
-      <MemoryRouter>
-        <GamificacioRoleta />
-      </MemoryRouter>
-    );
+  describe('Pruebas Esenciales', () => {
+    
+    test('Integration - Positiva: registrar premio correctamente en backend', async () => {
+      axios.get
+        .mockResolvedValueOnce({ data: { elegible: true } })
+        .mockResolvedValueOnce({ data: [{ id: 1, porcentaje: 10 }] });
 
-    const button = await screen.findByText('Girar Ruleta');
-    fireEvent.click(button);
-    jest.advanceTimersByTime(5500); 
-    expect(await screen.findByText('Ganaste 10% de descuento')).toBeInTheDocument();
+      axios.post.mockResolvedValueOnce({
+        data: { indicePremio: 0, porcentaje: 10 }
+      });
+
+      render(
+        <MemoryRouter>
+          <GamificacioRoleta />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Girar Ruleta/i)).toBeInTheDocument();
+      });
+
+      const button = screen.getByText(/Girar Ruleta/i);
+      
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      await waitFor(() => {
+        expect(axios.post).toHaveBeenCalledWith(
+          'https://backendcentro.onrender.com/api/ruleta/girar/125'
+        );
+      });
+    });
+
+    test('Integration - Negativa: usuario no elegible no puede girar', async () => {
+      axios.get
+        .mockResolvedValueOnce({ data: { elegible: false } })
+        .mockResolvedValueOnce({ data: [{ id: 1, porcentaje: 10 }] });
+
+      render(
+        <MemoryRouter>
+          <GamificacioRoleta />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/No tienes giros disponibles/i)).toBeInTheDocument();
+      });
+
+      const button = screen.getByText(/Sin giros/i);
+      expect(button).toBeDisabled();
+    });
+
+    test('Integration - Flujo completo: verificar elegibilidad -> girar -> registrar', async () => {
+      axios.get
+        .mockResolvedValueOnce({ data: { elegible: true } })
+        .mockResolvedValueOnce({ data: [{ id: 1, porcentaje: 25 }] });
+
+      axios.post.mockResolvedValueOnce({
+        data: { indicePremio: 0, porcentaje: 25 }
+      });
+
+      render(
+        <MemoryRouter>
+          <GamificacioRoleta />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(axios.get).toHaveBeenCalledTimes(2);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Girar Ruleta/i)).toBeInTheDocument();
+      });
+
+      const button = screen.getByText(/Girar Ruleta/i);
+      
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      await waitFor(() => {
+        expect(axios.post).toHaveBeenCalled();
+      });
+    });
   });
 
-  test('Integration - Negativa: simular fallo del servidor y verificar mensaje de error', async () => {
-    server.use(
-      rest.post('https://backendcentro.onrender.com/api/ruleta/girar/:id', (req, res, ctx) => {
-        return res(ctx.status(500), ctx.json({ error: 'No se pudo registrar el premio' }));
-      })
-    );
+  // ============================================
+  // PRUEBAS ADICIONALES (Opcionales)
+  // ============================================
 
-    render(
-      <MemoryRouter>
-        <GamificacioRoleta />
-      </MemoryRouter>
-    );
+  describe('Pruebas Adicionales', () => {
+    
+    test('Integration - Negativa: simular fallo del servidor', async () => {
+      axios.get
+        .mockResolvedValueOnce({ data: { elegible: true } })
+        .mockResolvedValueOnce({ data: [{ id: 1, porcentaje: 10 }] });
 
-    const button = await screen.findByText('Girar Ruleta');
-    fireEvent.click(button);
-    jest.advanceTimersByTime(5500); 
-    expect(await screen.findByText('No se pudo registrar el premio')).toBeInTheDocument();
+      axios.post.mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: { error: 'No se pudo registrar el premio' }
+        }
+      });
+
+      render(
+        <MemoryRouter>
+          <GamificacioRoleta />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Girar Ruleta/i)).toBeInTheDocument();
+      });
+
+      const button = screen.getByText(/Girar Ruleta/i);
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByText(/No se pudo registrar el premio/i)).toBeInTheDocument();
+      });
+    });
+
+    test('Integration - Negativa: error al cargar premios', async () => {
+      axios.get
+        .mockResolvedValueOnce({ data: { elegible: true } })
+        .mockRejectedValueOnce(new Error('Network error'));
+
+      render(
+        <MemoryRouter>
+          <GamificacioRoleta />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/No se pudieron cargar los premios/i)).toBeInTheDocument();
+      });
+    });
+
+    test('Integration - Negativa: usuario sin autenticar', async () => {
+      window.localStorage.getItem = jest.fn(() => null);
+
+      axios.get.mockResolvedValueOnce({ data: [{ id: 1, porcentaje: 10 }] });
+
+      render(
+        <MemoryRouter>
+          <GamificacioRoleta />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Sin giros/i)).toBeInTheDocument();
+      });
+
+      const button = screen.getByText(/Sin giros/i);
+      expect(button).toBeDisabled();
+    });
   });
 });

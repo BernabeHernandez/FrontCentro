@@ -12,139 +12,221 @@ on:
 
 jobs:
   build:
+    name: 🏗️ Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Node.js
+        
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+          
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: Build project
+        
+      - name: 🏗️ Build project
         run: npm run build --if-present
         env:
           CI: false
-      - name: Upload build artifact
+          
+      - name: 📤 Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
           path: build
+          retention-days: 7
 
   pruebas-unitarias:
+    name: 🧪 Pruebas Unitarias
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Node.js
+        
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+          
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: Run Jest Unit Tests
-        run: npm test -- --coverage src/Componentes/Cliente/Gamificacion/GamificacioRoleta.unit.test.jsx || true
+        
+      - name: 🧪 Run Jest Unit Tests
+        run: npm test -- --coverage --watchAll=false --testPathPattern=unit.test.jsx
         env:
           NODE_ENV: test
-      - name: Upload unit coverage
+          CI: true
+          
+      - name: 📊 Upload unit coverage
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: jest-unit-coverage
           path: coverage/
+          retention-days: 30
+          
+      - name: 📈 Display coverage summary
+        if: always()
+        run: |
+          echo "## 📊 Unit Test Coverage" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              console.log('- **Statements:** ' + total.statements.pct + '%');
+              console.log('- **Branches:** ' + total.branches.pct + '%');
+              console.log('- **Functions:** ' + total.functions.pct + '%');
+              console.log('- **Lines:** ' + total.lines.pct + '%');
+            " >> $GITHUB_STEP_SUMMARY
+          fi
 
   pruebas-integracion:
+    name: 🔗 Pruebas de Integración
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Node.js
+        
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+          
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: Run Jest Integration Tests
-        run: npm test -- --coverage src/Componentes/Cliente/Gamificacion/GamificacioRoleta.integration.test.jsx || true
+        
+      - name: 🔗 Run Jest Integration Tests
+        run: npm test -- --coverage --watchAll=false --testPathPattern=integration.test.jsx
         env:
           NODE_ENV: test
-      - name: Upload integration coverage
+          CI: true
+          
+      - name: 📊 Upload integration coverage
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: jest-integration-coverage
           path: coverage/
+          retention-days: 30
+          
+      - name: 📈 Display coverage summary
+        if: always()
+        run: |
+          echo "## 🔗 Integration Test Coverage" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              console.log('- **Statements:** ' + total.statements.pct + '%');
+              console.log('- **Branches:** ' + total.branches.pct + '%');
+              console.log('- **Functions:** ' + total.functions.pct + '%');
+              console.log('- **Lines:** ' + total.lines.pct + '%');
+            " >> $GITHUB_STEP_SUMMARY
+          fi
 
   pruebas-extremo-a-extremo:
+    name: 🎭 Pruebas E2E (Cypress)
     runs-on: ubuntu-latest
-    needs: build
+    needs: [pruebas-unitarias, pruebas-integracion]
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Node.js
+        
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+          
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: Install Cypress
-        run: npm install cypress@15.5.0 --no-save
-      - name: Download build artifact
+        
+      - name: 🎭 Install Cypress
+        run: npm install cypress@13.6.0 --save-dev --no-save
+        
+      - name: 📥 Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
           path: build
-      - name: Run Cypress E2E Tests
+          
+      - name: 🎭 Run Cypress E2E Tests
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
           start: npm start
-          wait-on: 'http://localhost:3000/cliente/ruleta'
-          wait-on-timeout: 300
-          spec: cypress/e2e/gamificacion_ruleta.cy.js
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          spec: cypress/e2e/**/*.cy.js
           install: false
           headless: true
         env:
           CI: false
-          CYPRESS_LOG_LEVEL: debug
-      - name: Upload screenshots on failure
+          CYPRESS_baseUrl: http://localhost:3000
+          
+      - name: 📸 Upload screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-      - name: Upload logs on failure
-        if: failure()
+          retention-days: 7
+          
+      - name: 📹 Upload videos
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-logs
-          path: cypress/logs
+          name: cypress-videos
+          path: cypress/videos
+          retention-days: 7
 
   deploy:
-    if: github.ref == 'refs/heads/master'
+    name: 🚀 Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: [pruebas-unitarias, pruebas-integracion, pruebas-extremo-a-extremo]
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Node.js
+        
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+          
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: Build project
-        run: npm run build --if-present
+        
+      - name: 🏗️ Build project
+        run: npm run build
         env:
           CI: false
-      - name: Deploy to GitHub Pages
+          PUBLIC_URL: /centro-rehabilitacion
+          
+      - name: 🚀 Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build
           branch: gh-pages
+          clean: true
+          
+      - name: 📝 Generate deployment summary
+        run: |
+          echo "## 🎉 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **All tests passed!**" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- E2E tests: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Deployed to GitHub Pages**" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: gh-pages" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
