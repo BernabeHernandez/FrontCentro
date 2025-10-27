@@ -87,7 +87,7 @@ describe('GamificacioRoleta - Unit Tests', () => {
 
   describe('Pruebas Negativas', () => {
     test('Unit - Negativa: enviar usuario no elegible y verificar manejo de error', () => {
-      const usuarioId = '125';
+      const usuarioId = '1';
       const elegible = false;
       const premios = [{ id: 1, porcentaje: 10 }];
 
