@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["master"]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build
@@ -39,7 +42,7 @@ jobs:
           CI: true
 
   pruebas-integracion:
-    name: Pruebas de Integración 
+    name: Pruebas de Integración
     runs-on: ubuntu-latest
     needs: build
     steps:
