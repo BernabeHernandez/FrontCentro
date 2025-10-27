@@ -39,7 +39,7 @@ jobs:
           CI: true
 
   pruebas-integracion:
-    name: Pruebas de Integración
+    name: Pruebas de Integración 
     runs-on: ubuntu-latest
     needs: build
     steps:
