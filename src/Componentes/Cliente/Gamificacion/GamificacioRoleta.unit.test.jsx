@@ -93,7 +93,7 @@ describe('GamificacioRoleta - Unit Tests', () => {
 
       expect(() => {
         calcularPremio(usuarioId, elegible, premios);
-      }).toThrow('Usuario no elegible');
+      }).toThrow('Usuario no elegibleeee');
     });
 
     test('Unit - Negativa: verificar usuario sin tipo Cliente', () => {
