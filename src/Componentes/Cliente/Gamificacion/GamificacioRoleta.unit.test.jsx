@@ -1,13 +1,10 @@
-// src/Componentes/Cliente/Gamificacion/GamificacioRoleta.unit.test.jsx
-
 describe('GamificacioRoleta - Unit Tests', () => {
   
-  // Funciones utilitarias extraídas para testing
   const verificarElegibilidad = (usuario) => {
     if (!usuario || !usuario.id) {
       throw new Error('Usuario inválido');
     }
-    // Lógica de verificación
+ 
     return usuario.tipo === 'Cliente';
   };
 
@@ -20,7 +17,7 @@ describe('GamificacioRoleta - Unit Tests', () => {
       throw new Error('No hay premios disponibles');
     }
 
-    // Seleccionar premio aleatorio
+    
     const indicePremio = Math.floor(Math.random() * premios.length);
     return {
       indicePremio,
@@ -28,9 +25,6 @@ describe('GamificacioRoleta - Unit Tests', () => {
     };
   };
 
-  // ============================================
-  // PRUEBAS POSITIVAS
-  // ============================================
   
   describe('Pruebas Positivas', () => {
     test('Unit - Positiva: calcular correctamente premio para usuario elegible', () => {
@@ -81,7 +75,7 @@ describe('GamificacioRoleta - Unit Tests', () => {
         { id: 4, porcentaje: 20 },
       ];
 
-      // Ejecutar múltiples veces para asegurar consistencia
+     
       for (let i = 0; i < 10; i++) {
         const resultado = calcularPremio(usuarioId, elegible, premios);
         expect(typeof resultado.indicePremio).toBe('number');
@@ -90,9 +84,6 @@ describe('GamificacioRoleta - Unit Tests', () => {
     });
   });
 
-  // ============================================
-  // PRUEBAS NEGATIVAS
-  // ============================================
 
   describe('Pruebas Negativas', () => {
     test('Unit - Negativa: enviar usuario no elegible y verificar manejo de error', () => {
@@ -152,16 +143,11 @@ describe('GamificacioRoleta - Unit Tests', () => {
       const elegible = true;
       const premios = [{ id: 1, porcentaje: 10 }];
 
-      // Aunque el usuarioId esté vacío, si es elegible debería funcionar
-      // O podrías agregar validación adicional
       const resultado = calcularPremio(usuarioId, elegible, premios);
       expect(resultado).toBeDefined();
     });
   });
 
-  // ============================================
-  // CASOS EXTREMOS
-  // ============================================
 
   describe('Casos Extremos', () => {
     test('Unit - Extremo: calcular premio con muchos premios', () => {

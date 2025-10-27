@@ -1,9 +1,8 @@
-// src/Componentes/Cliente/Gamificacion/GamificacioRoleta.integration.test.jsx
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import GamificacioRoleta from './GamificacioRoleta';
 
-// ⭐ MOCK DE AXIOS - DEBE IR ANTES DE IMPORTAR AXIOS
+
 jest.mock('axios', () => ({
   __esModule: true,
   default: {
@@ -12,16 +11,14 @@ jest.mock('axios', () => ({
   }
 }));
 
-// ⭐ AHORA SÍ IMPORTAR AXIOS
 import axios from 'axios';
 
 describe('GamificacioRoleta - Integration Tests', () => {
   
   beforeEach(() => {
-    // Configurar fake timers
+   
     jest.useFakeTimers();
     
-    // Mock de localStorage
     const mockLocalStorage = {
       getItem: jest.fn((key) => {
         if (key === 'usuario_id' || key === 'id') {
@@ -50,9 +47,6 @@ describe('GamificacioRoleta - Integration Tests', () => {
     jest.restoreAllMocks();
   });
 
-  // ============================================
-  // PRUEBAS ESENCIALES (Las 3 más importantes)
-  // ============================================
 
   describe('Pruebas Esenciales', () => {
     
@@ -142,9 +136,6 @@ describe('GamificacioRoleta - Integration Tests', () => {
     });
   });
 
-  // ============================================
-  // PRUEBAS ADICIONALES (Opcionales)
-  // ============================================
 
   describe('Pruebas Adicionales', () => {
     
