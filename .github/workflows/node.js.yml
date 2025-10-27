@@ -73,7 +73,7 @@ jobs:
         with:
           browser: chrome
           start: npx serve -s build -l 3000
-          wait-on: 'http://localhost:3000/cliente/ruleta'
+          wait-on: 'http://localhost:3000'
           wait-on-timeout: 300
           spec: cypress/e2e/gamificacion_ruleta.cy.js
         env:
