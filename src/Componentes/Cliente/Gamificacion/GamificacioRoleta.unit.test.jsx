@@ -9,9 +9,9 @@ describe('GamificacioRoleta - Unit Tests', () => {
   };
 
   const calcularPremio = (usuarioId, elegible, premios) => {
-    //if (!elegible) {
-      //throw new Error('Usuario no elegible');
-    //}
+    if (!elegible) {
+      throw new Error('Usuario no elegible');
+    }
     
     if (!premios || premios.length === 0) {
       throw new Error('No hay premios disponibles');
@@ -87,13 +87,13 @@ describe('GamificacioRoleta - Unit Tests', () => {
 
   describe('Pruebas Negativas', () => {
     test('Unit - Negativa: enviar usuario no elegible y verificar manejo de error', () => {
-      const usuarioId = '1';
+      const usuarioId = '125';
       const elegible = false;
       const premios = [{ id: 1, porcentaje: 10 }];
 
       expect(() => {
         calcularPremio(usuarioId, elegible, premios);
-      }).toThrow('Usuario no elegibleeee');
+      }).toThrow('Usuario no elegible');
     });
 
     test('Unit - Negativa: verificar usuario sin tipo Cliente', () => {
