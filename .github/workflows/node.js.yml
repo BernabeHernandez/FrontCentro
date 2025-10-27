@@ -17,7 +17,7 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
+      - run: npm run build --if-present
         env:
           CI: false
 
@@ -66,16 +66,19 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - name: Instalar Cypress y Serve
+      - name: Build de la aplicación
+        run: npm run build
+        env:
+          CI: false
+      - name: Instalar Cypress
         run: npm install cypress@15.5.0 serve --save-dev
-      - name: Servir aplicación en background
-        run: |
-          npx serve -s build -l 3000 &
-          npx wait-on http://localhost:3000
       - name: Ejecutar pruebas E2E
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
+          start: npx serve -s build -l 3000
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 300
           spec: cypress/e2e/gamificacion_ruleta.cy.js
         env:
           CI: true
