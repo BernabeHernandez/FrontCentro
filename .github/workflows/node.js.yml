@@ -103,11 +103,11 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - name: Build for production
+      - name: Build para producción
         run: npm run build
         env:
           CI: false
-      - name: Deploy to Vercel
+      - name: Desplegar en Vercel
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
