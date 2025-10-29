@@ -1,34 +1,26 @@
 module.exports = {
-  // Carpeta donde está la build de React
   globDirectory: "build/",
-  
-  // Archivos estáticos a precachear
   globPatterns: [
     "**/*.{html,js,css,png,jpg,svg,json,ico,woff2,woff}"
   ],
 
-  // Tamaño máximo de archivo a cachear (por si tu main.js es grande)
-  maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
+  maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
 
-  // Archivo SW que se va a generar
-  swDest: "public/service-worker.js",
+  swDest: "build/service-worker.js",
 
-  // Cache dinámico para APIs
   runtimeCaching: [
     {
-      // API de productos
       urlPattern: /^https:\/\/backendcentro\.onrender\.com\/api\/productos/,
       handler: "StaleWhileRevalidate",
       options: {
         cacheName: "productos-cache",
         expiration: {
           maxEntries: 50,
-          maxAgeSeconds: 24 * 60 * 60, // 1 día
+          maxAgeSeconds: 24 * 60 * 60, 
         },
       },
     },
     {
-      // API de servicios
       urlPattern: /^https:\/\/backendcentro\.onrender\.com\/api\/servicios/,
       handler: "StaleWhileRevalidate",
       options: {
@@ -40,7 +32,6 @@ module.exports = {
       },
     },
 
-
       {
       urlPattern: /^https:\/\/backendcentro\.onrender\.com\/api\/carrito\/carrito\/.*$/,
       handler: "StaleWhileRevalidate",
@@ -50,7 +41,6 @@ module.exports = {
       },
     },
 
-    // Perfil cliente
     {
       urlPattern: /^https:\/\/backendcentro\.onrender\.com\/api\/perfilcliente\/.*$/,
       handler: "StaleWhileRevalidate",
