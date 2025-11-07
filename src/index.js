@@ -1,14 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; 
+import ReactDOM from 'react-dom/client';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from './Componentes/Temas/ThemeContext'; 
+import { ThemeProvider } from './Componentes/Temas/ThemeContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider> 
+    <ThemeProvider>
       <BrowserRouter>
         <App />
       </BrowserRouter>
@@ -16,15 +16,13 @@ root.render(
   </React.StrictMode>
 );
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .then((reg) => {
-        console.log("Service Worker registrado:", reg);
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => {
+        console.log('SW registrado:', reg);
+        reg.update();
       })
-      .catch((err) => {
-        console.log("Error al registrar Service Worker:", err);
-      });
+      .catch(err => console.error('Error SW:', err));
   });
 }
