@@ -316,7 +316,10 @@ const MercadoPagoServicio = () => {
                 const eligibilityResponse = await axios.get(
                   `https://backendcentro.onrender.com/api/ruleta/elegibilidad/${id_usuario}`
                 );
-                const ruta = eligibilityResponse.data?.elegible ? '/cliente/ruleta' : '/cliente/CitasCliente';
+                // Solo redirigir a la ruleta si está elegible Y la ruleta está activa
+                const ruta = (eligibilityResponse.data?.elegible && eligibilityResponse.data?.ruletaActiva !== false) 
+                  ? '/cliente/ruleta' 
+                  : '/cliente/CitasCliente';
                 navigate(ruta, {
                   state: { servicioId: id_servicio },
                   replace: true,

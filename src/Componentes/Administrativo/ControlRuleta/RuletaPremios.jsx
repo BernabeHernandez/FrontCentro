@@ -24,6 +24,7 @@ import {
   Percent as PercentIcon,
   Casino as CasinoIcon,
   Refresh as RefreshIcon,
+  PowerSettingsNew as PowerIcon,
 } from "@mui/icons-material"
 import axios from "axios"
 
@@ -32,6 +33,41 @@ const RuletaPremios = () => {
   const [loading, setLoading] = useState(true)
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" })
   const [savingId, setSavingId] = useState(null)
+  const [ruletaActiva, setRuletaActiva] = useState(true)
+  const [loadingEstado, setLoadingEstado] = useState(true)
+
+  // Obtener estado de la ruleta
+  const fetchEstadoRuleta = async () => {
+    try {
+      setLoadingEstado(true)
+      const res = await axios.get("https://backendcentro.onrender.com/api/ruleta-config/estado")
+      setRuletaActiva(res.data.activa)
+      setLoadingEstado(false)
+    } catch (error) {
+      console.error(error)
+      setLoadingEstado(false)
+    }
+  }
+
+  // Actualizar estado de la ruleta
+  const handleToggleRuleta = async () => {
+    try {
+      setLoadingEstado(true)
+      const nuevoEstado = !ruletaActiva
+      await axios.put("https://backendcentro.onrender.com/api/ruleta-config/estado", { activa: nuevoEstado })
+      setRuletaActiva(nuevoEstado)
+      setSnackbar({ 
+        open: true, 
+        message: nuevoEstado ? "Ruleta activada exitosamente" : "Ruleta desactivada exitosamente", 
+        severity: "success" 
+      })
+      setLoadingEstado(false)
+    } catch (error) {
+      console.error(error)
+      setSnackbar({ open: true, message: "Error al actualizar estado de la ruleta", severity: "error" })
+      setLoadingEstado(false)
+    }
+  }
 
   // Obtener premios de la API
   const fetchPremios = async () => {
@@ -49,6 +85,7 @@ const RuletaPremios = () => {
 
   useEffect(() => {
     fetchPremios()
+    fetchEstadoRuleta()
   }, [])
 
   // Actualizar premio
@@ -146,6 +183,52 @@ const RuletaPremios = () => {
           </Box>
 
           <Divider sx={{ my: 3 }} />
+
+          {/* Toggle de activación/desactivación */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              p: 2,
+              bgcolor: ruletaActiva ? "rgba(76, 175, 80, 0.1)" : "rgba(244, 67, 54, 0.1)",
+              borderRadius: 2,
+              border: `2px solid ${ruletaActiva ? "#4caf50" : "#f44336"}`,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <PowerIcon sx={{ fontSize: 32, color: ruletaActiva ? "#4caf50" : "#f44336" }} />
+              <Box>
+                <Typography variant="h6" fontWeight="bold" color="text.primary">
+                  Estado de la Ruleta
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {ruletaActiva 
+                    ? "La ruleta está activa y los usuarios pueden girarla" 
+                    : "La ruleta está desactivada y los usuarios no pueden girarla"}
+                </Typography>
+              </Box>
+            </Box>
+            <Button
+              variant="contained"
+              color={ruletaActiva ? "success" : "error"}
+              onClick={handleToggleRuleta}
+              disabled={loadingEstado}
+              startIcon={<PowerIcon />}
+              sx={{
+                px: 3,
+                py: 1.5,
+                fontWeight: "bold",
+                textTransform: "none",
+              }}
+            >
+              {loadingEstado 
+                ? "Cargando..." 
+                : ruletaActiva 
+                  ? "Desactivar Ruleta" 
+                  : "Activar Ruleta"}
+            </Button>
+          </Box>
         </Paper>
 
         {/* Grid de Premios */}

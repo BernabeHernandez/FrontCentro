@@ -169,7 +169,8 @@ function Login() {
           const eligibilityResponse = await axios.get(
             `https://backendcentro.onrender.com/api/ruleta/elegibilidad/${id_usuario}`
           );
-          if (eligibilityResponse.data?.elegible) {
+          // Solo redirigir a la ruleta si está elegible Y la ruleta está activa
+          if (eligibilityResponse.data?.elegible && eligibilityResponse.data?.ruletaActiva !== false) {
             ruta = "/cliente/ruleta";
           }
         } catch (error) {

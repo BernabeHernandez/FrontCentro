@@ -15,13 +15,14 @@ export default function GamificacioRoleta() {
   const [eligible, setEligible] = useState(null)
   const [error, setError] = useState("")
   const [prizes, setPrizes] = useState([])
+  const [ruletaActiva, setRuletaActiva] = useState(true)
   const navigate = useNavigate()
 
   const usuarioId = typeof window !== "undefined"
     ? localStorage.getItem("usuario_id") || localStorage.getItem("id")
     : null
 
-  // Cargar elegibilidad
+  // Cargar elegibilidad y estado de la ruleta
   useEffect(() => {
     let isMounted = true
     const fetchEligibility = async () => {
@@ -31,7 +32,17 @@ export default function GamificacioRoleta() {
           return
         }
         const resp = await axios.get(`https://backendcentro.onrender.com/api/ruleta/elegibilidad/${usuarioId}`)
-        if (isMounted) setEligible(!!resp.data?.elegible)
+        if (isMounted) {
+          setEligible(!!resp.data?.elegible)
+          setRuletaActiva(resp.data?.ruletaActiva !== false)
+          // Si la ruleta no está activa, mostrar mensaje y redirigir
+          if (resp.data?.ruletaActiva === false) {
+            setError("La ruleta está temporalmente desactivada. Intenta más tarde.")
+            setTimeout(() => {
+              navigate("/cliente/")
+            }, 3000)
+          }
+        }
       } catch (e) {
         if (isMounted) {
           setEligible(false)
@@ -41,7 +52,7 @@ export default function GamificacioRoleta() {
     }
     fetchEligibility()
     return () => { isMounted = false }
-  }, [usuarioId])
+  }, [usuarioId, navigate])
 
   // Cargar premios dinámicos
   useEffect(() => {
@@ -67,7 +78,7 @@ export default function GamificacioRoleta() {
   }, [])
 
   const spinWheel = async () => {
-    if (isSpinning || !eligible || prizes.length === 0) return
+    if (isSpinning || !eligible || prizes.length === 0 || !ruletaActiva) return
 
     setIsSpinning(true)
     setWinner(null)
@@ -190,10 +201,13 @@ export default function GamificacioRoleta() {
           </Box>
 
           {/* Mensajes */}
-          {eligible===false && !winner && <Paper elevation={0} sx={{ mb:2,p:2,textAlign:"center",bgcolor:"#fff7f7", borderRadius:2 }}>
+          {!ruletaActiva && <Paper elevation={0} sx={{ mb:2,p:2,textAlign:"center",bgcolor:"#fff7f7", borderRadius:2 }}>
+            <Typography variant="body2" color="error.main">La ruleta está temporalmente desactivada. Serás redirigido en breve.</Typography>
+          </Paper>}
+          {eligible===false && !winner && ruletaActiva && <Paper elevation={0} sx={{ mb:2,p:2,textAlign:"center",bgcolor:"#fff7f7", borderRadius:2 }}>
             <Typography variant="body2" color="error.main">No tienes giros disponibles por ahora.</Typography>
           </Paper>}
-          {error && <Paper elevation={0} sx={{ mb:2,p:2,textAlign:"center",bgcolor:"#fffaf0", borderRadius:2 }}>
+          {error && ruletaActiva && <Paper elevation={0} sx={{ mb:2,p:2,textAlign:"center",bgcolor:"#fffaf0", borderRadius:2 }}>
             <Typography variant="body2" color="warning.main">{error}</Typography>
           </Paper>}
           
@@ -207,14 +221,14 @@ export default function GamificacioRoleta() {
           <Box sx={{ display:"flex", flexDirection:{xs:"column",sm:"row"}, gap:1.5 }}>
             <Button
               onClick={spinWheel}
-              disabled={isSpinning || eligible===false || eligible===null || hasSpun || prizes.length===0}
+              disabled={isSpinning || eligible===false || eligible===null || hasSpun || prizes.length===0 || !ruletaActiva}
               variant="contained"
               size="large"
               fullWidth
               sx={{ flex:1, background:"linear-gradient(90deg,#1976d2 0%,#9c27b0 100%)", fontSize:"1.125rem", fontWeight:600, padding:"12px 24px", boxShadow:3, transition:"all 0.3s", "&:hover":{transform:"scale(1.05)", boxShadow:6}, "&:disabled":{opacity:0.5} }}
               startIcon={isSpinning ? <Box sx={{ display:"inline-block", width:20, height:20, border:"2px solid white", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 1s linear infinite", "@keyframes spin":{ to:{transform:"rotate(360deg)"} } }} /> : <SparklesIcon />}
             >
-              {eligible===null ? "Cargando..." : isSpinning ? "Girando..." : eligible && !hasSpun ? "Girar Ruleta" : "Sin giros"}
+              {!ruletaActiva ? "Ruleta Desactivada" : eligible===null ? "Cargando..." : isSpinning ? "Girando..." : eligible && !hasSpun ? "Girar Ruleta" : "Sin giros"}
             </Button>
 
             <Button
