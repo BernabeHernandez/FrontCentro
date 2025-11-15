@@ -358,7 +358,7 @@ const RuletaPremios = () => {
   )
 }
 
-// Función auxiliar para generar colores de gradiente
+// Función auxiliar para generar colores de gradiente 
 const getGradientColors = (index) => {
   const gradients = [
     "#667eea 0%, #764ba2 100%",
