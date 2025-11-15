@@ -52,7 +52,7 @@ const DetallesServicio = () => {
   useEffect(() => {
     const fetchServicio = async () => {
       try {
-        // Obtener servicios con promociones (aplica descuento de ruleta si usuario tiene)
+        // Obtener servicios con promociones (aplica descuento de ruleta solo si está activa y usuario tiene)
         const idUsuario = localStorage.getItem('usuario_id') || localStorage.getItem('id');
         const base = 'https://backendcentro.onrender.com';
         const url = idUsuario
