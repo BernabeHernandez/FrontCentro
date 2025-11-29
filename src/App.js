@@ -8,13 +8,12 @@ import ScrollToTop from './Componentes/ScrollToTop';
 import SplashScreen from './splash-screen';
 import LocationPermission from './Componentes/LocationPermission/LocationPermission';
 
-// IMPORTA EL TOAST DE RED
 import NetworkStatusToast from './Componentes/NetworkStatusToast';
 
-// AÑADIDO: Import de Vercel Analytics
+// VERCEL: Analytics + Speed Insights
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react'; 
 
-// URLs ESTÁTICAS A PRECARGAR 
 const STATIC_API_URLS = [
   'https://backendcentro.onrender.com/api/productos',
   'https://backendcentro.onrender.com/api/serviciosConDes/todos-con-y-sin-descuento',
@@ -45,12 +44,10 @@ const App = () => {
             cache: 'no-cache',
           });
 
-          // Cachear API
           const apiClone = response.clone();
           await apiCache.put(url, apiClone);
           console.log(`[App] API cacheada: ${url}`);
 
-          // Extraer imágenes del JSON
           if (response.ok) {
             let data;
             try {
@@ -64,7 +61,6 @@ const App = () => {
               .map(item => item.imagen)
               .filter(img => img && img.includes('res.cloudinary.com'));
 
-            // Cachear cada imagen
             const imgPromises = imageUrls.map(async (imgUrl) => {
               try {
                 const imgRes = await fetch(imgUrl, { cache: 'no-cache' });
@@ -134,7 +130,6 @@ const App = () => {
           <ScrollToTop />
           <AppRouter />
 
-          {/* Permiso de ubicación */}
           {showLocationPrompt && (
             <LocationPermission
               onPermissionGranted={handleLocationGranted}
@@ -145,8 +140,9 @@ const App = () => {
         </ErrorBoundary>
       </LayoutConEncabezado>
 
-      {/* VERCEL ANALYTICS – Se monta una sola vez y trackea todas las rutas */}
       <Analytics />
+      <SpeedInsights />     
+
     </AuthProvider>
   );
 };
