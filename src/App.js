@@ -8,8 +8,11 @@ import ScrollToTop from './Componentes/ScrollToTop';
 import SplashScreen from './splash-screen';
 import LocationPermission from './Componentes/LocationPermission/LocationPermission';
 
-//IMPORTA EL TOAST DE RED
+// IMPORTA EL TOAST DE RED
 import NetworkStatusToast from './Componentes/NetworkStatusToast';
+
+// AÑADIDO: Import de Vercel Analytics
+import { Analytics } from '@vercel/analytics/react';
 
 // URLs ESTÁTICAS A PRECARGAR 
 const STATIC_API_URLS = [
@@ -130,7 +133,7 @@ const App = () => {
         <ErrorBoundary fallback={<PaginaError500j />}>
           <ScrollToTop />
           <AppRouter />
-          
+
           {/* Permiso de ubicación */}
           {showLocationPrompt && (
             <LocationPermission
@@ -139,9 +142,11 @@ const App = () => {
             />
           )}
           <NetworkStatusToast />
-
         </ErrorBoundary>
       </LayoutConEncabezado>
+
+      {/* VERCEL ANALYTICS – Se monta una sola vez y trackea todas las rutas */}
+      <Analytics />
     </AuthProvider>
   );
 };
